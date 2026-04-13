@@ -12,6 +12,7 @@ model User {
   email     String   @unique
   password  String
   role      Role     @default(COLLABORATOR)
+  mustResetPassword Boolean @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
