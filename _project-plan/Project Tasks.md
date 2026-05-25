@@ -6,8 +6,8 @@ This document outlines the development phases for the nexTask project. The work 
 
 _Handled exclusively by **Member A**. This phase establishes the environment, core architecture, and database foundation required for all other members to begin work._
 
-| Task ID | Task Description                                                                                                                                                           | Assigned To | Status  |
-| :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------- | :------ |
+| Task ID | Task Description                                                                                                                                                           | Assigned To | Status    |
+| :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------- | :-------- |
 | T0.1    | **Monorepo Scaffolding** \- Initialize pnpm workspaces. \- Create root pnpm-workspace.yaml. \- Scaffold server, client, and types directories.                             | Member A    | Completed |
 | T0.2    | **Backend & API Config** \- Initialize Express with TypeScript. \- Configure tsoa for automated Swagger generation. \- Link shared TypeScript types to the server package. | Member A    | Completed |
 | T0.3    | **Database & Schema** \- Initialize PostgreSQL connection. \- Set up Prisma ORM. \- Define base User and Task models in schema.prisma.                                     | Member A    | Completed |
@@ -18,13 +18,13 @@ _Handled exclusively by **Member A**. This phase establishes the environment, co
 
 _Focuses on user access, task management foundations, and system infrastructure._
 
-| Task ID | Task Description                                                                                                                                                                                              | Assigned To | Status  |
-| :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :---------- | :------ |
+| Task ID | Task Description                                                                                                                                                                                              | Assigned To | Status    |
+| :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :---------- | :-------- |
 | T1.1    | **Authentication Engine** \- Implement Argon2 password hashing utilities. \- Build JWT generation and verification logic. \- Create Login and Registration endpoints.                                         | Member A    | Completed |
-| T1.2    | **Task Services** \- Create Prisma-based CRUD services for tasks. \- Implement TSOA controllers (must return standardized ApiResponse and throw ApiError).                                                    | Member B    | Pending |
-| T1.3    | **Base Layout UI** \- Design the responsive Dashboard Shell with Sidebar. \- Build the top Navigation bar with user status. \- Implement frontend routing and protected routes.                               | Member C    | Pending |
-| T1.4    | **User Onboarding Flows** \- Build "First Login" password reset logic (enforce via mustResetPassword flag). \- Implement the User Profile edit interface. \- Enforce password complexity frontend validation. | Member D    | Pending |
-| T1.5    | **Error Infrastructure** \- (Backend middleware & ApiError implemented in T1.1) \- Implement frontend toast notification system mapped to standardized API response format.                                   | Member E    | Pending |
+| T1.2    | **Task Services** \- Create Prisma-based CRUD services for tasks. \- Implement TSOA controllers (must return standardized ApiResponse and throw ApiError).                                                    | Member B    | Pending   |
+| T1.3    | **Base Layout UI** \- Design the responsive Dashboard Shell with Sidebar. \- Build the top Navigation bar with user status. \- Implement frontend routing and protected routes.                               | Member C    | Pending   |
+| T1.4    | **User Onboarding Flows** \- Build "First Login" password reset logic (enforce via mustResetPassword flag). \- Implement the User Profile edit interface. \- Enforce password complexity frontend validation. | Member D    | Pending   |
+| T1.5    | **Error Infrastructure** \- (Backend middleware & ApiError implemented in T1.1) \- Implement frontend toast notification system mapped to standardized API response format.                                   | Member E    | Pending   |
 
 ## **🚀 Phase 2: Notifications & UI Features**
 

@@ -4,7 +4,9 @@
   "private": true,
   "main": "dist/index.js",
   "scripts": {
-    "dev": "nodemon src/index.ts",
+    "predev": "prisma generate",
+    "dev": "nodemon",
+    "prebuild": "prisma generate",
     "build": "tsoa spec-and-routes && tsc",
     "start": "node dist/index.js",
     "prisma:generate": "prisma generate",
@@ -12,7 +14,7 @@
   },
   "dependencies": {
     "@nextask/types": "workspace:*",
-    "@prisma/adapter-pg": "^7.7.0",
+    "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "7.7.0",
     "@tsoa/runtime": "7.0.0-alpha.0",
     "@types/pg": "^8.20.0",
@@ -21,7 +23,7 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
-    "pg": "^8.20.0",
+    "pg": "^8.21.0",
     "swagger-ui-express": "^5.0.1",
     "tsoa": "7.0.0-alpha.0"
   },
@@ -30,14 +32,14 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^25.6.0",
+    "@types/node": "^25.9.1",
     "@types/swagger-ui-express": "^4.1.8",
     "eslint": "^9.39.4",
-    "globals": "^17.5.0",
+    "globals": "^17.6.0",
     "nodemon": "^3.1.14",
     "prisma": "7.7.0",
     "ts-node": "^10.9.2",
-    "typescript": "^6.0.2",
-    "typescript-eslint": "^8.58.2"
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.59.4"
   }
 }
