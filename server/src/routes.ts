@@ -3,15 +3,12 @@
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import type { TsoaRoute } from '@tsoa/runtime';
 import {  fetchMiddlewares, ExpressTemplateService } from '@tsoa/runtime';
-// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { PingController } from './controllers/ping.controller';
-// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { AuthController } from './controllers/auth.controller';
 import type { Request as ExRequest, Response as ExResponse, RequestHandler, Router } from 'express';
 
 
 
-// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
 const models: TsoaRoute.Models = {
     "PingResponse": {
@@ -22,7 +19,6 @@ const models: TsoaRoute.Models = {
         },
         "additionalProperties": false,
     },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "AuthData": {
         "dataType": "refObject",
         "properties": {
@@ -30,7 +26,6 @@ const models: TsoaRoute.Models = {
         },
         "additionalProperties": false,
     },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ApiResponse_AuthData_": {
         "dataType": "refObject",
         "properties": {
@@ -41,7 +36,6 @@ const models: TsoaRoute.Models = {
         },
         "additionalProperties": false,
     },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "RegisterRequest": {
         "dataType": "refObject",
         "properties": {
@@ -50,7 +44,6 @@ const models: TsoaRoute.Models = {
         },
         "additionalProperties": false,
     },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "LoginRequest": {
         "dataType": "refObject",
         "properties": {
@@ -59,11 +52,9 @@ const models: TsoaRoute.Models = {
         },
         "additionalProperties": false,
     },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 };
 const templateService = new ExpressTemplateService(models, {"noImplicitAdditionalProperties":"throw-on-extras","bodyCoercion":true});
 
-// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
 
 
@@ -85,7 +76,6 @@ export function RegisterRoutes(app: Router) {
 
             async function PingController_getMessage(request: ExRequest, response: ExResponse, next: any) {
 
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
             let validatedArgs: any[] = [];
             try {
@@ -105,7 +95,6 @@ export function RegisterRoutes(app: Router) {
                 return next(err);
             }
         });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsAuthController_register: Record<string, TsoaRoute.ParameterSchema> = {
                 requestBody: {"in":"body","name":"requestBody","required":true,"ref":"RegisterRequest"},
         };
@@ -115,7 +104,6 @@ export function RegisterRoutes(app: Router) {
 
             async function AuthController_register(request: ExRequest, response: ExResponse, next: any) {
 
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
             let validatedArgs: any[] = [];
             try {
@@ -135,7 +123,6 @@ export function RegisterRoutes(app: Router) {
                 return next(err);
             }
         });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsAuthController_login: Record<string, TsoaRoute.ParameterSchema> = {
                 requestBody: {"in":"body","name":"requestBody","required":true,"ref":"LoginRequest"},
         };
@@ -145,7 +132,6 @@ export function RegisterRoutes(app: Router) {
 
             async function AuthController_login(request: ExRequest, response: ExResponse, next: any) {
 
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
             let validatedArgs: any[] = [];
             try {
@@ -165,12 +151,8 @@ export function RegisterRoutes(app: Router) {
                 return next(err);
             }
         });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
 
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
 }
 
-// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa

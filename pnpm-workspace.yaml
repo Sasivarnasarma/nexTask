@@ -5,5 +5,5 @@ packages:
 allowBuilds:
   '@prisma/engines': true
   '@scarf/scarf': true
-  argon2: false
-  prisma: false
+  argon2: true
+  prisma: true

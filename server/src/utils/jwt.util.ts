@@ -1,6 +1,17 @@
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_please_change_in_production';
+function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET environment variable is required.');
+  }
+  if (secret.length < 32) {
+    throw new Error('JWT_SECRET must be at least 32 characters long.');
+  }
+  return secret;
+}
+
+const JWT_SECRET = getJwtSecret();
 const JWT_EXPIRES_IN = '24h';
 
 export interface JwtPayload {
@@ -21,5 +32,5 @@ export function generateToken(payload: JwtPayload): string {
  * Throws an error if the token is invalid or expired.
  */
 export function verifyToken(token: string): JwtPayload {
-  return jwt.verify(token, JWT_SECRET) as JwtPayload;
+  return jwt.verify(token, JWT_SECRET) as unknown as JwtPayload;
 }

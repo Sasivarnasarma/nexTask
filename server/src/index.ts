@@ -32,6 +32,21 @@ app.use((err: unknown, req: Request, res: Response, _next: NextFunction) => {
     return res.status(err.statusCode).json(errorResponse(err.message));
   }
 
+  if (
+    err &&
+    typeof err === 'object' &&
+    'name' in err &&
+    err.name === 'ValidateError' &&
+    'fields' in err
+  ) {
+    return res.status(422).json({
+      status: 'error',
+      message: 'Request validation failed.',
+      data: (err as { fields: Record<string, unknown> }).fields,
+      error: 'VALIDATION_ERROR',
+    });
+  }
+
   const message = err instanceof Error ? err.message : 'An unexpected error occurred.';
   return res.status(500).json(errorResponse(message));
 });
