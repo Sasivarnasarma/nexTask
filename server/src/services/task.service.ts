@@ -1,5 +1,6 @@
-import { Task, Priority, Status } from "@prisma/client";
-import { prisma } from "../lib/prisma";
+import { Priority, Status, Task } from '@prisma/client';
+
+import { prisma } from '../lib/prisma';
 
 // Shape of data needed to create a task
 export interface CreateTaskInput {
@@ -24,7 +25,16 @@ export interface UpdateTaskInput {
 // CREATE
 export const createTask = async (data: CreateTaskInput): Promise<Task> => {
   if (data.dueDate && data.dueDate <= new Date()) {
-    throw new Error("Due date must be in the future.");
+    throw new Error('Due date must be in the future.');
+  }
+
+  if (data.assignedUserId) {
+    const userExists = await prisma.user.findUnique({
+      where: { id: data.assignedUserId },
+    });
+    if (!userExists) {
+      throw new Error('Assigned user does not exist.');
+    }
   }
 
   return prisma.task.create({ data });
@@ -33,7 +43,7 @@ export const createTask = async (data: CreateTaskInput): Promise<Task> => {
 // GET ALL
 export const getAllTasks = async (): Promise<Task[]> => {
   return prisma.task.findMany({
-    orderBy: { createdAt: "desc" },
+    orderBy: { createdAt: 'desc' },
   });
 };
 
@@ -43,16 +53,22 @@ export const getTaskById = async (id: string): Promise<Task | null> => {
 };
 
 // UPDATE
-export const updateTask = async (
-  id: string,
-  data: UpdateTaskInput
-): Promise<Task> => {
+export const updateTask = async (id: string, data: UpdateTaskInput): Promise<Task> => {
   if (data.dueDate && data.dueDate <= new Date()) {
-    throw new Error("Due date must be in the future.");
+    throw new Error('Due date must be in the future.');
+  }
+
+  if (data.assignedUserId) {
+    const userExists = await prisma.user.findUnique({
+      where: { id: data.assignedUserId },
+    });
+    if (!userExists) {
+      throw new Error('Assigned user does not exist.');
+    }
   }
 
   const existing = await prisma.task.findUnique({ where: { id } });
-  if (!existing) throw new Error("Task not found.");
+  if (!existing) throw new Error('Task not found.');
 
   return prisma.task.update({ where: { id }, data });
 };
@@ -60,7 +76,7 @@ export const updateTask = async (
 // DELETE
 export const deleteTask = async (id: string): Promise<Task> => {
   const existing = await prisma.task.findUnique({ where: { id } });
-  if (!existing) throw new Error("Task not found.");
+  if (!existing) throw new Error('Task not found.');
 
   return prisma.task.delete({ where: { id } });
 };

@@ -1,0 +1,96 @@
+# 🚀 nexTask API Integration Tests
+# This file is compatible with the VS Code REST Client extension.
+# It allows to execute HTTP queries directly inside the editor.
+
+@baseUrl = http://localhost:3000
+@contentType = application/json
+
+### 1. Register a New User
+# NOTE: Make sure ALLOW_PUBLIC_REGISTRATION="true" is set in server/.env
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "developer@nextask.com",
+  "password": "SecurePassword123!"
+}
+
+### 2. Login to Retrieve JWT Token
+# @name loginRequest
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "developer@nextask.com",
+  "password": "SecurePassword123!"
+}
+
+### 3. Extract JWT Token from Login Response
+@authToken = {{loginRequest.response.body.data.token}}
+
+
+### ==========================================
+# 🔒 SECURED TASK ROUTES (Requires JWT Header)
+### ==========================================
+
+### 4. Create a Task (Valid Input)
+# @name createTaskRequest
+POST {{baseUrl}}/tasks
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "title": "Perform Task Controller Security Audit",
+  "description": "Double check all validation bounds, user assignment integrity, and authentication status handlers.",
+  "priority": "HIGH",
+  "status": "TODO",
+  "dueDate": "2027-12-31T23:59:59.000Z"
+}
+
+### 5. Extract Task ID from Response
+@taskId = {{createTaskRequest.response.body.data.id}}
+
+### 6. Create a Task (Invalid Input - Past Due Date)
+POST {{baseUrl}}/tasks
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "title": "Urgent Yesterday Fix",
+  "description": "This should fail because due date is in the past.",
+  "priority": "LOW",
+  "dueDate": "2020-01-01T00:00:00.000Z"
+}
+
+### 7. Create a Task (Invalid Input - Nonexistent User Assignment)
+POST {{baseUrl}}/tasks
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "title": "Orphaned Task",
+  "description": "This should fail because the assigned user UUID does not exist.",
+  "assignedUserId": "00000000-0000-0000-0000-000000000000"
+}
+
+### 8. Get All Tasks
+GET {{baseUrl}}/tasks
+Authorization: Bearer {{authToken}}
+
+### 9. Get Task By ID
+GET {{baseUrl}}/tasks/{{taskId}}
+Authorization: Bearer {{authToken}}
+
+### 10. Update Task Status & Details
+PUT {{baseUrl}}/tasks/{{taskId}}
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "status": "IN_PROGRESS",
+  "description": "Audited security endpoints: Added explicit JWT error catcher and assigned user lookup validators successfully."
+}
+
+### 11. Delete Task
+DELETE {{baseUrl}}/tasks/{{taskId}}
+Authorization: Bearer {{authToken}}

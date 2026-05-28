@@ -47,6 +47,17 @@ app.use((err: unknown, req: Request, res: Response, _next: NextFunction) => {
     });
   }
 
+  if (
+    err &&
+    typeof err === 'object' &&
+    'status' in err &&
+    'message' in err &&
+    typeof (err as any).status === 'number' &&
+    typeof (err as any).message === 'string'
+  ) {
+    return res.status((err as any).status).json(errorResponse((err as any).message));
+  }
+
   const message = err instanceof Error ? err.message : 'An unexpected error occurred.';
   return res.status(500).json(errorResponse(message));
 });
