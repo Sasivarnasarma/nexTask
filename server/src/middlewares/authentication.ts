@@ -1,5 +1,6 @@
 import { Request } from 'express';
-import jwt from 'jsonwebtoken';
+
+import { verifyToken } from '../utils/jwt.util';
 
 export async function expressAuthentication(
   request: Request,
@@ -16,8 +17,7 @@ export async function expressAuthentication(
     const token = authHeader.split(' ')[1];
 
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
-      return decoded;
+      return verifyToken(token);
     } catch {
       throw { status: 401, message: 'Invalid or expired token.' };
     }
