@@ -1,21 +1,25 @@
 export function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
   return (
     <nav className="h-16 border-b border-slate-200 flex items-center justify-between px-6 bg-white text-slate-800">
-      
       <div className="flex items-center gap-4">
         {/* Hamburger Menu Icon (Now visible on ALL screens) */}
-        <button 
+        <button
           onClick={onMenuClick}
           className="p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6h16M4 12h16M4 18h16"
+            />
           </svg>
         </button>
 
         {/* Brand Title (Now visible on ALL screens if the sidebar is closed) */}
         <div className="font-extrabold text-xl tracking-tight text-slate-900 md:hidden">
-          nexTask.
+          nexTask
         </div>
       </div>
 
@@ -26,7 +30,6 @@ export function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
           <span className="text-xs font-bold">U</span>
         </div>
       </div>
-      
     </nav>
   );
 }

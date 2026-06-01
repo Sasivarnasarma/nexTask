@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+
 import { Navbar } from './components/Navbar';
-import { Sidebar } from './components/Sidebar';
 import { ProtectedRoute } from './components/ProtectedRoute';
-import { Dashboard } from './pages/Dashboard';
-import { Settings } from './pages/Settings';
-import { Login } from './pages/Login';
+import { Sidebar } from './components/Sidebar';
 import './index.css';
+import { Dashboard } from './pages/Dashboard';
+import { Login } from './pages/Login';
+import { Settings } from './pages/Settings';
 
 // We create an internal component layout wrapper so we can use hooks like useLocation safely
 const DashboardLayout: React.FC = () => {
@@ -15,7 +16,9 @@ const DashboardLayout: React.FC = () => {
   return (
     <div className="flex min-h-screen bg-slate-50 overflow-hidden">
       {/* Sidebar Wrapper */}
-      <div className={`transition-all duration-300 ease-in-out shrink-0 ${isSidebarOpen ? 'w-64' : 'w-20'}`}>
+      <div
+        className={`transition-all duration-300 ease-in-out shrink-0 ${isSidebarOpen ? 'w-64' : 'w-20'}`}
+      >
         <div className="w-full h-full overflow-hidden">
           <Sidebar isOpen={isSidebarOpen} />
         </div>
@@ -46,19 +49,21 @@ const App: React.FC = () => {
     <BrowserRouter>
       <Routes>
         {/* Public Login Route */}
-        <Route 
-          path="/login" 
-          element={auth ? <Navigate to="/dashboard" replace /> : <Login onLogin={() => setAuth(true)} />} 
+        <Route
+          path="/login"
+          element={
+            auth ? <Navigate to="/dashboard" replace /> : <Login onLogin={() => setAuth(true)} />
+          }
         />
 
         {/* Master Protected Dashboard Route Node */}
-        <Route 
-          path="/*" 
+        <Route
+          path="/*"
           element={
             <ProtectedRoute isAuthenticated={auth}>
               <DashboardLayout />
             </ProtectedRoute>
-          } 
+          }
         />
       </Routes>
     </BrowserRouter>
