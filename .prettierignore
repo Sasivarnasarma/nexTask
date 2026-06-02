@@ -6,3 +6,5 @@ coverage
 .nuxt
 out
 .cache
+server/src/swagger.json
+server/src/routes.ts
