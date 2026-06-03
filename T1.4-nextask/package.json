@@ -1,0 +1,19 @@
+{
+  "name": "nextask-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "nexTask - Collaborative Task Management System Monorepo",
+  "scripts": {
+    "dev": "pnpm --parallel run dev",
+    "build": "pnpm --recursive run build",
+    "prod": "pnpm run build && pnpm --parallel run start",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,css}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,css}\"",
+    "lint": "pnpm --recursive run lint"
+  },
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^6.0.2",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
+  }
+}

@@ -1,0 +1,9 @@
+packages:
+  - 'server'
+  - 'client'
+  - 'types'
+allowBuilds:
+  '@prisma/engines': true
+  '@scarf/scarf': true
+  argon2: true
+  prisma: true

@@ -1,0 +1,27 @@
+{
+  "entryFile": "src/index.ts",
+  "noImplicitAdditionalProperties": "throw-on-extras",
+  "controllerPathGlobs": ["src/controllers/**/*.ts"],
+  "spec": {
+    "outputDirectory": "src/generated",
+    "specVersion": 3,
+    "name": "nexTask API",
+    "description": "nexTask Collaborative Task Management API",
+    "version": "1.0.0",
+    "contact": {
+      "name": "nexTask Dev Team"
+    },
+    "securityDefinitions": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "security": [{ "BearerAuth": [] }]
+  },
+  "routes": {
+    "routesDir": "src/generated",
+    "authenticationModule": "src/middleware/auth.ts"
+  }
+}

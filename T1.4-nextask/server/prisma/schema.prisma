@@ -1,0 +1,43 @@
+// server/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  admin
+  manager
+  member
+}
+
+// ─── Models ───────────────────────────────────────────────────────────────────
+
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  passwordHash      String    @map("password_hash")
+  name              String
+  role              UserRole  @default(member)
+  avatarUrl         String?   @map("avatar_url")
+  bio               String?
+  phone             String?
+  timezone          String    @default("UTC")
+
+  /// When true the user MUST change their password before using the app.
+  /// Set to true on first-time account creation by an admin.
+  /// Cleared to false when the user successfully completes the force-reset flow.
+  mustResetPassword Boolean   @default(false) @map("must_reset_password")
+
+  isActive          Boolean   @default(true) @map("is_active")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  @@map("users")
+}

@@ -1,0 +1,9 @@
+{
+  "watch": ["src"],
+  "ext": "ts",
+  "ignore": ["src/generated/**", "dist/**"],
+  "exec": "tsoa spec-and-routes && ts-node -r tsconfig-paths/register src/index.ts",
+  "env": {
+    "NODE_ENV": "development"
+  }
+}

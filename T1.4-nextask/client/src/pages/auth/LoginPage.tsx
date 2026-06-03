@@ -1,0 +1,137 @@
+// client/src/pages/auth/LoginPage.tsx
+import { useState, FormEvent } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { AlertCircle, CheckSquare } from "lucide-react";
+import { login } from "@/api/auth.api";
+import { useAuthStore } from "@/store/auth.store";
+import { PasswordInput } from "@/components/ui/PasswordInput";
+import { cn } from "@/lib/utils";
+
+export default function LoginPage() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const setAuth = useAuthStore((s) => s.setAuth);
+
+  const from = (location.state as { from?: { pathname: string } })?.from?.pathname ?? "/dashboard";
+
+  const [email, setEmail]     = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError]     = useState("");
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      const result = await login({ email, password });
+
+      // Store token + user in persistent Zustand store
+      setAuth(result.token, result.user);
+
+      // ── KEY LOGIC ──────────────────────────────────────────────────────────
+      // If the user must reset their password, override any intended redirect
+      // and send them exclusively to the force-reset screen.
+      if (result.mustResetPassword) {
+        navigate("/force-reset", { replace: true });
+      } else {
+        navigate(from, { replace: true });
+      }
+    } catch (err: unknown) {
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+        "Login failed. Please try again.";
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-6">
+      <div className="w-full max-w-sm">
+
+        {/* Brand */}
+        <div className="flex items-center gap-2.5 mb-8">
+          <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center">
+            <CheckSquare size={18} className="text-white" />
+          </div>
+          <span className="text-lg font-bold text-zinc-100 tracking-tight">nexTask</span>
+        </div>
+
+        {/* Card */}
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
+          <h1 className="text-xl font-bold text-zinc-100 mb-1 tracking-tight">
+            Welcome back
+          </h1>
+          <p className="text-sm text-zinc-400 mb-6">
+            Sign in to your workspace
+          </p>
+
+          {/* Error banner */}
+          {error && (
+            <div className="flex items-center gap-2 px-3 py-2.5 bg-red-950 border border-red-900 rounded-lg mb-5 text-sm text-red-300">
+              <AlertCircle size={14} className="flex-shrink-0" />
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Email */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-zinc-400" htmlFor="email">
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                required
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@company.com"
+                className="w-full px-3 py-2.5 rounded-lg text-sm bg-zinc-950 border border-zinc-700 text-zinc-100 placeholder:text-zinc-600 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/40 transition-colors"
+              />
+            </div>
+
+            {/* Password */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-zinc-400" htmlFor="password">
+                Password
+              </label>
+              <PasswordInput
+                id="password"
+                required
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+              />
+            </div>
+
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={loading}
+              className={cn(
+                "w-full py-2.5 rounded-lg text-sm font-semibold text-white transition-all mt-2",
+                "bg-indigo-600 hover:bg-indigo-500 active:scale-[.98]",
+                loading && "opacity-60 cursor-not-allowed"
+              )}
+            >
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                  Signing in…
+                </span>
+              ) : (
+                "Sign in"
+              )}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
