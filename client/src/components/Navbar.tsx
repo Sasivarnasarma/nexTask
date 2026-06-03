@@ -1,3 +1,6 @@
+import { User } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
 export function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
   return (
     <nav className="h-16 border-b border-slate-200 flex items-center justify-between px-6 bg-white text-slate-800">
@@ -25,9 +28,13 @@ export function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
 
       <div className="flex items-center gap-4">
         <span className="text-sm font-semibold text-slate-600">Active</span>
-        <div className="h-8 w-8 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center">
-          <span className="text-xs font-bold">U</span>
-        </div>
+        <Link
+          to="/profile"
+          title="Profile Settings"
+          className="h-8 w-8 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-full flex items-center justify-center transition-colors"
+        >
+          <User size={16} />
+        </Link>
       </div>
     </nav>
   );

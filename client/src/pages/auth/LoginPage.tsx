@@ -1,11 +1,12 @@
-import { useState, FormEvent } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
 import { AlertCircle, CheckSquare } from 'lucide-react';
+import { FormEvent, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+
 import { login } from '@/api/auth.api';
 import { getProfile } from '@/api/profile.api';
-import { useAuthStore } from '@/store/auth.store';
 import { PasswordInput } from '@/components/ui/PasswordInput';
 import { cn } from '@/lib/utils';
+import { useAuthStore } from '@/store/auth.store';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -14,10 +15,10 @@ export default function LoginPage() {
 
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname ?? '/dashboard';
 
-  const [email, setEmail]     = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState('');
+  const [error, setError] = useState('');
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -59,7 +60,6 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-6 w-full">
       <div className="w-full max-w-sm">
-
         {/* Brand */}
         <div className="flex items-center gap-2.5 mb-8">
           <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center">
@@ -70,17 +70,13 @@ export default function LoginPage() {
 
         {/* Card */}
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
-          <h1 className="text-xl font-bold text-zinc-100 mb-1 tracking-tight">
-            Welcome back
-          </h1>
-          <p className="text-sm text-zinc-400 mb-6">
-            Sign in to your workspace
-          </p>
+          <h1 className="text-xl font-bold text-zinc-100 mb-1 tracking-tight">Welcome back</h1>
+          <p className="text-sm text-zinc-400 mb-6">Sign in to your workspace</p>
 
           {/* Error banner */}
           {error && (
             <div className="flex items-center gap-2 px-3 py-2.5 bg-red-950 border border-red-900 rounded-lg mb-5 text-sm text-red-300">
-              <AlertCircle size={14} className="flex-shrink-0" />
+              <AlertCircle size={14} className="shrink-0" />
               {error}
             </div>
           )}
@@ -125,7 +121,7 @@ export default function LoginPage() {
               className={cn(
                 'w-full py-2.5 rounded-lg text-sm font-semibold text-white transition-all mt-2',
                 'bg-indigo-600 hover:bg-indigo-500 active:scale-[.98]',
-                loading && 'opacity-60 cursor-not-allowed'
+                loading && 'opacity-60 cursor-not-allowed',
               )}
             >
               {loading ? (

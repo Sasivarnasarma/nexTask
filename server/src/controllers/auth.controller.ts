@@ -1,5 +1,5 @@
-import { Body, Controller, Post, Request, Route, Security, SuccessResponse } from 'tsoa';
 import type { Request as ExRequest } from 'express';
+import { Body, Controller, Post, Request, Route, Security, SuccessResponse } from 'tsoa';
 
 import {
   AuthData,

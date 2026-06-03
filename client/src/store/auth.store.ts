@@ -1,6 +1,6 @@
+import { User } from '@nextask/types';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { User } from '@nextask/types';
 
 interface AuthState {
   token: string | null;
@@ -20,19 +20,16 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       isAuthenticated: false,
 
-      setAuth: (token, user) =>
-        set({ token, user, isAuthenticated: true }),
+      setAuth: (token, user) => set({ token, user, isAuthenticated: true }),
 
-      setToken: (token) =>
-        set({ token }),
+      setToken: (token) => set({ token }),
 
       updateUser: (userUpdates) =>
         set((state) => ({
           user: state.user ? { ...state.user, ...userUpdates } : null,
         })),
 
-      logout: () =>
-        set({ token: null, user: null, isAuthenticated: false }),
+      logout: () => set({ token: null, user: null, isAuthenticated: false }),
     }),
     {
       name: 'nextask-auth',
@@ -42,6 +39,6 @@ export const useAuthStore = create<AuthState>()(
           state.isAuthenticated = true;
         }
       },
-    }
-  )
+    },
+  ),
 );

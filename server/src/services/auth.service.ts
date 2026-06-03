@@ -91,10 +91,7 @@ export class AuthService {
    * - Clears the mustResetPassword flag on success.
    * - Returns a fresh JWT so the client can continue without re-logging in.
    */
-  public async resetPassword(
-    userId: string,
-    data: ResetPasswordRequest,
-  ): Promise<AuthData> {
+  public async resetPassword(userId: string, data: ResetPasswordRequest): Promise<AuthData> {
     // --- Confirm passwords match ---
     if (data.newPassword !== data.confirmNewPassword) {
       throw new ApiError(400, 'New password and confirmation do not match.');
@@ -129,7 +126,7 @@ export class AuthService {
       where: { id: userId },
       data: {
         password: hashedNewPassword,
-        mustResetPassword: false,   // ← clears the first-login gate
+        mustResetPassword: false, // ← clears the first-login gate
       },
     });
 

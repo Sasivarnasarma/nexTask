@@ -32,9 +32,7 @@ export async function expressAuthentication(
       // block all endpoints EXCEPT the reset-password route itself.
       if (payload.mustResetPassword) {
         const isAllowed = RESET_ALLOWED_PATHS.some(
-          (entry) =>
-            entry.method === request.method &&
-            request.path === entry.path,
+          (entry) => entry.method === request.method && request.path === entry.path,
         );
 
         if (!isAllowed) {

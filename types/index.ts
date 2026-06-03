@@ -66,11 +66,11 @@ export interface PasswordRule {
 }
 
 export const PASSWORD_RULES: PasswordRule[] = [
-  { id: "length", label: "At least 8 characters" },
-  { id: "uppercase", label: "One uppercase letter (A–Z)" },
-  { id: "lowercase", label: "One lowercase letter (a–z)" },
-  { id: "number", label: "One number (0–9)" },
-  { id: "special", label: "One special character (!@#$%^&*…)" },
+  { id: 'length', label: 'At least 8 characters' },
+  { id: 'uppercase', label: 'One uppercase letter (A–Z)' },
+  { id: 'lowercase', label: 'One lowercase letter (a–z)' },
+  { id: 'number', label: 'One number (0–9)' },
+  { id: 'special', label: 'One special character (!@#$%^&*…)' },
 ];
 
 // ─── API Response Wrapper ─────────────────────────────────────────────────────

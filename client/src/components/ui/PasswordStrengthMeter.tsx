@@ -36,7 +36,7 @@ export function PasswordStrengthMeter({ password, className = '' }: Props) {
           <li key={rule.id} className="flex items-center gap-2">
             {/* Indicator dot / checkmark */}
             <span
-              className="inline-flex items-center justify-center w-4 h-4 rounded-full flex-shrink-0 transition-colors duration-200"
+              className="inline-flex items-center justify-center w-4 h-4 rounded-full shrink-0 transition-colors duration-200"
               style={{ backgroundColor: rule.met ? '#22c55e' : '#3f3f46' }}
             >
               {rule.met ? (
@@ -55,9 +55,7 @@ export function PasswordStrengthMeter({ password, className = '' }: Props) {
             </span>
             <span
               className={`text-xs transition-colors duration-200 ${
-                rule.met
-                  ? 'text-zinc-400 line-through decoration-zinc-600'
-                  : 'text-zinc-500'
+                rule.met ? 'text-zinc-400 line-through decoration-zinc-600' : 'text-zinc-500'
               }`}
             >
               {rule.label}

@@ -1,12 +1,13 @@
-import { useState, FormEvent } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { User as UserIcon, Save, AlertCircle, CheckCircle, Key } from 'lucide-react';
-import { getProfile, updateProfile, changePassword } from '@/api/profile.api';
-import { useAuthStore } from '@/store/auth.store';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { AlertCircle, CheckCircle, Key, Save, User as UserIcon } from 'lucide-react';
+import { FormEvent, useState } from 'react';
+
+import { changePassword, getProfile, updateProfile } from '@/api/profile.api';
 import { PasswordInput } from '@/components/ui/PasswordInput';
 import { PasswordStrengthMeter } from '@/components/ui/PasswordStrengthMeter';
 import { usePasswordStrength } from '@/hooks/usePasswordStrength';
 import { cn } from '@/lib/utils';
+import { useAuthStore } from '@/store/auth.store';
 
 export default function ProfilePage() {
   const queryClient = useQueryClient();
@@ -20,9 +21,11 @@ export default function ProfilePage() {
   });
 
   // ── Profile form state ─────────────────────────────────────────────────────
-  const [name, setName]   = useState(profile?.name ?? '');
+  const [name, setName] = useState(profile?.name ?? '');
   const [email, setEmail] = useState(profile?.email ?? '');
-  const [profileMsg, setProfileMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [profileMsg, setProfileMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(
+    null,
+  );
 
   const profileMutation = useMutation({
     mutationFn: updateProfile,
@@ -33,8 +36,9 @@ export default function ProfilePage() {
       setTimeout(() => setProfileMsg(null), 3000);
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
-        ?? 'Failed to update profile.';
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+        'Failed to update profile.';
       setProfileMsg({ type: 'error', text: msg });
     },
   });
@@ -46,24 +50,28 @@ export default function ProfilePage() {
   }
 
   // ── Password change section (optional, for already-authenticated users) ────
-  const [curPw, setCurPw]       = useState('');
-  const [newPw, setNewPw]       = useState('');
-  const [conPw, setConPw]       = useState('');
-  const [pwMsg, setPwMsg]       = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const strength                = usePasswordStrength(newPw);
-  const pwMatches               = newPw.length > 0 && newPw === conPw;
-  const pwMismatch              = conPw.length > 0 && newPw !== conPw;
+  const [curPw, setCurPw] = useState('');
+  const [newPw, setNewPw] = useState('');
+  const [conPw, setConPw] = useState('');
+  const [pwMsg, setPwMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const strength = usePasswordStrength(newPw);
+  const pwMatches = newPw.length > 0 && newPw === conPw;
+  const pwMismatch = conPw.length > 0 && newPw !== conPw;
 
   const pwMutation = useMutation({
-    mutationFn: () => changePassword({ currentPassword: curPw, newPassword: newPw, confirmNewPassword: conPw }),
+    mutationFn: () =>
+      changePassword({ currentPassword: curPw, newPassword: newPw, confirmNewPassword: conPw }),
     onSuccess: () => {
       setPwMsg({ type: 'success', text: 'Password changed successfully.' });
-      setCurPw(''); setNewPw(''); setConPw('');
+      setCurPw('');
+      setNewPw('');
+      setConPw('');
       setTimeout(() => setPwMsg(null), 4000);
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
-        ?? 'Failed to change password.';
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+        'Failed to change password.';
       setPwMsg({ type: 'error', text: msg });
     },
   });
@@ -93,7 +101,6 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 p-6 lg:p-10 w-full">
       <div className="max-w-2xl mx-auto space-y-8">
-
         {/* Page header */}
         <div>
           <h1 className="text-2xl font-bold tracking-tight mb-1">Profile Settings</h1>
@@ -122,13 +129,19 @@ export default function ProfilePage() {
 
           {/* Status banner */}
           {profileMsg && (
-            <div className={cn(
-              'flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm mb-5',
-              profileMsg.type === 'success'
-                ? 'bg-green-950 border border-green-900 text-green-300'
-                : 'bg-red-950 border border-red-900 text-red-300'
-            )}>
-              {profileMsg.type === 'success' ? <CheckCircle size={14} /> : <AlertCircle size={14} />}
+            <div
+              className={cn(
+                'flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm mb-5',
+                profileMsg.type === 'success'
+                  ? 'bg-green-950 border border-green-900 text-green-300'
+                  : 'bg-red-950 border border-red-900 text-red-300',
+              )}
+            >
+              {profileMsg.type === 'success' ? (
+                <CheckCircle size={14} />
+              ) : (
+                <AlertCircle size={14} />
+              )}
               {profileMsg.text}
             </div>
           )}
@@ -165,7 +178,7 @@ export default function ProfilePage() {
               className={cn(
                 'flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold',
                 'bg-indigo-600 hover:bg-indigo-500 text-white transition-all active:scale-[.98]',
-                profileMutation.isPending && 'opacity-60 cursor-not-allowed'
+                profileMutation.isPending && 'opacity-60 cursor-not-allowed',
               )}
             >
               {profileMutation.isPending ? (
@@ -190,12 +203,14 @@ export default function ProfilePage() {
           </h2>
 
           {pwMsg && (
-            <div className={cn(
-              'flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm mb-5',
-              pwMsg.type === 'success'
-                ? 'bg-green-950 border border-green-900 text-green-300'
-                : 'bg-red-950 border border-red-900 text-red-300'
-            )}>
+            <div
+              className={cn(
+                'flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm mb-5',
+                pwMsg.type === 'success'
+                  ? 'bg-green-950 border border-green-900 text-green-300'
+                  : 'bg-red-950 border border-red-900 text-red-300',
+              )}
+            >
               {pwMsg.type === 'success' ? <CheckCircle size={14} /> : <AlertCircle size={14} />}
               {pwMsg.text}
             </div>
@@ -251,7 +266,8 @@ export default function ProfilePage() {
               className={cn(
                 'flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold',
                 'bg-indigo-600 hover:bg-indigo-500 text-white transition-all active:scale-[.98]',
-                (!strength.isValid || !pwMatches || !curPw || pwMutation.isPending) && 'opacity-40 cursor-not-allowed'
+                (!strength.isValid || !pwMatches || !curPw || pwMutation.isPending) &&
+                  'opacity-40 cursor-not-allowed',
               )}
             >
               {pwMutation.isPending ? (
@@ -268,7 +284,6 @@ export default function ProfilePage() {
             </button>
           </form>
         </section>
-
       </div>
     </div>
   );

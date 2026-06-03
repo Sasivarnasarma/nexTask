@@ -1,6 +1,6 @@
 import { prisma } from '../lib/prisma';
 import { ApiError } from '../utils/apiError.util';
-import { verifyPassword, hashPassword } from '../utils/hash.util';
+import { hashPassword, verifyPassword } from '../utils/hash.util';
 import { validatePasswordComplexity } from '../utils/password.util';
 
 export interface UserProfile {
@@ -47,10 +47,7 @@ export class UserService {
    * Updates display name and/or email.
    * - Email uniqueness is re-validated before saving.
    */
-  public async updateProfile(
-    userId: string,
-    data: UpdateProfileRequest,
-  ): Promise<UserProfile> {
+  public async updateProfile(userId: string, data: UpdateProfileRequest): Promise<UserProfile> {
     if (!data.name && !data.email) {
       throw new ApiError(400, 'At least one field (name or email) must be provided.');
     }
@@ -89,10 +86,7 @@ export class UserService {
    * Allows an already-onboarded user to change their password voluntarily.
    * (The first-login forced reset is handled by AuthService.resetPassword)
    */
-  public async changePassword(
-    userId: string,
-    data: ChangePasswordRequest,
-  ): Promise<void> {
+  public async changePassword(userId: string, data: ChangePasswordRequest): Promise<void> {
     if (data.newPassword !== data.confirmNewPassword) {
       throw new ApiError(400, 'New password and confirmation do not match.');
     }

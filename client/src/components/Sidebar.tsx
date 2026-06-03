@@ -1,13 +1,22 @@
 import { LayoutDashboard, LogOut, Settings } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+
+import { useAuthStore } from '@/store/auth.store';
 
 export function Sidebar({ isOpen }: { isOpen: boolean }) {
   const location = useLocation();
+  const navigate = useNavigate();
+  const logout = useAuthStore((s) => s.logout);
 
   const isActive = (path: string) => location.pathname.includes(path);
 
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   return (
-    <aside className="w-full border-r border-slate-200 min-h-screen py-6 bg-slate-50 flex flex-col justify-between transition-all duration-300">
+    <aside className="w-full border-r border-slate-200 h-full py-6 bg-slate-50 flex flex-col justify-between transition-all duration-300">
       <div className="flex flex-col gap-8">
         <div
           className={`font-extrabold tracking-tight text-slate-900 transition-all duration-300 ${isOpen ? 'text-2xl px-6' : 'text-xl text-center'}`}
@@ -64,7 +73,7 @@ export function Sidebar({ isOpen }: { isOpen: boolean }) {
 
       <div className="px-3">
         <button
-          onClick={() => window.location.reload()}
+          onClick={handleLogout}
           title="Log Out"
           className={`group flex items-center gap-3 w-full ${isOpen ? 'px-4 py-2.5 justify-start' : 'h-10 w-10 justify-center mx-auto'} text-slate-500 hover:bg-red-50 hover:text-red-600 rounded-lg font-bold text-sm transition-all duration-200`}
         >

@@ -539,7 +539,7 @@
 						}
 					}
 				},
-				"description": "Allows an authenticated, onboarded user to change their password voluntarily.\r\n(First-login forced reset uses POST /auth/reset-password instead.)",
+				"description": "Allows an authenticated, onboarded user to change their password voluntarily.\n(First-login forced reset uses POST /auth/reset-password instead.)",
 				"security": [
 					{
 						"jwt": []
@@ -821,7 +821,7 @@
 						}
 					}
 				},
-				"description": "First-login password reset (and any subsequent voluntary reset).\r\nRequires a valid JWT — users with mustResetPassword=true are ONLY\r\nallowed to call this endpoint until they complete the reset.",
+				"description": "First-login password reset (and any subsequent voluntary reset).\nRequires a valid JWT — users with mustResetPassword=true are ONLY\nallowed to call this endpoint until they complete the reset.",
 				"security": [
 					{
 						"jwt": []

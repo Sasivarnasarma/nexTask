@@ -1,30 +1,31 @@
-import { useState, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { AlertTriangle, CheckCircle, LogOut } from 'lucide-react';
+import { FormEvent, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import { resetPassword } from '@/api/auth.api';
 import { getProfile } from '@/api/profile.api';
-import { useAuthStore } from '@/store/auth.store';
 import { PasswordInput } from '@/components/ui/PasswordInput';
 import { PasswordStrengthMeter } from '@/components/ui/PasswordStrengthMeter';
 import { usePasswordStrength } from '@/hooks/usePasswordStrength';
 import { cn } from '@/lib/utils';
+import { useAuthStore } from '@/store/auth.store';
 
 export default function ForceResetPage() {
   const navigate = useNavigate();
   const { setAuth, logout } = useAuthStore();
 
-  const [currentPw, setCurrentPw]   = useState('');
-  const [newPw, setNewPw]           = useState('');
-  const [confirmPw, setConfirmPw]   = useState('');
-  const [loading, setLoading]       = useState(false);
-  const [error, setError]           = useState('');
-  const [done, setDone]             = useState(false);
+  const [currentPw, setCurrentPw] = useState('');
+  const [newPw, setNewPw] = useState('');
+  const [confirmPw, setConfirmPw] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [done, setDone] = useState(false);
 
   // Live complexity checking
-  const strength      = usePasswordStrength(newPw);
+  const strength = usePasswordStrength(newPw);
   const matchesConfirm = confirmPw.length > 0 && newPw === confirmPw;
-  const mismatch      = confirmPw.length > 0 && newPw !== confirmPw;
-  const canSubmit     = currentPw.length > 0 && strength.isValid && matchesConfirm && !loading;
+  const mismatch = confirmPw.length > 0 && newPw !== confirmPw;
+  const canSubmit = currentPw.length > 0 && strength.isValid && matchesConfirm && !loading;
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -79,7 +80,6 @@ export default function ForceResetPage() {
   return (
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-6 w-full">
       <div className="w-full max-w-md">
-
         {/* Warning badge */}
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-950 border border-amber-900 text-amber-400 text-xs font-semibold mb-5">
           <AlertTriangle size={12} />
@@ -90,24 +90,21 @@ export default function ForceResetPage() {
           Set your new password
         </h1>
         <p className="text-sm text-zinc-400 mb-7 leading-relaxed">
-          Your account was set up with a temporary password. Choose a strong
-          new password to continue — you cannot access nexTask until this is
-          complete.
+          Your account was set up with a temporary password. Choose a strong new password to
+          continue — you cannot access nexTask until this is complete.
         </p>
 
         {/* Card */}
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-7 space-y-5">
-
           {/* Error banner */}
           {error && (
             <div className="flex items-start gap-2 px-3 py-2.5 bg-red-950 border border-red-900 rounded-lg text-sm text-red-300">
-              <AlertTriangle size={14} className="flex-shrink-0 mt-0.5" />
+              <AlertTriangle size={14} className="shrink-0 mt-0.5" />
               {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
-
             {/* Current password */}
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-zinc-400">
@@ -127,9 +124,7 @@ export default function ForceResetPage() {
 
             {/* New password + strength meter */}
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-zinc-400">
-                New password
-              </label>
+              <label className="text-xs font-medium text-zinc-400">New password</label>
               <PasswordInput
                 required
                 autoComplete="new-password"
@@ -148,9 +143,7 @@ export default function ForceResetPage() {
 
             {/* Confirm password */}
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-zinc-400">
-                Confirm new password
-              </label>
+              <label className="text-xs font-medium text-zinc-400">Confirm new password</label>
               <PasswordInput
                 required
                 autoComplete="new-password"
@@ -174,7 +167,7 @@ export default function ForceResetPage() {
               className={cn(
                 'w-full py-2.5 rounded-lg text-sm font-semibold text-white transition-all',
                 'bg-indigo-600 hover:bg-indigo-500 active:scale-[.98]',
-                !canSubmit && 'opacity-40 cursor-not-allowed'
+                !canSubmit && 'opacity-40 cursor-not-allowed',
               )}
             >
               {loading ? (

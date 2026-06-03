@@ -1,4 +1,5 @@
-import { User, ProfileUpdateRequest, ChangePasswordRequest, ApiResponse } from '@nextask/types';
+import { ApiResponse, ChangePasswordRequest, ProfileUpdateRequest, User } from '@nextask/types';
+
 import apiClient from './client';
 
 export async function getProfile(): Promise<User> {

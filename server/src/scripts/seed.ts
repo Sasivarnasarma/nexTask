@@ -1,4 +1,5 @@
 import 'dotenv/config';
+
 import { prisma } from '../lib/prisma';
 import { hashPassword } from '../utils/hash.util';
 
