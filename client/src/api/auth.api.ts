@@ -3,20 +3,25 @@ import {
   LoginRequest,
   LoginResponse,
   PasswordResetRequest,
-  PasswordResetResponse,
 } from '@nextask/types';
 
 import apiClient from './client';
 
 export async function login(payload: LoginRequest): Promise<LoginResponse> {
   const { data } = await apiClient.post<ApiResponse<LoginResponse>>('/auth/login', payload);
+  if (data.data === null) {
+    throw new Error('Login response payload is missing.');
+  }
   return data.data;
 }
 
-export async function resetPassword(payload: PasswordResetRequest): Promise<PasswordResetResponse> {
-  const { data } = await apiClient.post<ApiResponse<PasswordResetResponse>>(
+export async function resetPassword(payload: PasswordResetRequest): Promise<LoginResponse> {
+  const { data } = await apiClient.post<ApiResponse<LoginResponse>>(
     '/auth/reset-password',
     payload,
   );
+  if (data.data === null) {
+    throw new Error('Reset password response payload is missing.');
+  }
   return data.data;
 }

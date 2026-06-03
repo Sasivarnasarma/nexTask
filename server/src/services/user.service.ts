@@ -48,26 +48,31 @@ export class UserService {
    * - Email uniqueness is re-validated before saving.
    */
   public async updateProfile(userId: string, data: UpdateProfileRequest): Promise<UserProfile> {
-    if (!data.name && !data.email) {
+    if (data.name === undefined && data.email === undefined) {
       throw new ApiError(400, 'At least one field (name or email) must be provided.');
-    }
-
-    if (data.email) {
-      const conflict = await prisma.user.findFirst({
-        where: { email: data.email, NOT: { id: userId } },
-      });
-      if (conflict) throw new ApiError(409, 'This email address is already in use.');
     }
 
     if (data.name !== undefined && data.name.trim().length === 0) {
       throw new ApiError(400, 'Name cannot be empty.');
     }
 
+    const email = data.email?.trim();
+    if (data.email !== undefined && email?.length === 0) {
+      throw new ApiError(400, 'Email cannot be empty.');
+    }
+
+    if (data.email !== undefined) {
+      const conflict = await prisma.user.findFirst({
+        where: { email, NOT: { id: userId } },
+      });
+      if (conflict) throw new ApiError(409, 'This email address is already in use.');
+    }
+
     const updated = await prisma.user.update({
       where: { id: userId },
       data: {
         ...(data.name !== undefined && { name: data.name.trim() }),
-        ...(data.email !== undefined && { email: data.email }),
+        ...(data.email !== undefined && { email }),
       },
     });
 

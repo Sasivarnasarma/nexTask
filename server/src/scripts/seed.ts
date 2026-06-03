@@ -3,10 +3,18 @@ import 'dotenv/config';
 import { prisma } from '../lib/prisma';
 import { hashPassword } from '../utils/hash.util';
 
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+  return value;
+}
+
 async function main() {
-  const email = 'developer@nextask.com';
-  const password = 'SecurePassword123!';
-  const name = 'Developer Account';
+  const email = requireEnv('SEED_ADMIN_EMAIL');
+  const password = requireEnv('SEED_ADMIN_PASSWORD');
+  const name = process.env.SEED_ADMIN_NAME ?? 'Developer Account';
 
   console.log('🔐 Hashing password...');
   const passwordHash = await hashPassword(password);
@@ -33,17 +41,18 @@ async function main() {
   console.log(`   ID:    ${user.id}`);
   console.log(`   Email: ${user.email}`);
   console.log(`   Role:  ${user.role}`);
-  console.log(`   mustResetPassword: ${user.mustResetPassword}`);
 
   // Also create a test account that MUST reset on first login
-  const testEmail = 'newuser@nextask.com';
-  const testHash = await hashPassword('TempPass@1');
+  const testEmail = requireEnv('SEED_TEST_EMAIL');
+  const testPassword = requireEnv('SEED_TEST_PASSWORD');
+  const testName = process.env.SEED_TEST_NAME ?? 'New User';
+  const testHash = await hashPassword(testPassword);
   const testUser = await prisma.user.upsert({
     where: { email: testEmail },
     create: {
       email: testEmail,
       password: testHash,
-      name: 'New User',
+      name: testName,
       role: 'COLLABORATOR',
       mustResetPassword: true,
     },
@@ -55,8 +64,7 @@ async function main() {
 
   console.log(`\n✅ Test "must-reset" account ready:`);
   console.log(`   Email:    ${testUser.email}`);
-  console.log(`   Password: TempPass@1`);
-  console.log(`   mustResetPassword: ${testUser.mustResetPassword}`);
+  console.log('   Password: [configured via SEED_TEST_PASSWORD]');
 }
 
 main()

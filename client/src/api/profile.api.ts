@@ -4,11 +4,17 @@ import apiClient from './client';
 
 export async function getProfile(): Promise<User> {
   const { data } = await apiClient.get<ApiResponse<User>>('/users/me');
+  if (data.data === null) {
+    throw new Error('Profile response payload is missing.');
+  }
   return data.data;
 }
 
 export async function updateProfile(payload: ProfileUpdateRequest): Promise<User> {
   const { data } = await apiClient.patch<ApiResponse<User>>('/users/me', payload);
+  if (data.data === null) {
+    throw new Error('Profile update response payload is missing.');
+  }
   return data.data;
 }
 

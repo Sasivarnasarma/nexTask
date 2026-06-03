@@ -41,8 +41,8 @@ export interface PasswordResetRequest {
 }
 
 export interface PasswordResetResponse {
-  message: string;
   token: string;
+  mustResetPassword: boolean;
 }
 
 // ─── Profile Payloads ─────────────────────────────────────────────────────────
@@ -78,6 +78,6 @@ export const PASSWORD_RULES: PasswordRule[] = [
 export interface ApiResponse<T = null> {
   status: 'success' | 'error';
   message: string;
-  data: T;
+  data: T | null;
   error: string | null;
 }
