@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertCircle, CheckCircle, Key, Save, User as UserIcon } from 'lucide-react';
+import { AlertCircle, Bell, BellOff, CheckCircle, Key, Save, User as UserIcon } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 
 import { changePassword, getProfile, updateProfile } from '@/api/profile.api';
 import { PasswordInput } from '@/components/ui/PasswordInput';
 import { PasswordStrengthMeter } from '@/components/ui/PasswordStrengthMeter';
 import { usePasswordStrength } from '@/hooks/usePasswordStrength';
+import { useWebPush } from '@/hooks/useWebPush';
 import { extractApiError } from '@/lib/apiError';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth.store';
@@ -13,6 +14,7 @@ import { useAuthStore } from '@/store/auth.store';
 export default function ProfilePage() {
   const queryClient = useQueryClient();
   const { updateUser, user: storeUser } = useAuthStore();
+  const { isSupported, permission, isSubscribed, isPending, subscribe, unsubscribe } = useWebPush();
 
   // Fetch fresh profile from server
   const { data: profile, isLoading } = useQuery({
@@ -278,6 +280,79 @@ export default function ProfilePage() {
               )}
             </button>
           </form>
+        </section>
+
+        {/* ── Section 3: Push Notifications ───────────────────────────────── */}
+        <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 lg:p-8">
+          <h2 className="text-sm font-semibold text-zinc-300 uppercase tracking-wider mb-6 flex items-center gap-2">
+            <Bell size={14} /> Push Notifications
+          </h2>
+
+          <div className="space-y-4">
+            <p className="text-sm text-zinc-400 leading-relaxed">
+              Enable push notifications to receive real-time updates when tasks are assigned to you
+              or when their status changes.
+            </p>
+
+            {!isSupported ? (
+              <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm bg-yellow-950/40 border border-yellow-900/50 text-yellow-500">
+                <AlertCircle size={16} />
+                Push notifications are not supported by this browser.
+              </div>
+            ) : (
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-zinc-950 border border-zinc-800">
+                <div>
+                  <div className="text-sm font-medium text-zinc-200">
+                    Status:{' '}
+                    {permission === 'denied' ? (
+                      <span className="text-red-400 font-semibold">Blocked</span>
+                    ) : isSubscribed ? (
+                      <span className="text-green-400 font-semibold">Subscribed</span>
+                    ) : (
+                      <span className="text-zinc-500">Not Subscribed</span>
+                    )}
+                  </div>
+                  <p className="text-xs text-zinc-500 mt-1">
+                    {permission === 'denied'
+                      ? 'Please reset notification permissions in your browser settings to enable.'
+                      : isSubscribed
+                        ? 'Your device is configured to receive push notifications.'
+                        : 'Opt-in to start receiving background notifications on this device.'}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  disabled={isPending || permission === 'denied'}
+                  onClick={isSubscribed ? unsubscribe : subscribe}
+                  className={cn(
+                    'flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all active:scale-[.98]',
+                    isSubscribed
+                      ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700'
+                      : 'bg-indigo-600 hover:bg-indigo-500 text-white',
+                    (isPending || permission === 'denied') && 'opacity-50 cursor-not-allowed',
+                  )}
+                >
+                  {isPending ? (
+                    <>
+                      <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                      Processing…
+                    </>
+                  ) : isSubscribed ? (
+                    <>
+                      <BellOff size={14} />
+                      Disable Notifications
+                    </>
+                  ) : (
+                    <>
+                      <Bell size={14} />
+                      Enable Notifications
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+          </div>
         </section>
       </div>
     </div>

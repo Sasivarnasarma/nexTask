@@ -7,6 +7,7 @@ import { getProfile } from '@/api/profile.api';
 import { PasswordInput } from '@/components/ui/PasswordInput';
 import { PasswordStrengthMeter } from '@/components/ui/PasswordStrengthMeter';
 import { usePasswordStrength } from '@/hooks/usePasswordStrength';
+import { useWebPush } from '@/hooks/useWebPush';
 import { extractApiError } from '@/lib/apiError';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth.store';
@@ -14,6 +15,7 @@ import { useAuthStore } from '@/store/auth.store';
 export default function ForceResetPage() {
   const navigate = useNavigate();
   const { setAuth, logout } = useAuthStore();
+  const { unsubscribe } = useWebPush();
 
   const [currentPw, setCurrentPw] = useState('');
   const [newPw, setNewPw] = useState('');
@@ -58,6 +60,11 @@ export default function ForceResetPage() {
   }
 
   async function handleLogout() {
+    try {
+      await unsubscribe();
+    } catch (e) {
+      console.error('Failed to unsubscribe push notifications on logout:', e);
+    }
     logout();
     navigate('/login', { replace: true });
   }

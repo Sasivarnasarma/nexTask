@@ -115,3 +115,15 @@ export interface ApiResponse<T = null> {
   data: T | null;
   error: string | null;
 }
+
+// ─── Web Push Subscription Payloads ───────────────────────────────────────────
+
+export interface PushSubscriptionKeys {
+  p256dh: string;
+  auth: string;
+}
+
+export interface PushSubscriptionRequest {
+  endpoint: string;
+  keys: PushSubscriptionKeys;
+}

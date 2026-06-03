@@ -2,6 +2,7 @@ import { Priority, Status, Task } from '@prisma/client';
 
 import { prisma } from '../lib/prisma';
 import { ApiError } from '../utils/apiError.util';
+import { PushService } from './push.service';
 
 // Shape of data needed to create a task
 export interface CreateTaskInput {
@@ -38,7 +39,17 @@ export const createTask = async (data: CreateTaskInput): Promise<Task> => {
     }
   }
 
-  return prisma.task.create({ data });
+  const task = await prisma.task.create({ data });
+
+  if (task.assignedUserId) {
+    PushService.sendNotificationToUser(task.assignedUserId, {
+      title: 'New Task Assigned',
+      body: `You have been assigned to task: "${task.title}"`,
+      data: { url: '/dashboard' },
+    }).catch((err) => console.error('Failed to dispatch assignment push notification:', err));
+  }
+
+  return task;
 };
 
 // GET ALL
@@ -71,7 +82,18 @@ export const updateTask = async (id: string, data: UpdateTaskInput): Promise<Tas
   const existing = await prisma.task.findUnique({ where: { id } });
   if (!existing) throw new ApiError(404, 'Task not found.');
 
-  return prisma.task.update({ where: { id }, data });
+  const updated = await prisma.task.update({ where: { id }, data });
+
+  // If newly assigned or reassigned to a different user, send a notification
+  if (updated.assignedUserId && updated.assignedUserId !== existing.assignedUserId) {
+    PushService.sendNotificationToUser(updated.assignedUserId, {
+      title: 'New Task Assigned',
+      body: `You have been assigned to task: "${updated.title}"`,
+      data: { url: '/dashboard' },
+    }).catch((err) => console.error('Failed to dispatch assignment push notification:', err));
+  }
+
+  return updated;
 };
 
 // DELETE

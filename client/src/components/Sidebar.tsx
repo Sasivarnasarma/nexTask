@@ -1,16 +1,23 @@
 import { LayoutDashboard, LogOut, Settings } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
+import { useWebPush } from '@/hooks/useWebPush';
 import { useAuthStore } from '@/store/auth.store';
 
 export function Sidebar({ isOpen }: { isOpen: boolean }) {
   const location = useLocation();
   const navigate = useNavigate();
   const logout = useAuthStore((s) => s.logout);
+  const { unsubscribe } = useWebPush();
 
   const isActive = (path: string) => location.pathname.includes(path);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await unsubscribe();
+    } catch (e) {
+      console.error('Failed to unsubscribe push notifications on logout:', e);
+    }
     logout();
     navigate('/login');
   };
