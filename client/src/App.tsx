@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import { Navbar } from './components/Navbar';
+import { PushNotificationPrompt } from './components/PushNotificationPrompt';
 import { Sidebar } from './components/Sidebar';
 import { RedirectIfAuthenticated, RequireAuth } from './components/auth/RouteGuard';
 import './index.css';
@@ -58,6 +59,7 @@ const DashboardLayout: React.FC = () => {
           </Routes>
         </main>
       </div>
+      <PushNotificationPrompt />
     </div>
   );
 };

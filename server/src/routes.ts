@@ -8,6 +8,8 @@ import { UserController } from './controllers/user.controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { TaskController } from './controllers/task.controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { PushController } from './controllers/push.controller';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { PingController } from './controllers/ping.controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { AuthController } from './controllers/auth.controller';
@@ -160,6 +162,35 @@ const models: TsoaRoute.Models = {
             "dueDate": {"dataType":"datetime"},
             "priority": {"ref":"Priority"},
             "status": {"ref":"Status"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ApiResponse__publicKey-string__": {
+        "dataType": "refObject",
+        "properties": {
+            "status": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["success"]},{"dataType":"enum","enums":["error"]}],"required":true},
+            "message": {"dataType":"string","required":true},
+            "data": {"dataType":"union","subSchemas":[{"dataType":"nestedObjectLiteral","nestedProperties":{"publicKey":{"dataType":"string","required":true}}},{"dataType":"enum","enums":[null]}],"required":true},
+            "error": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "PushSubscriptionKeys": {
+        "dataType": "refObject",
+        "properties": {
+            "p256dh": {"dataType":"string","required":true},
+            "auth": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "PushSubscriptionRequest": {
+        "dataType": "refObject",
+        "properties": {
+            "endpoint": {"dataType":"string","required":true},
+            "keys": {"ref":"PushSubscriptionKeys","required":true},
         },
         "additionalProperties": false,
     },
@@ -477,6 +508,100 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'deleteExistingTask',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsPushController_getPublicKey: Record<string, TsoaRoute.ParameterSchema> = {
+        };
+        app.get('/push/key',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(PushController)),
+            ...(fetchMiddlewares<RequestHandler>(PushController.prototype.getPublicKey)),
+
+            async function PushController_getPublicKey(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsPushController_getPublicKey, request, response });
+
+                const controller = new PushController();
+
+              await templateService.apiHandler({
+                methodName: 'getPublicKey',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsPushController_subscribe: Record<string, TsoaRoute.ParameterSchema> = {
+                subscription: {"in":"body","name":"subscription","required":true,"ref":"PushSubscriptionRequest"},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.post('/push/subscribe',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(PushController)),
+            ...(fetchMiddlewares<RequestHandler>(PushController.prototype.subscribe)),
+
+            async function PushController_subscribe(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsPushController_subscribe, request, response });
+
+                const controller = new PushController();
+
+              await templateService.apiHandler({
+                methodName: 'subscribe',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 201,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsPushController_unsubscribe: Record<string, TsoaRoute.ParameterSchema> = {
+                body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"endpoint":{"dataType":"string","required":true}}},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.post('/push/unsubscribe',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(PushController)),
+            ...(fetchMiddlewares<RequestHandler>(PushController.prototype.unsubscribe)),
+
+            async function PushController_unsubscribe(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsPushController_unsubscribe, request, response });
+
+                const controller = new PushController();
+
+              await templateService.apiHandler({
+                methodName: 'unsubscribe',
                 controller,
                 response,
                 next,
