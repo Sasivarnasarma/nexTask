@@ -446,29 +446,30 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Pick_User.id-or-email-or-name-or-role_": {
+			"CommentAuthor": {
 				"properties": {
-					"name": {
-						"type": "string"
-					},
 					"id": {
 						"type": "string"
 					},
 					"email": {
 						"type": "string"
 					},
+					"name": {
+						"type": "string",
+						"nullable": true
+					},
 					"role": {
 						"$ref": "#/components/schemas/UserRole"
 					}
 				},
 				"required": [
-					"name",
 					"id",
 					"email",
+					"name",
 					"role"
 				],
 				"type": "object",
-				"description": "From T, pick a set of properties whose keys are in the union K"
+				"additionalProperties": false
 			},
 			"Attachment": {
 				"properties": {
@@ -539,7 +540,7 @@
 						"type": "string"
 					},
 					"author": {
-						"$ref": "#/components/schemas/Pick_User.id-or-email-or-name-or-role_"
+						"$ref": "#/components/schemas/CommentAuthor"
 					},
 					"createdAt": {
 						"anyOf": [
@@ -1342,6 +1343,42 @@
 						}
 					}
 				}
+			}
+		},
+		"/comments/{commentId}": {
+			"delete": {
+				"operationId": "RemoveComment",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Deletes a comment by ID.",
+				"tags": [
+					"Comments"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "commentId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/auth/register": {

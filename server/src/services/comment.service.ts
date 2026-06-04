@@ -44,19 +44,23 @@ export const postComment = async (
     let createdAttachments: SharedAttachment[] = [];
     if (attachments && attachments.length > 0) {
       createdAttachments = await Promise.all(
-        attachments.map((att) =>
-          tx.attachment.create({
+        attachments.map((att) => {
+          const parsedSize = Math.floor(att.fileSize);
+          if (isNaN(parsedSize) || parsedSize <= 0) {
+            throw new ApiError(400, 'File size must be a positive integer.');
+          }
+          return tx.attachment.create({
             data: {
               filename: att.filename,
               fileUrl: att.fileUrl,
               mimeType: att.mimeType,
-              fileSize: att.fileSize,
+              fileSize: parsedSize,
               taskId,
               commentId: newComment.id,
               uploadedById: userId,
             },
-          }),
-        ),
+          });
+        }),
       );
     }
 
@@ -106,5 +110,28 @@ export const getCommentsByTaskId = async (taskId: string): Promise<SharedComment
       attachments: true,
     },
     orderBy: { createdAt: 'asc' },
+  });
+};
+
+export const deleteComment = async (
+  commentId: string,
+  userId: string,
+  userRole: string,
+): Promise<void> => {
+  const comment = await prisma.comment.findUnique({
+    where: { id: commentId },
+  });
+
+  if (!comment) {
+    throw new ApiError(404, 'Comment not found.');
+  }
+
+  // Only allow deletion if user is the author, or an ADMIN / PROJECT_MANAGER
+  if (comment.authorId !== userId && userRole !== 'ADMIN' && userRole !== 'PROJECT_MANAGER') {
+    throw new ApiError(403, 'You do not have permission to delete this comment.');
+  }
+
+  await prisma.comment.delete({
+    where: { id: commentId },
   });
 };

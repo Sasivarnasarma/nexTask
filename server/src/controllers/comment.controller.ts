@@ -1,8 +1,8 @@
 import { Comment, CreateCommentRequest } from '@nextask/types';
 import type { Request as ExRequest } from 'express';
-import { Body, Controller, Get, Path, Post, Request, Route, Security, Tags } from 'tsoa';
+import { Body, Controller, Delete, Get, Path, Post, Request, Route, Security, Tags } from 'tsoa';
 
-import { getCommentsByTaskId, postComment } from '../services/comment.service';
+import { deleteComment, getCommentsByTaskId, postComment } from '../services/comment.service';
 import { ApiResponse, successResponse } from '../utils/response.util';
 
 @Route('tasks')
@@ -30,5 +30,23 @@ export class CommentController extends Controller {
     const { userId } = (request as any).user;
     const comment = await postComment(userId, taskId, body.content, body.attachments);
     return successResponse('Comment posted successfully.', comment);
+  }
+}
+
+@Route('comments')
+@Tags('Comments')
+@Security('jwt')
+export class CommentDeleteController extends Controller {
+  /**
+   * Deletes a comment by ID.
+   */
+  @Delete('{commentId}')
+  public async removeComment(
+    @Path() commentId: string,
+    @Request() request: ExRequest,
+  ): Promise<ApiResponse<null>> {
+    const { userId, role } = (request as any).user;
+    await deleteComment(commentId, userId, role);
+    return successResponse('Comment deleted successfully.', null);
   }
 }

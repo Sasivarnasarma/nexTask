@@ -187,6 +187,9 @@ Content-Type: {{contentType}}
   ]
 }
 
+### Extract Comment ID from Response
+@commentId = {{postCommentRequest.response.body.data.id}}
+
 ### 17. Get All Comments for Task
 GET {{baseUrl}}/tasks/{{taskId}}/comments
 Authorization: Bearer {{freshToken}}
@@ -215,12 +218,16 @@ Authorization: Bearer {{freshToken}}
 DELETE {{baseUrl}}/attachments/{{attachmentId}}
 Authorization: Bearer {{freshToken}}
 
+### 21. Delete Comment
+DELETE {{baseUrl}}/comments/{{commentId}}
+Authorization: Bearer {{freshToken}}
+
 
 # ==========================================
 # 🧹 CLEANUP & TEARDOWN
 # ==========================================
 
-### 21. Delete Task (will cascade delete comments/attachments)
+### 22. Delete Task (will cascade delete comments/attachments)
 DELETE {{baseUrl}}/tasks/{{taskId}}
 Authorization: Bearer {{freshToken}}
 

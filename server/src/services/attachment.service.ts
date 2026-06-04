@@ -17,12 +17,17 @@ export const createTaskAttachment = async (
     throw new ApiError(404, 'Task not found.');
   }
 
+  const parsedSize = Math.floor(data.fileSize);
+  if (isNaN(parsedSize) || parsedSize <= 0) {
+    throw new ApiError(400, 'File size must be a positive integer.');
+  }
+
   return prisma.attachment.create({
     data: {
       filename: data.filename,
       fileUrl: data.fileUrl,
       mimeType: data.mimeType,
-      fileSize: data.fileSize,
+      fileSize: parsedSize,
       taskId,
       uploadedById: userId,
     },

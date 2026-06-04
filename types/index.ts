@@ -132,12 +132,19 @@ export interface PushSubscriptionRequest {
 
 // ─── Collaboration (Comments & Attachments) ───────────────────────────────────
 
+export interface CommentAuthor {
+  id: string;
+  email: string;
+  name: string | null;
+  role: UserRole;
+}
+
 export interface Comment {
   id: string;
   content: string;
   taskId: string;
   authorId: string;
-  author?: Pick<User, 'id' | 'email' | 'name' | 'role'>;
+  author?: CommentAuthor;
   createdAt: Date | string;
   updatedAt: Date | string;
   attachments?: Attachment[];

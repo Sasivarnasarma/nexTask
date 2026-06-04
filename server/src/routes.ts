@@ -14,6 +14,8 @@ import { PingController } from './controllers/ping.controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { CommentController } from './controllers/comment.controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { CommentDeleteController } from './controllers/comment.controller';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { AuthController } from './controllers/auth.controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { AttachmentController } from './controllers/attachment.controller';
@@ -210,9 +212,15 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Pick_User.id-or-email-or-name-or-role_": {
-        "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"name":{"dataType":"string","required":true},"id":{"dataType":"string","required":true},"email":{"dataType":"string","required":true},"role":{"ref":"UserRole","required":true}},"validators":{}},
+    "CommentAuthor": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string","required":true},
+            "email": {"dataType":"string","required":true},
+            "name": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "role": {"ref":"UserRole","required":true},
+        },
+        "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Attachment": {
@@ -238,7 +246,7 @@ const models: TsoaRoute.Models = {
             "content": {"dataType":"string","required":true},
             "taskId": {"dataType":"string","required":true},
             "authorId": {"dataType":"string","required":true},
-            "author": {"ref":"Pick_User.id-or-email-or-name-or-role_"},
+            "author": {"ref":"CommentAuthor"},
             "createdAt": {"dataType":"union","subSchemas":[{"dataType":"datetime"},{"dataType":"string"}],"required":true},
             "updatedAt": {"dataType":"union","subSchemas":[{"dataType":"datetime"},{"dataType":"string"}],"required":true},
             "attachments": {"dataType":"array","array":{"dataType":"refObject","ref":"Attachment"}},
@@ -801,6 +809,38 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'createComment',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsCommentDeleteController_removeComment: Record<string, TsoaRoute.ParameterSchema> = {
+                commentId: {"in":"path","name":"commentId","required":true,"dataType":"string"},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.delete('/comments/:commentId',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(CommentDeleteController)),
+            ...(fetchMiddlewares<RequestHandler>(CommentDeleteController.prototype.removeComment)),
+
+            async function CommentDeleteController_removeComment(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsCommentDeleteController_removeComment, request, response });
+
+                const controller = new CommentDeleteController();
+
+              await templateService.apiHandler({
+                methodName: 'removeComment',
                 controller,
                 response,
                 next,
