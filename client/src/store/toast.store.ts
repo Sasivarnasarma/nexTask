@@ -22,7 +22,7 @@ interface ToastState {
 export const useToastStore = create<ToastState>((set) => ({
   toasts: [],
   addToast: (type, message, duration = 4000) => {
-    const id = Math.random().toString(36).substring(2, 9);
+    const id = (globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2)) as string;
     set((state) => ({
       toasts: [...state.toasts, { id, type, message, duration }],
     }));

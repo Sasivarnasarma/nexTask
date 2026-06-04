@@ -21,10 +21,9 @@ const ToastCard: React.FC<{ toast: Toast }> = ({ toast }) => {
 
   const dismiss = useCallback(() => {
     setIsMounted(false);
-    const timer = setTimeout(() => {
+    window.setTimeout(() => {
       removeToast(toast.id);
     }, 300);
-    return () => clearTimeout(timer);
   }, [removeToast, toast.id]);
 
   useEffect(() => {
@@ -87,7 +86,7 @@ const ToastCard: React.FC<{ toast: Toast }> = ({ toast }) => {
 
       <button
         onClick={dismiss}
-        className="text-zinc-500 hover:text-zinc-300 transition-colors focus:outline-none shrink-0"
+        className="text-zinc-500 hover:text-zinc-300 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:ring-offset-2 focus:ring-offset-zinc-900 shrink-0"
         aria-label="Dismiss notification"
       >
         <X className="w-4 h-4" />
