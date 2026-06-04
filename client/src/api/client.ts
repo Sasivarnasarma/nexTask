@@ -1,6 +1,8 @@
 import axios from 'axios';
 
 import { useAuthStore } from '@/store/auth.store';
+import { useToastStore } from '@/store/toast.store';
+import { extractApiError } from '@/lib/apiError';
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:3000',
@@ -17,7 +19,7 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-// ─── Response interceptor – handle 401 globally ──────────────────────────────
+// ─── Response interceptor – handle 401 globally & error toasts ───────────────
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -27,9 +29,16 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401 && !isAuthUrl) {
       useAuthStore.getState().logout();
       window.location.href = '/login';
+    } else {
+      const skipGlobalToast = (error.config as Record<string, unknown> & { skipGlobalToast?: boolean })?.skipGlobalToast;
+      if (!skipGlobalToast && !isAuthUrl) {
+        const message = extractApiError(error);
+        useToastStore.getState().showError(message);
+      }
     }
     return Promise.reject(error);
   },
 );
 
 export default apiClient;
+
