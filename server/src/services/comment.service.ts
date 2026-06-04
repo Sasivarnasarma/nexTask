@@ -1,5 +1,8 @@
-import { Comment } from '@prisma/client';
-import { CreateAttachmentRequest } from '@nextask/types';
+import {
+  CreateAttachmentRequest,
+  Attachment as SharedAttachment,
+  Comment as SharedComment,
+} from '@nextask/types';
 
 import { prisma } from '../lib/prisma';
 import { ApiError } from '../utils/apiError.util';
@@ -10,7 +13,7 @@ export const postComment = async (
   taskId: string,
   content: string,
   attachments?: CreateAttachmentRequest[],
-): Promise<any> => {
+): Promise<SharedComment> => {
   const task = await prisma.task.findUnique({
     where: { id: taskId },
   });
@@ -38,7 +41,7 @@ export const postComment = async (
       },
     });
 
-    let createdAttachments: any[] = [];
+    let createdAttachments: SharedAttachment[] = [];
     if (attachments && attachments.length > 0) {
       createdAttachments = await Promise.all(
         attachments.map((att) =>
@@ -52,8 +55,8 @@ export const postComment = async (
               commentId: newComment.id,
               uploadedById: userId,
             },
-          })
-        )
+          }),
+        ),
       );
     }
 
@@ -67,7 +70,7 @@ export const postComment = async (
   if (task.assignedUserId && task.assignedUserId !== userId) {
     const author = comment.author;
     const authorName = author?.name || author?.email || 'A teammate';
-    
+
     PushService.sendNotificationToUser(task.assignedUserId, {
       title: 'New Comment on Task',
       body: `${authorName} commented: "${content.substring(0, 60)}${content.length > 60 ? '...' : ''}"`,
@@ -80,7 +83,7 @@ export const postComment = async (
   return comment;
 };
 
-export const getCommentsByTaskId = async (taskId: string): Promise<any[]> => {
+export const getCommentsByTaskId = async (taskId: string): Promise<SharedComment[]> => {
   const task = await prisma.task.findUnique({
     where: { id: taskId },
   });

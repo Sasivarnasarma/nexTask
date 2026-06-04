@@ -210,6 +210,11 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Pick_User.id-or-email-or-name-or-role_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"name":{"dataType":"string","required":true},"id":{"dataType":"string","required":true},"email":{"dataType":"string","required":true},"role":{"ref":"UserRole","required":true}},"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Attachment": {
         "dataType": "refObject",
         "properties": {
@@ -233,7 +238,7 @@ const models: TsoaRoute.Models = {
             "content": {"dataType":"string","required":true},
             "taskId": {"dataType":"string","required":true},
             "authorId": {"dataType":"string","required":true},
-            "author": {"ref":"User"},
+            "author": {"ref":"Pick_User.id-or-email-or-name-or-role_"},
             "createdAt": {"dataType":"union","subSchemas":[{"dataType":"datetime"},{"dataType":"string"}],"required":true},
             "updatedAt": {"dataType":"union","subSchemas":[{"dataType":"datetime"},{"dataType":"string"}],"required":true},
             "attachments": {"dataType":"array","array":{"dataType":"refObject","ref":"Attachment"}},

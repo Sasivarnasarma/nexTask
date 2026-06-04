@@ -137,7 +137,7 @@ export interface Comment {
   content: string;
   taskId: string;
   authorId: string;
-  author?: User;
+  author?: Pick<User, 'id' | 'email' | 'name' | 'role'>;
   createdAt: Date | string;
   updatedAt: Date | string;
   attachments?: Attachment[];

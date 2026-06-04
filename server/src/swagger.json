@@ -446,6 +446,30 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"Pick_User.id-or-email-or-name-or-role_": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"role": {
+						"$ref": "#/components/schemas/UserRole"
+					}
+				},
+				"required": [
+					"name",
+					"id",
+					"email",
+					"role"
+				],
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
 			"Attachment": {
 				"properties": {
 					"id": {
@@ -515,7 +539,7 @@
 						"type": "string"
 					},
 					"author": {
-						"$ref": "#/components/schemas/User"
+						"$ref": "#/components/schemas/Pick_User.id-or-email-or-name-or-role_"
 					},
 					"createdAt": {
 						"anyOf": [

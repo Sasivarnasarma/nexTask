@@ -1,16 +1,6 @@
+import { Attachment, CreateAttachmentRequest } from '@nextask/types';
 import type { Request as ExRequest } from 'express';
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Path,
-  Post,
-  Request,
-  Route,
-  Security,
-  Tags,
-} from 'tsoa';
+import { Body, Controller, Delete, Get, Path, Post, Request, Route, Security, Tags } from 'tsoa';
 
 import {
   createTaskAttachment,
@@ -18,7 +8,6 @@ import {
   getAttachmentsByTaskId,
 } from '../services/attachment.service';
 import { ApiResponse, successResponse } from '../utils/response.util';
-import { CreateAttachmentRequest, Attachment } from '@nextask/types';
 
 @Route('tasks')
 @Tags('Attachments')
@@ -30,7 +19,7 @@ export class AttachmentController extends Controller {
   @Get('{taskId}/attachments')
   public async getAttachments(@Path() taskId: string): Promise<ApiResponse<Attachment[]>> {
     const attachments = await getAttachmentsByTaskId(taskId);
-    return successResponse('Attachments retrieved successfully.', attachments as any[]);
+    return successResponse('Attachments retrieved successfully.', attachments);
   }
 
   /**
@@ -44,7 +33,7 @@ export class AttachmentController extends Controller {
   ): Promise<ApiResponse<Attachment>> {
     const { userId } = (request as any).user;
     const attachment = await createTaskAttachment(userId, taskId, body);
-    return successResponse('Attachment metadata registered successfully.', attachment as any);
+    return successResponse('Attachment metadata registered successfully.', attachment);
   }
 }
 

@@ -1,19 +1,9 @@
+import { Comment, CreateCommentRequest } from '@nextask/types';
 import type { Request as ExRequest } from 'express';
-import {
-  Body,
-  Controller,
-  Get,
-  Path,
-  Post,
-  Request,
-  Route,
-  Security,
-  Tags,
-} from 'tsoa';
+import { Body, Controller, Get, Path, Post, Request, Route, Security, Tags } from 'tsoa';
 
 import { getCommentsByTaskId, postComment } from '../services/comment.service';
 import { ApiResponse, successResponse } from '../utils/response.util';
-import { CreateCommentRequest, Comment } from '@nextask/types';
 
 @Route('tasks')
 @Tags('Comments')
@@ -25,7 +15,7 @@ export class CommentController extends Controller {
   @Get('{taskId}/comments')
   public async getComments(@Path() taskId: string): Promise<ApiResponse<Comment[]>> {
     const comments = await getCommentsByTaskId(taskId);
-    return successResponse('Comments retrieved successfully.', comments as any[]);
+    return successResponse('Comments retrieved successfully.', comments);
   }
 
   /**
@@ -39,6 +29,6 @@ export class CommentController extends Controller {
   ): Promise<ApiResponse<Comment>> {
     const { userId } = (request as any).user;
     const comment = await postComment(userId, taskId, body.content, body.attachments);
-    return successResponse('Comment posted successfully.', comment as any);
+    return successResponse('Comment posted successfully.', comment);
   }
 }

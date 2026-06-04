@@ -24,19 +24,19 @@ _Focuses on user access, task management foundations, and system infrastructure.
 | T1.2    | **Task Services** \- Create Prisma-based CRUD services for tasks. \- Implement TSOA controllers (must return standardized ApiResponse and throw ApiError).                                                    | Member B    | Completed |
 | T1.3    | **Base Layout UI** \- Design the responsive Dashboard Shell with Sidebar. \- Build the top Navigation bar with user status. \- Implement frontend routing and protected routes.                               | Member C    | Completed |
 | T1.4    | **User Onboarding Flows** \- Build "First Login" password reset logic (enforce via mustResetPassword flag). \- Implement the User Profile edit interface. \- Enforce password complexity frontend validation. | Member D    | Completed |
-| T1.5    | **Error Infrastructure** \- (Backend middleware & ApiError implemented in T1.1) \- Implement frontend toast notification system mapped to standardized API response format.                                   | Member E    | Pending   |
+| T1.5    | **Error Infrastructure** \- (Backend middleware & ApiError implemented in T1.1) \- Implement frontend toast notification system mapped to standardized API response format.                                   | Member E    | Completed |
 
 ## **🚀 Phase 2: Notifications & UI Features**
 
 _Focuses on multi-device connectivity and essential user interaction tools._
 
-| Task ID | Task Description                                                                                                                                                                                                    | Assigned To | Status  |
-| :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :---------- | :------ |
-| T2.1    | **Web Push System** \- Generate VAPID keys and manage server-side subscriptions. \- Build the service to store and manage multi-device push tokens. \- Implement Service Worker logic for background notifications. | Member A    | Pending |
-| T2.2    | **Collaboration Logic** \- Implement the database model and services for task comments. \- Build the logic for handling file attachment metadata. \- Create API endpoints for real-time comment posting.            | Member B    | Pending |
-| T2.3    | **Task Visualization** \- Build the interactive Kanban Board UI using shadcn. \- Implement Task Cards with priority-based color coding. \- Create a filterable List/Table view for detailed tracking.               | Member C    | Pending |
-| T2.4    | **Global Search & Filter** \- Build the search utility for the global Dashboard. \- Implement backend filters for Task Status and Priority. \- Create a team member search component for assignments.               | Member D    | Pending |
-| T2.5    | **Mail Integration** \- Configure Nodemailer with SMTP credentials. \- Design HTML templates for Onboarding and Task Assignment. \- Link mail triggers to specific backend event hooks.                             | Member E    | Pending |
+| Task ID | Task Description                                                                                                                                                                                                    | Assigned To | Status    |
+| :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :---------- | :-------- |
+| T2.1    | **Web Push System** \- Generate VAPID keys and manage server-side subscriptions. \- Build the service to store and manage multi-device push tokens. \- Implement Service Worker logic for background notifications. | Member A    | Completed |
+| T2.2    | **Collaboration Logic** \- Implement the database model and services for task comments. \- Build the logic for handling file attachment metadata. \- Create API endpoints for real-time comment posting.            | Member B    | Completed |
+| T2.3    | **Task Visualization** \- Build the interactive Kanban Board UI using shadcn. \- Implement Task Cards with priority-based color coding. \- Create a filterable List/Table view for detailed tracking.               | Member C    | Pending   |
+| T2.4    | **Global Search & Filter** \- Build the search utility for the global Dashboard. \- Implement backend filters for Task Status and Priority. \- Create a team member search component for assignments.               | Member D    | Pending   |
+| T2.5    | **Mail Integration** \- Configure Nodemailer with SMTP credentials. \- Design HTML templates for Onboarding and Task Assignment. \- Link mail triggers to specific backend event hooks.                             | Member E    | Pending   |
 
 ## **🔒 Phase 3: Real-Time & Advanced Governance**
 

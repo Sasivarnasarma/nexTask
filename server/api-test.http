@@ -1,9 +1,16 @@
 # 🚀 nexTask API Integration Tests
 # This file is compatible with the VS Code REST Client extension.
-# It allows to execute HTTP queries directly inside the editor.
+# It allows executing HTTP queries sequentially directly inside the editor.
 
 @baseUrl = http://localhost:3000
 @contentType = application/json
+@email = developer@nextask.com
+@password = SecurePassword123!
+@newPassword = NewSecurePassword@2026!
+
+# ==========================================
+# 🔐 AUTHENTICATION & ONBOARDING
+# ==========================================
 
 ### 1. Register a New User
 # NOTE: Make sure ALLOW_PUBLIC_REGISTRATION="true" is set in server/.env
@@ -11,32 +18,90 @@ POST {{baseUrl}}/auth/register
 Content-Type: {{contentType}}
 
 {
-  "email": "developer@nextask.com",
-  "password": "SecurePassword123!"
+  "email": "{{email}}",
+  "password": "{{password}}"
 }
 
-### 2. Login to Retrieve JWT Token
+### 2. Login to Retrieve JWT Token (First login, mustResetPassword will be true)
 # @name loginRequest
 POST {{baseUrl}}/auth/login
 Content-Type: {{contentType}}
 
 {
-  "email": "developer@nextask.com",
-  "password": "SecurePassword123!"
+  "email": "{{email}}",
+  "password": "{{password}}"
 }
 
-### 3. Extract JWT Token from Login Response
-@authToken = {{loginRequest.response.body.data.token}}
+### 3. Extract Temporary JWT Token from Login Response
+@tempToken = {{loginRequest.response.body.data.token}}
+
+### 4. Mandatory First-Login Password Reset
+# @name resetPasswordRequest
+POST {{baseUrl}}/auth/reset-password
+Authorization: Bearer {{tempToken}}
+Content-Type: {{contentType}}
+
+{
+  "currentPassword": "{{password}}",
+  "newPassword": "{{newPassword}}",
+  "confirmNewPassword": "{{newPassword}}"
+}
+
+### 5. Extract Final Auth Token from Reset Password Response
+@authToken = {{resetPasswordRequest.response.body.data.token}}
 
 
-### ==========================================
-# 🔒 SECURED TASK ROUTES (Requires JWT Header)
-### ==========================================
+# ==========================================
+# 👤 USER PROFILE
+# ==========================================
 
-### 4. Create a Task (Valid Input)
+### 6. Get Auth User Profile
+GET {{baseUrl}}/users/me
+Authorization: Bearer {{authToken}}
+
+### 7. Update User Profile Name & Email
+PATCH {{baseUrl}}/users/me
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "name": "Lead Developer",
+  "email": "{{email}}"
+}
+
+### 8. Voluntary Password Change (voluntary, post-onboarding)
+POST {{baseUrl}}/users/me/change-password
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "currentPassword": "{{newPassword}}",
+  "newPassword": "{{password}}",
+  "confirmNewPassword": "{{password}}"
+}
+
+# NOTE: Re-login to get a fresh token with the current password
+# @name reLoginRequest
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+### Extract Fresh Auth Token
+@freshToken = {{reLoginRequest.response.body.data.token}}
+
+
+# ==========================================
+# 📋 TASKS CRUD
+# ==========================================
+
+### 9. Create a Task (Valid Input)
 # @name createTaskRequest
 POST {{baseUrl}}/tasks
-Authorization: Bearer {{authToken}}
+Authorization: Bearer {{freshToken}}
 Content-Type: {{contentType}}
 
 {
@@ -47,12 +112,127 @@ Content-Type: {{contentType}}
   "dueDate": "2027-12-31T23:59:59.000Z"
 }
 
-### 5. Extract Task ID from Response
+### Extract Task ID from Response
 @taskId = {{createTaskRequest.response.body.data.id}}
 
-### 6. Create a Task (Invalid Input - Past Due Date)
+### 10. Get All Tasks
+GET {{baseUrl}}/tasks
+Authorization: Bearer {{freshToken}}
+
+### 11. Get Task By ID
+GET {{baseUrl}}/tasks/{{taskId}}
+Authorization: Bearer {{freshToken}}
+
+### 12. Update Task Status & Details
+PUT {{baseUrl}}/tasks/{{taskId}}
+Authorization: Bearer {{freshToken}}
+Content-Type: {{contentType}}
+
+{
+  "status": "IN_PROGRESS",
+  "description": "Audited security endpoints: Added explicit JWT error catcher and assigned user lookup validators successfully."
+}
+
+
+# ==========================================
+# 🔔 WEB PUSH NOTIFICATIONS
+# ==========================================
+
+### 13. Get VAPID Public Key for Web Push
+GET {{baseUrl}}/push/key
+Authorization: Bearer {{freshToken}}
+
+### 14. Register/Subscribe to Push Notifications
+POST {{baseUrl}}/push/subscribe
+Authorization: Bearer {{freshToken}}
+Content-Type: {{contentType}}
+
+{
+  "endpoint": "https://fcm.googleapis.com/fcm/send/mock-device-endpoint-12345",
+  "keys": {
+    "p256dh": "BFCxp-QcTjI...",
+    "auth": "5A8B..."
+  }
+}
+
+### 15. Unsubscribe from Push Notifications
+POST {{baseUrl}}/push/unsubscribe
+Authorization: Bearer {{freshToken}}
+Content-Type: {{contentType}}
+
+{
+  "endpoint": "https://fcm.googleapis.com/fcm/send/mock-device-endpoint-12345"
+}
+
+
+# ==========================================
+# 💬 COLLABORATION (COMMENTS & ATTACHMENTS)
+# ==========================================
+
+### 16. Post a Comment to Task (with optional attachments)
+# @name postCommentRequest
+POST {{baseUrl}}/tasks/{{taskId}}/comments
+Authorization: Bearer {{freshToken}}
+Content-Type: {{contentType}}
+
+{
+  "content": "Checking task comments logic and push dispatcher triggers.",
+  "attachments": [
+    {
+      "filename": "design_mockup.png",
+      "fileUrl": "https://example-storage.com/design_mockup.png",
+      "mimeType": "image/png",
+      "fileSize": 204857
+    }
+  ]
+}
+
+### 17. Get All Comments for Task
+GET {{baseUrl}}/tasks/{{taskId}}/comments
+Authorization: Bearer {{freshToken}}
+
+### 18. Upload/Register Independent Attachment Metadata
+# @name createAttachmentRequest
+POST {{baseUrl}}/tasks/{{taskId}}/attachments
+Authorization: Bearer {{freshToken}}
+Content-Type: {{contentType}}
+
+{
+  "filename": "sprint_report.pdf",
+  "fileUrl": "https://example-storage.com/sprint_report.pdf",
+  "mimeType": "application/pdf",
+  "fileSize": 1048576
+}
+
+### Extract Attachment ID from Response
+@attachmentId = {{createAttachmentRequest.response.body.data.id}}
+
+### 19. Get All Attachments for Task
+GET {{baseUrl}}/tasks/{{taskId}}/attachments
+Authorization: Bearer {{freshToken}}
+
+### 20. Delete Attachment Metadata
+DELETE {{baseUrl}}/attachments/{{attachmentId}}
+Authorization: Bearer {{freshToken}}
+
+
+# ==========================================
+# 🧹 CLEANUP & TEARDOWN
+# ==========================================
+
+### 21. Delete Task (will cascade delete comments/attachments)
+DELETE {{baseUrl}}/tasks/{{taskId}}
+Authorization: Bearer {{freshToken}}
+
+
+# ==========================================
+# ⚠️ NEGATIVE & VALIDATION TESTS
+# ==========================================
+
+### 22. Create a Task (Invalid Input - Past Due Date)
+# Should return 400 Bad Request
 POST {{baseUrl}}/tasks
-Authorization: Bearer {{authToken}}
+Authorization: Bearer {{freshToken}}
 Content-Type: {{contentType}}
 
 {
@@ -62,9 +242,10 @@ Content-Type: {{contentType}}
   "dueDate": "2020-01-01T00:00:00.000Z"
 }
 
-### 7. Create a Task (Invalid Input - Nonexistent User Assignment)
+### 23. Create a Task (Invalid Input - Nonexistent User Assignment)
+# Should return 400 Bad Request
 POST {{baseUrl}}/tasks
-Authorization: Bearer {{authToken}}
+Authorization: Bearer {{freshToken}}
 Content-Type: {{contentType}}
 
 {
@@ -73,103 +254,14 @@ Content-Type: {{contentType}}
   "assignedUserId": "00000000-0000-0000-0000-000000000000"
 }
 
-### 8. Get All Tasks
-GET {{baseUrl}}/tasks
-Authorization: Bearer {{authToken}}
-
-### 9. Get Task By ID
-GET {{baseUrl}}/tasks/{{taskId}}
-Authorization: Bearer {{authToken}}
-
-### 10. Update Task Status & Details
-PUT {{baseUrl}}/tasks/{{taskId}}
-Authorization: Bearer {{authToken}}
+### 24. Weak Password Test
+# Should return 400 Bad Request
+POST {{baseUrl}}/auth/reset-password
+Authorization: Bearer {{tempToken}}
 Content-Type: {{contentType}}
 
 {
-  "status": "IN_PROGRESS",
-  "description": "Audited security endpoints: Added explicit JWT error catcher and assigned user lookup validators successfully."
-}
-
-### 11. Delete Task
-DELETE {{baseUrl}}/tasks/{{taskId}}
-Authorization: Bearer {{authToken}}
-
-
-
-### nexTask API – T1.4 User Onboarding – Test Requests
-### Use the REST Client extension in VS Code (Huachao Mao)
-
-@baseUrl = http://localhost:3000
-@devEmail = developer@nextask.com
-@devPassword = SecurePassword123!
-
-### ─── 1. Login ───────────────────────────────────────────────────────────
-POST {{baseUrl}}/auth/login
-Content-Type: application/json
-
-{
-  "email": "{{devEmail}}",
-  "password": "{{devPassword}}"
-}
-
-### ─── Copy the token from the response above and paste below ─────────────
-@token = PASTE_TOKEN_HERE
-
-### ─── 2. Try a protected route (should 403 if mustResetPassword=true) ────
-GET {{baseUrl}}/tasks
-Authorization: Bearer {{token}}
-
-### ─── 3. First-login password reset ─────────────────────────────────────
-POST {{baseUrl}}/auth/reset-password
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-  "currentPassword": "{{devPassword}}",
-  "newPassword": "NewSecure@2025!",
-  "confirmNewPassword": "NewSecure@2025!"
-}
-
-### ─── Copy the NEW token from the response above ─────────────────────────
-@newToken = PASTE_NEW_TOKEN_HERE
-
-### ─── 4. Verify tasks are now accessible ────────────────────────────────
-GET {{baseUrl}}/tasks
-Authorization: Bearer {{newToken}}
-
-### ─── 5. Get my profile ─────────────────────────────────────────────────
-GET {{baseUrl}}/users/me
-Authorization: Bearer {{newToken}}
-
-### ─── 6. Update profile ─────────────────────────────────────────────────
-PATCH {{baseUrl}}/users/me
-Authorization: Bearer {{newToken}}
-Content-Type: application/json
-
-{
-  "name": "Dev User",
-  "email": "developer@nextask.com"
-}
-
-### ─── 7. Change password (voluntary, post-onboarding) ───────────────────
-POST {{baseUrl}}/users/me/change-password
-Authorization: Bearer {{newToken}}
-Content-Type: application/json
-
-{
-  "currentPassword": "NewSecure@2025!",
-  "newPassword": "AnotherPass@99!",
-  "confirmNewPassword": "AnotherPass@99!"
-}
-
-### ─── 8. Weak password test (should return 400 error) ───────────────────
-POST {{baseUrl}}/auth/reset-password
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-  "currentPassword": "{{devPassword}}",
-  "newPassword": "weakpassword",
-  "confirmNewPassword": "weakpassword"
+  "currentPassword": "{{password}}",
+  "newPassword": "weak",
+  "confirmNewPassword": "weak"
 }

@@ -1,5 +1,5 @@
-import { Attachment } from '@prisma/client';
 import { CreateAttachmentRequest } from '@nextask/types';
+import { Attachment } from '@prisma/client';
 
 import { prisma } from '../lib/prisma';
 import { ApiError } from '../utils/apiError.util';
