@@ -11,7 +11,9 @@ export async function getProfile(): Promise<User> {
 }
 
 export async function updateProfile(payload: ProfileUpdateRequest): Promise<User> {
-  const { data } = await apiClient.patch<ApiResponse<User>>('/users/me', payload);
+  const { data } = await apiClient.patch<ApiResponse<User>>('/users/me', payload, {
+    skipGlobalToast: true,
+  });
   if (data.data === null) {
     throw new Error('Profile update response payload is missing.');
   }
@@ -19,5 +21,7 @@ export async function updateProfile(payload: ProfileUpdateRequest): Promise<User
 }
 
 export async function changePassword(payload: ChangePasswordRequest): Promise<void> {
-  await apiClient.post<ApiResponse<null>>('/users/me/change-password', payload);
+  await apiClient.post<ApiResponse<null>>('/users/me/change-password', payload, {
+    skipGlobalToast: true,
+  });
 }

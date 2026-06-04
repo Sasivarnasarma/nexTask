@@ -6,6 +6,7 @@ import { Navbar } from './components/Navbar';
 import { PushNotificationPrompt } from './components/PushNotificationPrompt';
 import { Sidebar } from './components/Sidebar';
 import { RedirectIfAuthenticated, RequireAuth } from './components/auth/RouteGuard';
+import { ToastContainer } from './components/ui/Toast';
 import './index.css';
 import { Dashboard } from './pages/Dashboard';
 import { Settings } from './pages/Settings';
@@ -96,6 +97,7 @@ const App: React.FC = () => {
             }
           />
         </Routes>
+        <ToastContainer />
       </BrowserRouter>
     </QueryClientProvider>
   );

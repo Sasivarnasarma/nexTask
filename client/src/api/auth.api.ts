@@ -3,7 +3,9 @@ import { ApiResponse, LoginRequest, LoginResponse, PasswordResetRequest } from '
 import apiClient from './client';
 
 export async function login(payload: LoginRequest): Promise<LoginResponse> {
-  const { data } = await apiClient.post<ApiResponse<LoginResponse>>('/auth/login', payload);
+  const { data } = await apiClient.post<ApiResponse<LoginResponse>>('/auth/login', payload, {
+    skipGlobalToast: true,
+  });
   if (data.data === null) {
     throw new Error('Login response payload is missing.');
   }
@@ -14,6 +16,7 @@ export async function resetPassword(payload: PasswordResetRequest): Promise<Logi
   const { data } = await apiClient.post<ApiResponse<LoginResponse>>(
     '/auth/reset-password',
     payload,
+    { skipGlobalToast: true },
   );
   if (data.data === null) {
     throw new Error('Reset password response payload is missing.');
