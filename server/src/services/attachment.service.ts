@@ -1,14 +1,14 @@
-import { CreateAttachmentRequest } from '@nextask/types';
-import { Attachment } from '@prisma/client';
+import { CreateAttachmentRequest, Attachment as SharedAttachment } from '@nextask/types';
 
 import { prisma } from '../lib/prisma';
 import { ApiError } from '../utils/apiError.util';
+import { deleteFile, generateDownloadUrl } from './s3.service';
 
 export const createTaskAttachment = async (
   userId: string,
   taskId: string,
   data: CreateAttachmentRequest,
-): Promise<Attachment> => {
+): Promise<SharedAttachment> => {
   const task = await prisma.task.findUnique({
     where: { id: taskId },
   });
@@ -22,19 +22,26 @@ export const createTaskAttachment = async (
     throw new ApiError(400, 'File size must be a positive integer.');
   }
 
-  return prisma.attachment.create({
+  const attachment = await prisma.attachment.create({
     data: {
       filename: data.filename,
-      fileUrl: data.fileUrl,
+      fileKey: data.fileKey,
       mimeType: data.mimeType,
       fileSize: parsedSize,
       taskId,
       uploadedById: userId,
     },
   });
+
+  const presignedUrl = await generateDownloadUrl(attachment.fileKey);
+
+  return {
+    ...attachment,
+    presignedUrl: presignedUrl || undefined,
+  };
 };
 
-export const getAttachmentsByTaskId = async (taskId: string): Promise<Attachment[]> => {
+export const getAttachmentsByTaskId = async (taskId: string): Promise<SharedAttachment[]> => {
   const task = await prisma.task.findUnique({
     where: { id: taskId },
   });
@@ -43,10 +50,20 @@ export const getAttachmentsByTaskId = async (taskId: string): Promise<Attachment
     throw new ApiError(404, 'Task not found.');
   }
 
-  return prisma.attachment.findMany({
+  const attachments = await prisma.attachment.findMany({
     where: { taskId },
     orderBy: { createdAt: 'desc' },
   });
+
+  return Promise.all(
+    attachments.map(async (att) => {
+      const presignedUrl = await generateDownloadUrl(att.fileKey);
+      return {
+        ...att,
+        presignedUrl: presignedUrl || undefined,
+      };
+    }),
+  );
 };
 
 export const deleteAttachment = async (
@@ -62,7 +79,6 @@ export const deleteAttachment = async (
     throw new ApiError(404, 'Attachment not found.');
   }
 
-  // Only allow deletion if user is the uploader, or an ADMIN / PROJECT_MANAGER
   if (
     attachment.uploadedById !== userId &&
     userRole !== 'ADMIN' &&
@@ -70,6 +86,8 @@ export const deleteAttachment = async (
   ) {
     throw new ApiError(403, 'You do not have permission to delete this attachment.');
   }
+
+  await deleteFile(attachment.fileKey);
 
   await prisma.attachment.delete({
     where: { id: attachmentId },

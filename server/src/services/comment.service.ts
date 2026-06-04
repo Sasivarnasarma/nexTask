@@ -1,12 +1,10 @@
-import {
-  CreateAttachmentRequest,
-  Attachment as SharedAttachment,
-  Comment as SharedComment,
-} from '@nextask/types';
+import { CreateAttachmentRequest, Comment as SharedComment } from '@nextask/types';
+import { Attachment } from '@prisma/client';
 
 import { prisma } from '../lib/prisma';
 import { ApiError } from '../utils/apiError.util';
 import { PushService } from './push.service';
+import { deleteFile, generateDownloadUrl } from './s3.service';
 
 export const postComment = async (
   userId: string,
@@ -41,7 +39,7 @@ export const postComment = async (
       },
     });
 
-    let createdAttachments: SharedAttachment[] = [];
+    let createdAttachments: Attachment[] = [];
     if (attachments && attachments.length > 0) {
       createdAttachments = await Promise.all(
         attachments.map((att) => {
@@ -52,7 +50,7 @@ export const postComment = async (
           return tx.attachment.create({
             data: {
               filename: att.filename,
-              fileUrl: att.fileUrl,
+              fileKey: att.fileKey,
               mimeType: att.mimeType,
               fileSize: parsedSize,
               taskId,
@@ -64,9 +62,19 @@ export const postComment = async (
       );
     }
 
+    const attachmentsWithUrls = await Promise.all(
+      createdAttachments.map(async (att) => {
+        const presignedUrl = await generateDownloadUrl(att.fileKey);
+        return {
+          ...att,
+          presignedUrl: presignedUrl || undefined,
+        };
+      }),
+    );
+
     return {
       ...newComment,
-      attachments: createdAttachments,
+      attachments: attachmentsWithUrls,
     };
   });
 
@@ -96,7 +104,7 @@ export const getCommentsByTaskId = async (taskId: string): Promise<SharedComment
     throw new ApiError(404, 'Task not found.');
   }
 
-  return prisma.comment.findMany({
+  const comments = await prisma.comment.findMany({
     where: { taskId },
     include: {
       author: {
@@ -111,6 +119,24 @@ export const getCommentsByTaskId = async (taskId: string): Promise<SharedComment
     },
     orderBy: { createdAt: 'asc' },
   });
+
+  return Promise.all(
+    comments.map(async (c) => {
+      const mappedAttachments = await Promise.all(
+        c.attachments.map(async (att) => {
+          const presignedUrl = await generateDownloadUrl(att.fileKey);
+          return {
+            ...att,
+            presignedUrl: presignedUrl || undefined,
+          };
+        }),
+      );
+      return {
+        ...c,
+        attachments: mappedAttachments,
+      };
+    }),
+  );
 };
 
 export const deleteComment = async (
@@ -130,6 +156,13 @@ export const deleteComment = async (
   if (comment.authorId !== userId && userRole !== 'ADMIN' && userRole !== 'PROJECT_MANAGER') {
     throw new ApiError(403, 'You do not have permission to delete this comment.');
   }
+
+  const attachments = await prisma.attachment.findMany({
+    where: { commentId },
+    select: { fileKey: true },
+  });
+
+  await Promise.all(attachments.map((att) => deleteFile(att.fileKey)));
 
   await prisma.comment.delete({
     where: { id: commentId },

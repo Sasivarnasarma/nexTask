@@ -80,7 +80,7 @@ Content-Type: {{contentType}}
   "confirmNewPassword": "{{password}}"
 }
 
-# NOTE: Re-login to get a fresh token with the current password
+### 8b. Re-login to get a fresh token with the current password
 # @name reLoginRequest
 POST {{baseUrl}}/auth/login
 Content-Type: {{contentType}}
@@ -169,7 +169,30 @@ Content-Type: {{contentType}}
 # 💬 COLLABORATION (COMMENTS & ATTACHMENTS)
 # ==========================================
 
-### 16. Post a Comment to Task (with optional attachments)
+### 16. Get Presigned Upload URL for attachment
+# @name presignedUrlRequest
+POST {{baseUrl}}/attachments/presigned-url
+Authorization: Bearer {{freshToken}}
+Content-Type: {{contentType}}
+
+{
+  "filename": "design_mockup.png",
+  "mimeType": "image/png",
+  "fileSize": 204857
+}
+
+### 16.5 Upload the local file to S3 using the presigned URL
+# NOTE: The REST Client extension supports uploading local files using "< <path>" syntax.
+# We will reference a dummy file named 'design_mockup.png' in the same directory.
+PUT {{presignedUrlRequest.response.body.data.uploadUrl}}
+Content-Type: image/png
+
+< ./design_mockup.png
+
+### Extract Upload Key from Presigned URL Response
+@uploadKey = {{presignedUrlRequest.response.body.data.fileKey}}
+
+### 17. Post a Comment to Task (with S3 upload fileKey)
 # @name postCommentRequest
 POST {{baseUrl}}/tasks/{{taskId}}/comments
 Authorization: Bearer {{freshToken}}
@@ -180,7 +203,7 @@ Content-Type: {{contentType}}
   "attachments": [
     {
       "filename": "design_mockup.png",
-      "fileUrl": "https://example-storage.com/design_mockup.png",
+      "fileKey": "{{uploadKey}}",
       "mimeType": "image/png",
       "fileSize": 204857
     }
@@ -190,11 +213,26 @@ Content-Type: {{contentType}}
 ### Extract Comment ID from Response
 @commentId = {{postCommentRequest.response.body.data.id}}
 
-### 17. Get All Comments for Task
+### 18. Get All Comments for Task
 GET {{baseUrl}}/tasks/{{taskId}}/comments
 Authorization: Bearer {{freshToken}}
 
-### 18. Upload/Register Independent Attachment Metadata
+### 19. Get Presigned Upload URL for standalone attachment
+# @name standalonePresignedRequest
+POST {{baseUrl}}/attachments/presigned-url
+Authorization: Bearer {{freshToken}}
+Content-Type: {{contentType}}
+
+{
+  "filename": "sprint_report.pdf",
+  "mimeType": "application/pdf",
+  "fileSize": 1048576
+}
+
+### Extract Standalone Upload Key
+@standaloneKey = {{standalonePresignedRequest.response.body.data.fileKey}}
+
+### 20. Upload/Register Independent Attachment Metadata
 # @name createAttachmentRequest
 POST {{baseUrl}}/tasks/{{taskId}}/attachments
 Authorization: Bearer {{freshToken}}
@@ -202,7 +240,7 @@ Content-Type: {{contentType}}
 
 {
   "filename": "sprint_report.pdf",
-  "fileUrl": "https://example-storage.com/sprint_report.pdf",
+  "fileKey": "{{standaloneKey}}",
   "mimeType": "application/pdf",
   "fileSize": 1048576
 }
@@ -210,24 +248,25 @@ Content-Type: {{contentType}}
 ### Extract Attachment ID from Response
 @attachmentId = {{createAttachmentRequest.response.body.data.id}}
 
-### 19. Get All Attachments for Task
+### 21. Get All Attachments for Task
 GET {{baseUrl}}/tasks/{{taskId}}/attachments
 Authorization: Bearer {{freshToken}}
 
-### 20. Delete Attachment Metadata
+### 22. Delete Attachment Metadata
 DELETE {{baseUrl}}/attachments/{{attachmentId}}
 Authorization: Bearer {{freshToken}}
 
-### 21. Delete Comment
+### 23. Delete Comment
 DELETE {{baseUrl}}/comments/{{commentId}}
 Authorization: Bearer {{freshToken}}
+
 
 
 # ==========================================
 # 🧹 CLEANUP & TEARDOWN
 # ==========================================
 
-### 22. Delete Task (will cascade delete comments/attachments)
+### 24. Delete Task (will cascade delete comments/attachments)
 DELETE {{baseUrl}}/tasks/{{taskId}}
 Authorization: Bearer {{freshToken}}
 
@@ -236,7 +275,7 @@ Authorization: Bearer {{freshToken}}
 # ⚠️ NEGATIVE & VALIDATION TESTS
 # ==========================================
 
-### 22. Create a Task (Invalid Input - Past Due Date)
+### 25. Create a Task (Invalid Input - Past Due Date)
 # Should return 400 Bad Request
 POST {{baseUrl}}/tasks
 Authorization: Bearer {{freshToken}}
@@ -249,7 +288,7 @@ Content-Type: {{contentType}}
   "dueDate": "2020-01-01T00:00:00.000Z"
 }
 
-### 23. Create a Task (Invalid Input - Nonexistent User Assignment)
+### 26. Create a Task (Invalid Input - Nonexistent User Assignment)
 # Should return 400 Bad Request
 POST {{baseUrl}}/tasks
 Authorization: Bearer {{freshToken}}
@@ -261,7 +300,7 @@ Content-Type: {{contentType}}
   "assignedUserId": "00000000-0000-0000-0000-000000000000"
 }
 
-### 24. Weak Password Test
+### 27. Weak Password Test
 # Should return 400 Bad Request
 POST {{baseUrl}}/auth/reset-password
 Authorization: Bearer {{tempToken}}

@@ -34,6 +34,7 @@ The nexTask system provides a structured environment for managing the project li
 - **ORM:** Prisma
 - **Database:** PostgreSQL (Storing user profiles, tasks, and push subscriptions)
 - **Real-Time:** Socket.io (WSS) & **Web-Push** (VAPID protocol)
+- **Storage:** S3-Compatible Object Storage (AWS S3, Cloudflare R2, MinIO) via presigned URLs
 - **Mailing:** SMTP (Nodemailer)
 - **Documentation:** tsoa (Auto-generated OpenAPI/Swagger)
 
@@ -112,7 +113,14 @@ The project follows a clean, modular folder structure using pnpm workspaces as p
   - **Delivery:** System triggers push messages via the VAPID protocol to all registered devices upon task assignment or urgent updates.
 - **Reliability:** Notification storage for offline users and reconnection retry logic using exponential backoff.
 
-### **5\. Security & Error Handling**
+### **5\. File Attachments & S3-Compatible Storage**
+
+- **Direct-to-S3 Uploads:** Files are uploaded directly from the client to S3-compatible storage using cryptographically signed PUT URLs, bypassing the Express server to optimize network throughput.
+- **Private-by-Default Storage:** The S3 bucket/container is kept private. Short-lived (15-minute expiration) GET presigned URLs are generated in-memory on demand for secure rendering and download.
+- **Self-Cleaning Storage:** Deleting tasks, comments, or attachments triggers the physical removal of their associated objects from R2/S3/MinIO before database metadata deletion to prevent orphaned data.
+- **Multi-Provider Support:** Configurations support AWS S3, Cloudflare R2, and MinIO storage providers.
+
+### **6\. Security & Error Handling**
 
 - **Sanitization:** Input validation to prevent XSS and SQL Injection (Parameterized queries via Prisma).
 - **Encryption:** All communication forced over HTTPS (TLS) and WSS.

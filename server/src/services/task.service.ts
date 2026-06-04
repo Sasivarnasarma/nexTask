@@ -3,6 +3,7 @@ import { Priority, Status, Task } from '@prisma/client';
 import { prisma } from '../lib/prisma';
 import { ApiError } from '../utils/apiError.util';
 import { PushService } from './push.service';
+import { deleteFile } from './s3.service';
 
 // Shape of data needed to create a task
 export interface CreateTaskInput {
@@ -100,6 +101,13 @@ export const updateTask = async (id: string, data: UpdateTaskInput): Promise<Tas
 export const deleteTask = async (id: string): Promise<Task> => {
   const existing = await prisma.task.findUnique({ where: { id } });
   if (!existing) throw new ApiError(404, 'Task not found.');
+
+  const attachments = await prisma.attachment.findMany({
+    where: { taskId: id },
+    select: { fileKey: true },
+  });
+
+  await Promise.all(attachments.map((att) => deleteFile(att.fileKey)));
 
   return prisma.task.delete({ where: { id } });
 };

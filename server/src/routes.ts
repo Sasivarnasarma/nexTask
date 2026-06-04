@@ -21,6 +21,8 @@ import { AuthController } from './controllers/auth.controller';
 import { AttachmentController } from './controllers/attachment.controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { AttachmentDeleteController } from './controllers/attachment.controller';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { AttachmentUploadController } from './controllers/attachment-upload.controller';
 import { expressAuthentication } from './middlewares/authentication';
 // @ts-ignore - no great way to install types from subpackage
 import type { Request as ExRequest, Response as ExResponse, RequestHandler, Router } from 'express';
@@ -228,7 +230,8 @@ const models: TsoaRoute.Models = {
         "properties": {
             "id": {"dataType":"string","required":true},
             "filename": {"dataType":"string","required":true},
-            "fileUrl": {"dataType":"string","required":true},
+            "fileKey": {"dataType":"string","required":true},
+            "presignedUrl": {"dataType":"string"},
             "mimeType": {"dataType":"string","required":true},
             "fileSize": {"dataType":"double","required":true},
             "taskId": {"dataType":"string","required":true},
@@ -280,7 +283,7 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "filename": {"dataType":"string","required":true},
-            "fileUrl": {"dataType":"string","required":true},
+            "fileKey": {"dataType":"string","required":true},
             "mimeType": {"dataType":"string","required":true},
             "fileSize": {"dataType":"double","required":true},
         },
@@ -362,6 +365,36 @@ const models: TsoaRoute.Models = {
             "message": {"dataType":"string","required":true},
             "data": {"dataType":"union","subSchemas":[{"ref":"Attachment"},{"dataType":"enum","enums":[null]}],"required":true},
             "error": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "GetPresignedUrlResponse": {
+        "dataType": "refObject",
+        "properties": {
+            "uploadUrl": {"dataType":"string","required":true},
+            "fileKey": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ApiResponse_GetPresignedUrlResponse_": {
+        "dataType": "refObject",
+        "properties": {
+            "status": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["success"]},{"dataType":"enum","enums":["error"]}],"required":true},
+            "message": {"dataType":"string","required":true},
+            "data": {"dataType":"union","subSchemas":[{"ref":"GetPresignedUrlResponse"},{"dataType":"enum","enums":[null]}],"required":true},
+            "error": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "GetPresignedUrlRequest": {
+        "dataType": "refObject",
+        "properties": {
+            "filename": {"dataType":"string","required":true},
+            "mimeType": {"dataType":"string","required":true},
+            "fileSize": {"dataType":"double","required":true},
         },
         "additionalProperties": false,
     },
@@ -1029,6 +1062,37 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'removeAttachment',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAttachmentUploadController_getPresignedUrl: Record<string, TsoaRoute.ParameterSchema> = {
+                body: {"in":"body","name":"body","required":true,"ref":"GetPresignedUrlRequest"},
+        };
+        app.post('/attachments/presigned-url',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(AttachmentUploadController)),
+            ...(fetchMiddlewares<RequestHandler>(AttachmentUploadController.prototype.getPresignedUrl)),
+
+            async function AttachmentUploadController_getPresignedUrl(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAttachmentUploadController_getPresignedUrl, request, response });
+
+                const controller = new AttachmentUploadController();
+
+              await templateService.apiHandler({
+                methodName: 'getPresignedUrl',
                 controller,
                 response,
                 next,

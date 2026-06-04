@@ -158,7 +158,8 @@ export interface CreateCommentRequest {
 export interface Attachment {
   id: string;
   filename: string;
-  fileUrl: string;
+  fileKey: string;
+  presignedUrl?: string;
   mimeType: string;
   fileSize: number;
   taskId: string;
@@ -169,7 +170,18 @@ export interface Attachment {
 
 export interface CreateAttachmentRequest {
   filename: string;
-  fileUrl: string;
+  fileKey: string;
   mimeType: string;
   fileSize: number;
+}
+
+export interface GetPresignedUrlRequest {
+  filename: string;
+  mimeType: string;
+  fileSize: number;
+}
+
+export interface GetPresignedUrlResponse {
+  uploadUrl: string;
+  fileKey: string;
 }

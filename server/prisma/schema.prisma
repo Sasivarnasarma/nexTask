@@ -64,7 +64,7 @@ model Comment {
 model Attachment {
   id           String   @id @default(uuid())
   filename     String
-  fileUrl      String
+  fileKey      String
   mimeType     String
   fileSize     Int
   createdAt    DateTime @default(now())
