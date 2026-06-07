@@ -27,10 +27,9 @@ export async function getPresignedUploadUrl(
  * NOTE: We use standard axios directly here instead of apiClient to avoid adding
  * our custom JWT Authorization header, which would break S3 signature verification.
  */
-export async function uploadFileToS3(uploadUrl: string, file: File): Promise<void> {
   await axios.put(uploadUrl, file, {
     headers: {
-      'Content-Type': file.type,
+      'Content-Type': file.type || 'application/octet-stream',
     },
   });
 }

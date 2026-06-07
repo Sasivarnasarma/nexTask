@@ -277,6 +277,8 @@ export function Dashboard() {
 
     const taskId = active.id as string;
     const newStatus = mapStatusToBackend(over.id as string);
+    const current = tasks.find((t) => t.id === taskId);
+    if (current && mapStatusToBackend(current.status) === newStatus) return;
 
     updateTaskMutation.mutate({
       id: taskId,

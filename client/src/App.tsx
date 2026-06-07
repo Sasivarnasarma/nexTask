@@ -85,7 +85,14 @@ const App: React.FC = () => {
                 </RedirectIfAuthenticated>
               }
             />
-            <Route path="/force-reset" element={<ForceResetPage />} />
+            <Route
+              path="/force-reset"
+              element={
+                <RequireAuth>
+                  <ForceResetPage />
+                </RequireAuth>
+              }
+            />
 
             {/* 2. Secured Routes (Requires Login) */}
             <Route
