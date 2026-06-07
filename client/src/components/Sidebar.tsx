@@ -46,10 +46,10 @@ export function Sidebar({ isOpen }: { isOpen: boolean }) {
               title="Dashboard"
               className={`flex items-center gap-3 ${isOpen ? 'px-4 py-2.5 justify-start' : 'h-10 w-10 justify-center mx-auto'} ${
                 isActive('/dashboard')
-                  // Changed hardcoded indigo to theme primary colors
-                  ? 'bg-primary/10 text-primary font-bold shadow-sm'
-                  // Changed hover:bg-slate-100 to hover:bg-accent and text-slate-950 to text-accent-foreground
-                  : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                  ? // Changed hardcoded indigo to theme primary colors
+                    'bg-primary/10 text-primary font-bold shadow-sm'
+                  : // Changed hover:bg-slate-100 to hover:bg-accent and text-slate-950 to text-accent-foreground
+                    'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
               } rounded-lg text-sm transition-all duration-200`}
             >
               <LayoutDashboard
@@ -96,4 +96,4 @@ export function Sidebar({ isOpen }: { isOpen: boolean }) {
       </div>
     </aside>
   );
-} 
+}

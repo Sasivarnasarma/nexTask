@@ -5,6 +5,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { PushNotificationPrompt } from './components/PushNotificationPrompt';
 import { Sidebar } from './components/Sidebar';
+import { ThemeProvider } from './components/ThemeProvider';
 import { RedirectIfAuthenticated, RequireAuth } from './components/auth/RouteGuard';
 import { ToastContainer } from './components/ui/Toast';
 import './index.css';
@@ -13,7 +14,6 @@ import { Settings } from './pages/Settings';
 import ForceResetPage from './pages/auth/ForceResetPage';
 import LoginPage from './pages/auth/LoginPage';
 import ProfilePage from './pages/profile/ProfilePage';
-import { ThemeProvider } from "./components/ThemeProvider";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -41,9 +41,11 @@ const DashboardLayout: React.FC = () => {
       )}
 
       <div
-        className={`fixed inset-y-0 left-0 z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          } transition-transform duration-300 ease-in-out shrink-0 bg-background md:relative md:translate-x-0 ${isSidebarOpen ? 'md:w-64' : 'md:w-20'
-          }`}
+        className={`fixed inset-y-0 left-0 z-50 transform ${
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } transition-transform duration-300 ease-in-out shrink-0 bg-background md:relative md:translate-x-0 ${
+          isSidebarOpen ? 'md:w-64' : 'md:w-20'
+        }`}
       >
         <div className="w-full h-full overflow-hidden">
           <Sidebar isOpen={isSidebarOpen} />
@@ -75,19 +77,25 @@ const App: React.FC = () => {
         <BrowserRouter>
           <Routes>
             {/* 1. Unauthenticated Routes */}
-            <Route path="/login" element={
-              <RedirectIfAuthenticated>
-                <LoginPage />
-              </RedirectIfAuthenticated>
-            } />
+            <Route
+              path="/login"
+              element={
+                <RedirectIfAuthenticated>
+                  <LoginPage />
+                </RedirectIfAuthenticated>
+              }
+            />
             <Route path="/force-reset" element={<ForceResetPage />} />
 
             {/* 2. Secured Routes (Requires Login) */}
-            <Route path="/*" element={
-              <RequireAuth>
-                <DashboardLayout />
-              </RequireAuth>
-            } />
+            <Route
+              path="/*"
+              element={
+                <RequireAuth>
+                  <DashboardLayout />
+                </RequireAuth>
+              }
+            />
           </Routes>
           <ToastContainer />
         </BrowserRouter>

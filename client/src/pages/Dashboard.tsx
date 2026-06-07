@@ -1,34 +1,114 @@
-import React, { useState } from 'react';
-import { Card, CardHeader, CardTitle } from '../components/ui/card';
-import { Badge } from '../components/ui/badge';
-import { ScrollArea } from '../components/ui/scroll-area';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "../components/ui/dialog";
-import { Textarea } from "../components/ui/textarea";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../components/ui/dropdown-menu";
-import { Paperclip, MessageSquare, Send, LayoutGrid, List, Search, Filter, Plus ,Sun , Moon } from 'lucide-react';
-import { DndContext, DragEndEvent, DragStartEvent, DragOverlay, closestCorners, useDraggable, useDroppable, useSensor, useSensors, PointerSensor } from '@dnd-kit/core';
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+  PointerSensor,
+  closestCorners,
+  useDraggable,
+  useDroppable,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
+import { Task } from '@nextask/types';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  Filter,
+  LayoutGrid,
+  List,
+  MessageSquare,
+  Moon,
+  Paperclip,
+  Plus,
+  Search,
+  Send,
+  Sun,
+  Trash2,
+} from 'lucide-react';
+import React, { useState } from 'react';
 
-import { useTheme } from '../components/ThemeProvider';
+import {
+  createTaskAttachment,
+  deleteAttachment,
+  getPresignedUploadUrl,
+  uploadFileToS3,
+} from '../api/attachments.api';
+import { deleteComment, fetchComments, postComment } from '../api/comments.api';
+import {
+  UpdateTaskPayload,
+  createTask,
+  deleteTask,
+  fetchTaskById,
+  fetchTasks,
+  mapPriorityToBackend,
+  mapPriorityToFrontend,
+  mapStatusToBackend,
+  mapStatusToFrontend,
+  updateTask,
+} from '../api/tasks.api';
+import { Badge } from '../components/ui/badge';
+import { Button } from '../components/ui/button';
+import { Card, CardHeader, CardTitle } from '../components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../components/ui/dropdown-menu';
+import { Input } from '../components/ui/input';
+import { ScrollArea } from '../components/ui/scroll-area';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '../components/ui/table';
+import { Textarea } from '../components/ui/textarea';
+import { useTheme } from '../hooks/useTheme';
 
-const dummyTasks = [
-  { id: '1', title: 'Design database schema', status: 'Done', priority: 'High', description: 'Create a normalized PostgreSQL schema for the core entities.' },
-  { id: '2', title: 'Build Kanban Board UI', status: 'In Progress', priority: 'Medium', description: 'Implement the frontend drag-and-drop interface using dnd-kit.' },
-  { id: '3', title: 'Fix AWS Lockfile', status: 'To Do', priority: 'Low', description: 'Resolve the version mismatch in the terraform lock file.' },
-  { id: '4', title: 'Configure Nodemailer', status: 'To Do', priority: 'Medium', description: 'Set up SMTP transport for automated email notifications.' }
-];
+export interface FrontendTask extends Omit<Task, 'priority' | 'status'> {
+  priority: string;
+  status: string;
+}
 
-function KanbanColumn({ title, status, children }: { title: string, status: string, children: React.ReactNode }) {
+// ─── Kanban Column Component ──────────────────────────────────────────────────
+
+function KanbanColumn({
+  title,
+  status,
+  children,
+}: {
+  title: string;
+  status: string;
+  children: React.ReactNode;
+}) {
   const { isOver, setNodeRef } = useDroppable({ id: status });
-  // Dynamically switches to a highlighted state when dragging over it
-  const bgClass = isOver ? 'bg-muted border-2 border-primary border-dashed' : 'bg-muted/50 border-2 border-transparent';
-  const headerColor = status === 'To Do' ? 'text-muted-foreground' : status === 'In Progress' ? 'text-blue-500' : 'text-emerald-500';
+  const bgClass = isOver
+    ? 'bg-muted border-2 border-primary border-dashed'
+    : 'bg-muted/50 border-2 border-transparent';
+  const headerColor =
+    status === 'To Do'
+      ? 'text-muted-foreground'
+      : status === 'In Progress'
+        ? 'text-blue-500'
+        : 'text-emerald-500';
 
   return (
-    <div ref={setNodeRef} className={`w-80 shrink-0 rounded-xl p-4 flex flex-col transition-all ${bgClass}`}>
+    <div
+      ref={setNodeRef}
+      className={`w-80 shrink-0 rounded-xl p-4 flex flex-col transition-all ${bgClass}`}
+    >
       <h2 className={`text-sm font-bold uppercase tracking-widest mb-4 ${headerColor}`}>{title}</h2>
       <ScrollArea className="flex-1">
         <div className="flex flex-col gap-3 pr-4 min-h-[200px]">{children}</div>
@@ -37,17 +117,37 @@ function KanbanColumn({ title, status, children }: { title: string, status: stri
   );
 }
 
-function TaskCard({ task, onClick }: { task: any, onClick: () => void }) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: task.id, data: { task } });
+// ─── Task Card Component ───────────────────────────────────────────────────────
+
+function TaskCard({ task, onClick }: { task: FrontendTask; onClick: () => void }) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: task.id,
+    data: { task },
+  });
   const style = { transform: CSS.Translate.toString(transform), opacity: isDragging ? 0.3 : 1 };
 
   return (
     <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
-      <Card onClick={onClick} className="bg-card border-border text-card-foreground cursor-grab active:cursor-grabbing hover:border-primary/50 transition-colors shadow-sm">
-        <CardHeader className="p-4 pb-4">
+      <Card
+        onClick={onClick}
+        className="bg-card border-border text-card-foreground cursor-grab active:cursor-grabbing hover:border-primary/50 transition-colors shadow-sm"
+      >
+        <CardHeader className="p-4">
           <div className="flex justify-between items-start mb-2">
-            <Badge variant={task.priority === 'High' ? 'destructive' : task.priority === 'Medium' ? 'default' : 'secondary'}>{task.priority}</Badge>
-            <span className="text-muted-foreground text-xs">#{task.id}</span>
+            <Badge
+              variant={
+                task.priority === 'High'
+                  ? 'destructive'
+                  : task.priority === 'Medium'
+                    ? 'default'
+                    : 'secondary'
+              }
+            >
+              {task.priority}
+            </Badge>
+            <span className="text-muted-foreground text-xs">
+              #{task.id.substring(0, 8) || task.id}
+            </span>
           </div>
           <CardTitle className="text-sm font-medium leading-snug">{task.title}</CardTitle>
         </CardHeader>
@@ -56,55 +156,233 @@ function TaskCard({ task, onClick }: { task: any, onClick: () => void }) {
   );
 }
 
+// ─── Main Dashboard Page ───────────────────────────────────────────────────────
+
 export function Dashboard() {
+  const queryClient = useQueryClient();
   const { theme, setTheme } = useTheme();
-  const [tasks, setTasks] = useState(dummyTasks);
-  const [activeTask, setActiveTask] = useState<any | null>(null);
-  const [selectedTask, setSelectedTask] = useState<any | null>(null);
+
+  const [activeTask, setActiveTask] = useState<FrontendTask | null>(null);
+  const [selectedTask, setSelectedTask] = useState<FrontendTask | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [newTaskForm, setNewTaskForm] = useState({ title: '', description: '', priority: 'Medium' });
+  const [newTaskForm, setNewTaskForm] = useState({
+    title: '',
+    description: '',
+    priority: 'Medium',
+  });
   const [viewMode, setViewMode] = useState<'board' | 'table'>('board');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [commentText, setCommentText] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+
+  // ─── Task Queries & Mutations ──────────────────────────────────────────────
+
+  const { data: serverTasks = [], isLoading } = useQuery({
+    queryKey: ['tasks'],
+    queryFn: fetchTasks,
+  });
+
+  const tasks = serverTasks.map((t) => ({
+    ...t,
+    status: mapStatusToFrontend(t.status),
+    priority: mapPriorityToFrontend(t.priority),
+  }));
+
+  const createTaskMutation = useMutation({
+    mutationFn: createTask,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      setIsCreateModalOpen(false);
+      setNewTaskForm({ title: '', description: '', priority: 'Medium' });
+    },
+  });
+
+  const updateTaskMutation = useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: UpdateTaskPayload }) =>
+      updateTask(id, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+  });
+
+  const deleteTaskMutation = useMutation({
+    mutationFn: deleteTask,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      setSelectedTask(null);
+    },
+  });
+
+  // ─── Selected Task Detail Query ─────────────────────────────────────────────
+
+  const { data: taskDetails, refetch: refetchTaskDetails } = useQuery({
+    queryKey: ['task', selectedTask?.id],
+    queryFn: () => fetchTaskById(selectedTask!.id),
+    enabled: !!selectedTask?.id,
+  });
+
+  const mappedSelectedTask = taskDetails
+    ? {
+        ...taskDetails,
+        status: mapStatusToFrontend(taskDetails.status),
+        priority: mapPriorityToFrontend(taskDetails.priority),
+      }
+    : null;
+
+  // ─── Comment Queries & Mutations ────────────────────────────────────────────
+
+  const { data: comments = [], refetch: refetchComments } = useQuery({
+    queryKey: ['comments', selectedTask?.id],
+    queryFn: () => fetchComments(selectedTask!.id),
+    enabled: !!selectedTask?.id,
+  });
+
+  const postCommentMutation = useMutation({
+    mutationFn: (payload: { content: string }) => postComment(selectedTask!.id, payload),
+    onSuccess: () => {
+      refetchComments();
+      setCommentText('');
+    },
+  });
+
+  const deleteCommentMutation = useMutation({
+    mutationFn: deleteComment,
+    onSuccess: () => {
+      refetchComments();
+    },
+  });
+
+  // ─── Attachment Mutations ───────────────────────────────────────────────────
+
+  const deleteAttachmentMutation = useMutation({
+    mutationFn: deleteAttachment,
+    onSuccess: () => {
+      refetchTaskDetails();
+    },
+  });
+
+  // ─── Event Handlers ──────────────────────────────────────────────────────────
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
-  const handleDragStart = (event: DragStartEvent) => setActiveTask(tasks.find(t => t.id === event.active.id));
-  
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveTask(tasks.find((t) => t.id === event.active.id) || null);
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
-    setActiveTask(null); 
+    setActiveTask(null);
     const { active, over } = event;
     if (!over) return;
-    setTasks(prev => prev.map(t => t.id === active.id ? { ...t, status: over.id as string } : t));
+
+    const taskId = active.id as string;
+    const newStatus = mapStatusToBackend(over.id as string);
+
+    updateTaskMutation.mutate({
+      id: taskId,
+      payload: { status: newStatus },
+    });
   };
 
   const handleCreateTask = () => {
     if (!newTaskForm.title.trim()) return;
-    const newTask = {
-        id: Math.floor(Math.random() * 10000).toString(),
-        title: newTaskForm.title,
-        description: newTaskForm.description,
-        priority: newTaskForm.priority,
-        status: 'To Do'
-    };
-    setTasks([newTask, ...tasks]); // Appends to the top!
-    setNewTaskForm({ title: '', description: '', priority: 'Medium' });
-    setIsCreateModalOpen(false);
+    createTaskMutation.mutate({
+      title: newTaskForm.title.trim(),
+      description: newTaskForm.description.trim() || undefined,
+      priority: mapPriorityToBackend(newTaskForm.priority),
+      status: 'TODO',
+    });
   };
 
-  const filteredTasks = tasks.filter(task => {
+  const handleDeleteTask = () => {
+    if (!selectedTask?.id) return;
+    if (window.confirm('Are you sure you want to delete this task?')) {
+      deleteTaskMutation.mutate(selectedTask.id);
+    }
+  };
+
+  const handleSendComment = () => {
+    if (!commentText.trim()) return;
+    postCommentMutation.mutate({ content: commentText.trim() });
+  };
+
+  const handleDeleteComment = (id: string) => {
+    if (window.confirm('Delete this comment?')) {
+      deleteCommentMutation.mutate(id);
+    }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedTask?.id) return;
+
+    setIsUploading(true);
+    try {
+      // 1. Fetch Presigned PUT Upload URL
+      const { uploadUrl, fileKey } = await getPresignedUploadUrl({
+        filename: file.name,
+        mimeType: file.type || 'application/octet-stream',
+        fileSize: file.size,
+      });
+
+      // 2. Upload Binary Directly to S3 (No JWT Headers)
+      await uploadFileToS3(uploadUrl, file);
+
+      // 3. Register Attachment Metadata in DB
+      await createTaskAttachment(selectedTask.id, {
+        filename: file.name,
+        fileKey,
+        mimeType: file.type || 'application/octet-stream',
+        fileSize: file.size,
+      });
+
+      refetchTaskDetails();
+    } catch (err) {
+      console.error('File upload flow failed:', err);
+      alert('Failed to upload file.');
+    } finally {
+      setIsUploading(false);
+      if (e.target) e.target.value = '';
+    }
+  };
+
+  const handleDeleteAttachment = (id: string) => {
+    if (window.confirm('Delete this attachment?')) {
+      deleteAttachmentMutation.mutate(id);
+    }
+  };
+
+  const formatDate = (dateStr: Date | string) => {
+    return new Date(dateStr).toLocaleString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  // ─── Filter Tasks ────────────────────────────────────────────────────────────
+
+  const filteredTasks = tasks.filter((task) => {
     const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter ? task.status === statusFilter : true;
     return matchesSearch && matchesStatus;
   });
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
+        <p className="text-muted-foreground animate-pulse">Loading board...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="p-8 h-full flex flex-col bg-background text-foreground min-h-screen transition-colors duration-300">
-      
       <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="text-3xl font-extrabold mb-2">Project Board</h1>
-          <p className="text-muted-foreground">Task 2.3 Kanban Implementation</p>
+          <p className="text-muted-foreground">Manage and track your project tasks in real time.</p>
         </div>
 
         <div className="flex items-center gap-4">
@@ -112,8 +390,8 @@ export function Dashboard() {
             <div className="flex items-center gap-2 mr-4">
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input 
-                  placeholder="Search tasks..." 
+                <Input
+                  placeholder="Search tasks..."
                   className="w-64 pl-9 bg-background border-border text-foreground"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -121,14 +399,23 @@ export function Dashboard() {
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="bg-background border-border text-foreground hover:bg-accent hover:text-accent-foreground">
+                  <Button
+                    variant="outline"
+                    className="bg-background border-border text-foreground hover:bg-accent hover:text-accent-foreground"
+                  >
                     <Filter className="mr-2 h-4 w-4" /> {statusFilter || 'All Statuses'}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-popover border-border text-popover-foreground">
-                  <DropdownMenuItem onClick={() => setStatusFilter(null)}>All Statuses</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setStatusFilter('To Do')}>To Do</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setStatusFilter('In Progress')}>In Progress</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setStatusFilter(null)}>
+                    All Statuses
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setStatusFilter('To Do')}>
+                    To Do
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setStatusFilter('In Progress')}>
+                    In Progress
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setStatusFilter('Done')}>Done</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -136,18 +423,36 @@ export function Dashboard() {
           )}
 
           <div className="flex bg-muted/50 p-1 rounded-lg border border-border mr-2">
-            <Button variant="ghost" size="sm" onClick={() => setViewMode('board')} className={viewMode === 'board' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setViewMode('board')}
+              className={
+                viewMode === 'board'
+                  ? 'bg-background shadow-sm text-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              }
+            >
               <LayoutGrid className="h-4 w-4 mr-2" /> Board
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => setViewMode('table')} className={viewMode === 'table' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setViewMode('table')}
+              className={
+                viewMode === 'table'
+                  ? 'bg-background shadow-sm text-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              }
+            >
               <List className="h-4 w-4 mr-2" /> List
             </Button>
           </div>
 
-          <Button 
-            variant="outline" 
-            size="icon" 
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} 
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
             className="bg-background border-border text-foreground hover:bg-muted mr-2"
           >
             {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -160,27 +465,58 @@ export function Dashboard() {
       </div>
 
       {viewMode === 'board' ? (
-        <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCorners}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        >
           <div className="flex-1 flex gap-6 overflow-x-auto pb-4">
             <KanbanColumn title="To Do" status="To Do">
-              {tasks.filter(t => t.status === 'To Do').map(task => <TaskCard key={task.id} task={task} onClick={() => setSelectedTask(task)} />)}
+              {tasks
+                .filter((t) => t.status === 'To Do')
+                .map((task) => (
+                  <TaskCard key={task.id} task={task} onClick={() => setSelectedTask(task)} />
+                ))}
             </KanbanColumn>
             <KanbanColumn title="In Progress" status="In Progress">
-              {tasks.filter(t => t.status === 'In Progress').map(task => <TaskCard key={task.id} task={task} onClick={() => setSelectedTask(task)} />)}
+              {tasks
+                .filter((t) => t.status === 'In Progress')
+                .map((task) => (
+                  <TaskCard key={task.id} task={task} onClick={() => setSelectedTask(task)} />
+                ))}
             </KanbanColumn>
             <KanbanColumn title="Done" status="Done">
-              {tasks.filter(t => t.status === 'Done').map(task => <TaskCard key={task.id} task={task} onClick={() => setSelectedTask(task)} />)}
+              {tasks
+                .filter((t) => t.status === 'Done')
+                .map((task) => (
+                  <TaskCard key={task.id} task={task} onClick={() => setSelectedTask(task)} />
+                ))}
             </KanbanColumn>
           </div>
           <DragOverlay>
             {activeTask ? (
               <Card className="bg-card border-primary text-card-foreground shadow-2xl cursor-grabbing opacity-90 w-72">
-                <CardHeader className="p-4 pb-4">
+                <CardHeader className="p-4">
                   <div className="flex justify-between items-start mb-2">
-                    <Badge variant={activeTask.priority === 'High' ? 'destructive' : activeTask.priority === 'Medium' ? 'default' : 'secondary'}>{activeTask.priority}</Badge>
-                    <span className="text-muted-foreground text-xs">#{activeTask.id}</span>
+                    <Badge
+                      variant={
+                        activeTask.priority === 'High'
+                          ? 'destructive'
+                          : activeTask.priority === 'Medium'
+                            ? 'default'
+                            : 'secondary'
+                      }
+                    >
+                      {activeTask.priority}
+                    </Badge>
+                    <span className="text-muted-foreground text-xs">
+                      #{activeTask.id.substring(0, 8) || activeTask.id}
+                    </span>
                   </div>
-                  <CardTitle className="text-sm font-medium leading-snug">{activeTask.title}</CardTitle>
+                  <CardTitle className="text-sm font-medium leading-snug">
+                    {activeTask.title}
+                  </CardTitle>
                 </CardHeader>
               </Card>
             ) : null}
@@ -194,116 +530,307 @@ export function Dashboard() {
                 <TableHead className="text-muted-foreground font-medium w-[100px]">ID</TableHead>
                 <TableHead className="text-muted-foreground font-medium">Task Name</TableHead>
                 <TableHead className="text-muted-foreground font-medium">Status</TableHead>
-                <TableHead className="text-muted-foreground font-medium text-right">Priority</TableHead>
+                <TableHead className="text-muted-foreground font-medium text-right">
+                  Priority
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredTasks.length > 0 ? filteredTasks.map((task) => (
-                <TableRow key={task.id} className="border-border hover:bg-muted/50 cursor-pointer transition-colors" onClick={() => setSelectedTask(task)}>
-                  <TableCell className="font-medium text-muted-foreground">#{task.id}</TableCell>
-                  <TableCell className="text-foreground font-medium">{task.title}</TableCell>
-                  <TableCell>
-                     <span className={`text-xs px-2 py-1 rounded-full border ${task.status === 'Done' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : task.status === 'In Progress' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 'bg-muted text-muted-foreground border-border'}`}>
+              {filteredTasks.length > 0 ? (
+                filteredTasks.map((task) => (
+                  <TableRow
+                    key={task.id}
+                    className="border-border hover:bg-muted/50 cursor-pointer transition-colors"
+                    onClick={() => setSelectedTask(task)}
+                  >
+                    <TableCell className="font-medium text-muted-foreground">
+                      #{task.id.substring(0, 8) || task.id}
+                    </TableCell>
+                    <TableCell className="text-foreground font-medium">{task.title}</TableCell>
+                    <TableCell>
+                      <span
+                        className={`text-xs px-2 py-1 rounded-full border ${
+                          task.status === 'Done'
+                            ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                            : task.status === 'In Progress'
+                              ? 'bg-blue-500/10 text-blue-500 border-blue-500/20'
+                              : 'bg-muted text-muted-foreground border-border'
+                        }`}
+                      >
                         {task.status}
-                     </span>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Badge variant={task.priority === 'High' ? 'destructive' : task.priority === 'Medium' ? 'default' : 'secondary'}>{task.priority}</Badge>
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Badge
+                        variant={
+                          task.priority === 'High'
+                            ? 'destructive'
+                            : task.priority === 'Medium'
+                              ? 'default'
+                              : 'secondary'
+                        }
+                      >
+                        {task.priority}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center h-24 text-muted-foreground">
+                    No tasks found.
                   </TableCell>
                 </TableRow>
-              )) : (
-                <TableRow><TableCell colSpan={4} className="text-center h-24 text-muted-foreground">No tasks found.</TableCell></TableRow>
               )}
             </TableBody>
           </Table>
         </div>
       )}
 
-      {/* --- MODAL 1: VIEW TASK DETAILS --- */}
+      {/* ─── MODAL 1: VIEW TASK DETAILS ────────────────────────────────────────── */}
       <Dialog open={!!selectedTask} onOpenChange={() => setSelectedTask(null)}>
         <DialogContent className="max-w-4xl bg-background border-border text-foreground p-0 overflow-hidden">
           <div className="flex h-[600px]">
-            <div className="flex-1 p-8 border-r border-border space-y-6">
-                <DialogHeader>
-                    <Badge className="w-fit mb-2" variant={selectedTask?.priority === 'High' ? 'destructive' : 'default'}>{selectedTask?.priority} Priority</Badge>
-                    <DialogTitle className="text-2xl font-bold">{selectedTask?.title}</DialogTitle>
-                    <DialogDescription className="text-muted-foreground mt-4 text-base leading-relaxed">{selectedTask?.description || "No description provided."}</DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4 pt-4 mt-8 border-t border-border/50">
-                    <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Attachments</h4>
-                    <div className="border-2 border-dashed border-border bg-muted/30 rounded-xl p-8 text-center hover:border-primary hover:bg-primary/5 transition-all cursor-pointer group">
-                        <Paperclip className="mx-auto mb-3 h-8 w-8 text-muted-foreground group-hover:text-primary transition-colors" />
-                        <p className="text-sm text-foreground font-medium">Click to upload or drag files here</p>
-                    </div>
+            {/* Modal Left: Task & Attachments Details */}
+            <div className="flex-1 p-8 border-r border-border space-y-6 overflow-y-auto">
+              <DialogHeader>
+                <div className="flex justify-between items-start">
+                  <Badge
+                    className="w-fit mb-2"
+                    variant={mappedSelectedTask?.priority === 'High' ? 'destructive' : 'default'}
+                  >
+                    {mappedSelectedTask?.priority} Priority
+                  </Badge>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-muted-foreground hover:text-destructive text-xs hover:bg-destructive/10"
+                    onClick={handleDeleteTask}
+                    disabled={deleteTaskMutation.isPending}
+                  >
+                    <Trash2 size={14} className="mr-1" /> Delete Task
+                  </Button>
                 </div>
+                <DialogTitle className="text-2xl font-bold">
+                  {mappedSelectedTask?.title}
+                </DialogTitle>
+                <DialogDescription className="text-muted-foreground mt-4 text-base leading-relaxed">
+                  {mappedSelectedTask?.description || 'No description provided.'}
+                </DialogDescription>
+              </DialogHeader>
+
+              {/* Task S3 Attachments Box */}
+              <div className="space-y-4 pt-4 mt-8 border-t border-border/50">
+                <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                  Attachments
+                </h4>
+
+                <input
+                  type="file"
+                  id="file-upload"
+                  className="hidden"
+                  onChange={handleFileChange}
+                  disabled={isUploading}
+                />
+
+                <div
+                  onClick={() => !isUploading && document.getElementById('file-upload')?.click()}
+                  className={`border-2 border-dashed border-border bg-muted/30 rounded-xl p-6 text-center hover:border-primary hover:bg-primary/5 transition-all ${
+                    isUploading ? 'cursor-not-allowed' : 'cursor-pointer'
+                  } group`}
+                >
+                  {isUploading ? (
+                    <p className="text-sm animate-pulse text-primary font-semibold">
+                      Uploading to R2/S3...
+                    </p>
+                  ) : (
+                    <>
+                      <Paperclip className="mx-auto mb-2 h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors" />
+                      <p className="text-sm text-foreground font-medium">Click to upload files</p>
+                    </>
+                  )}
+                </div>
+
+                {/* Attachments List */}
+                {mappedSelectedTask?.attachments && mappedSelectedTask.attachments.length > 0 && (
+                  <div className="grid grid-cols-2 gap-3 mt-4">
+                    {mappedSelectedTask.attachments.map((att) => {
+                      const isImage = att.mimeType.startsWith('image/');
+                      return (
+                        <div
+                          key={att.id}
+                          className="relative group border border-border rounded-xl p-3 bg-muted/20 flex items-center gap-3"
+                        >
+                          {isImage && att.presignedUrl ? (
+                            <img
+                              src={att.presignedUrl}
+                              alt={att.filename}
+                              className="w-12 h-12 rounded-lg object-cover bg-background border border-border"
+                            />
+                          ) : (
+                            <div className="w-12 h-12 rounded-lg bg-background flex items-center justify-center border border-border">
+                              <Paperclip className="h-5 w-5 text-muted-foreground" />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-semibold truncate text-foreground pr-4">
+                              {att.filename}
+                            </p>
+                            <p className="text-[10px] text-muted-foreground">
+                              {(att.fileSize / 1024).toFixed(1)} KB
+                            </p>
+                            {att.presignedUrl && (
+                              <a
+                                href={att.presignedUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[10px] text-primary hover:underline font-semibold mt-1 inline-block"
+                              >
+                                Download
+                              </a>
+                            )}
+                          </div>
+                          <button
+                            onClick={() => handleDeleteAttachment(att.id)}
+                            className="absolute top-2 right-2 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="w-80 bg-muted/20 flex flex-col">
-                <div className="p-4 border-b border-border flex items-center gap-2 bg-muted/40">
-                    <MessageSquare size={18} className="text-primary" />
-                    <h4 className="font-bold text-sm tracking-wide">Activity</h4>
+
+            {/* Modal Right: Comments Side Panel */}
+            <div className="w-80 bg-muted/20 flex flex-col h-full border-l border-border">
+              <div className="p-4 border-b border-border flex items-center gap-2 bg-muted/40">
+                <MessageSquare size={18} className="text-primary" />
+                <h4 className="font-bold text-sm tracking-wide">Activity Feed</h4>
+              </div>
+
+              <ScrollArea className="flex-1 p-4">
+                {comments.length > 0 ? (
+                  <div className="flex flex-col gap-4">
+                    {comments.map((comment) => (
+                      <div
+                        key={comment.id}
+                        className="bg-card border border-border p-3 rounded-lg text-sm shadow-sm relative group"
+                      >
+                        <div className="flex justify-between items-center mb-1">
+                          <p className="font-bold text-primary text-xs truncate max-w-[150px]">
+                            {comment.author?.name || comment.author?.email || 'A teammate'}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground">
+                            {formatDate(comment.createdAt)}
+                          </p>
+                        </div>
+                        <p className="text-foreground leading-relaxed text-xs wrap-break-word">
+                          {comment.content}
+                        </p>
+                        <button
+                          onClick={() => handleDeleteComment(comment.id)}
+                          className="absolute bottom-2 right-2 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-xs text-muted-foreground">
+                    No comments yet. Start the conversation!
+                  </div>
+                )}
+              </ScrollArea>
+
+              {/* Comment TextBox & Submit */}
+              <div className="p-4 border-t border-border bg-muted/40 space-y-3">
+                <Textarea
+                  placeholder="Add a comment..."
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  className="bg-background border-border resize-none h-16 text-xs focus-visible:ring-primary"
+                />
+                <div className="flex justify-end">
+                  <Button
+                    size="sm"
+                    onClick={handleSendComment}
+                    disabled={postCommentMutation.isPending || !commentText.trim()}
+                  >
+                    <Send size={12} className="mr-1.5" /> Send
+                  </Button>
                 </div>
-                <ScrollArea className="flex-1 p-4">
-                    {/* FIXED: Generic System Message */}
-                    <div className="bg-background border border-border p-3 rounded-lg text-sm shadow-sm">
-                        <p className="font-bold text-primary mb-1 text-xs">System Notification</p>
-                        <p className="text-muted-foreground leading-relaxed text-xs">Database needs to be connected to sync tasks and activity history.</p>
-                    </div>
-                </ScrollArea>
+              </div>
             </div>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* --- MODAL 2: CREATE NEW TASK --- */}
+      {/* ─── MODAL 2: CREATE NEW TASK ────────────────────────────────────────── */}
       <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
         <DialogContent className="bg-background border-border text-foreground sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Create New Task</DialogTitle>
-            <DialogDescription className="text-muted-foreground">Fill out the details below to add a new task to the board.</DialogDescription>
+            <DialogDescription className="text-muted-foreground">
+              Fill out the details below to add a new task to the board.
+            </DialogDescription>
           </DialogHeader>
-          
+
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Task Title</label>
-                <Input 
-                    placeholder="e.g. Update user profile UI" 
-                    className="bg-background border-border focus-visible:ring-primary"
-                    value={newTaskForm.title}
-                    onChange={(e) => setNewTaskForm({...newTaskForm, title: e.target.value})}
-                />
+              <label className="text-sm font-medium text-foreground">Task Title</label>
+              <Input
+                placeholder="e.g. Update user profile UI"
+                className="bg-background border-border focus-visible:ring-primary"
+                value={newTaskForm.title}
+                onChange={(e) => setNewTaskForm({ ...newTaskForm, title: e.target.value })}
+              />
             </div>
 
             <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Priority</label>
-                <select 
-                    className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                    value={newTaskForm.priority}
-                    onChange={(e) => setNewTaskForm({...newTaskForm, priority: e.target.value})}
-                >
-                    <option value="Low">Low Priority</option>
-                    <option value="Medium">Medium Priority</option>
-                    <option value="High">High Priority</option>
-                </select>
+              <label className="text-sm font-medium text-foreground">Priority</label>
+              <select
+                className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                value={newTaskForm.priority}
+                onChange={(e) => setNewTaskForm({ ...newTaskForm, priority: e.target.value })}
+              >
+                <option value="Low">Low Priority</option>
+                <option value="Medium">Medium Priority</option>
+                <option value="High">High Priority</option>
+              </select>
             </div>
 
             <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Description</label>
-                <Textarea 
-                    placeholder="Briefly describe the task requirements..." 
-                    className="bg-background border-border focus-visible:ring-primary resize-none"
-                    value={newTaskForm.description}
-                    onChange={(e) => setNewTaskForm({...newTaskForm, description: e.target.value})}
-                />
+              <label className="text-sm font-medium text-foreground">Description</label>
+              <Textarea
+                placeholder="Briefly describe the task requirements..."
+                className="bg-background border-border focus-visible:ring-primary resize-none"
+                value={newTaskForm.description}
+                onChange={(e) => setNewTaskForm({ ...newTaskForm, description: e.target.value })}
+              />
             </div>
           </div>
 
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setIsCreateModalOpen(false)} className="hover:bg-muted text-muted-foreground hover:text-foreground">Cancel</Button>
-            <Button onClick={handleCreateTask}>Save Task</Button>
+            <Button
+              variant="ghost"
+              onClick={() => setIsCreateModalOpen(false)}
+              className="hover:bg-muted text-muted-foreground hover:text-foreground"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateTask}
+              disabled={createTaskMutation.isPending || !newTaskForm.title.trim()}
+            >
+              Save Task
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
     </div>
   );
 }

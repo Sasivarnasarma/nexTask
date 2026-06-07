@@ -1,3 +1,4 @@
+import { Task as SharedTask } from '@nextask/types';
 import { Task } from '@prisma/client';
 import {
   Body,
@@ -38,7 +39,7 @@ export class TaskController extends Controller {
 
   // GET /tasks/:id
   @Get('{id}')
-  public async getTask(@Path() id: string): Promise<ApiResponse<Task>> {
+  public async getTask(@Path() id: string): Promise<ApiResponse<SharedTask>> {
     const task = await getTaskById(id);
     if (!task) throw new ApiError(404, 'Task not found.');
     return successResponse('Task retrieved successfully.', task);

@@ -1,9 +1,10 @@
+import { Task as SharedTask } from '@nextask/types';
 import { Priority, Status, Task } from '@prisma/client';
 
 import { prisma } from '../lib/prisma';
 import { ApiError } from '../utils/apiError.util';
 import { PushService } from './push.service';
-import { deleteFile } from './s3.service';
+import { deleteFile, generateDownloadUrl } from './s3.service';
 
 // Shape of data needed to create a task
 export interface CreateTaskInput {
@@ -61,8 +62,40 @@ export const getAllTasks = async (): Promise<Task[]> => {
 };
 
 // GET ONE
-export const getTaskById = async (id: string): Promise<Task | null> => {
-  return prisma.task.findUnique({ where: { id } });
+export const getTaskById = async (id: string): Promise<SharedTask | null> => {
+  const task = await prisma.task.findUnique({
+    where: { id },
+    include: {
+      attachments: {
+        orderBy: { createdAt: 'desc' },
+      },
+    },
+  });
+
+  if (!task) return null;
+
+  const attachmentsWithUrls = await Promise.all(
+    task.attachments.map(async (att) => {
+      const presignedUrl = await generateDownloadUrl(att.fileKey);
+      return {
+        ...att,
+        presignedUrl: presignedUrl || undefined,
+      };
+    }),
+  );
+
+  return {
+    id: task.id,
+    title: task.title,
+    description: task.description ?? undefined,
+    dueDate: task.dueDate ?? undefined,
+    priority: task.priority as any,
+    status: task.status as any,
+    assignedUserId: task.assignedUserId ?? undefined,
+    createdAt: task.createdAt,
+    updatedAt: task.updatedAt,
+    attachments: attachmentsWithUrls,
+  };
 };
 
 // UPDATE

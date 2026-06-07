@@ -266,6 +266,266 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"CommentAuthor": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string",
+						"nullable": true
+					},
+					"role": {
+						"$ref": "#/components/schemas/UserRole"
+					}
+				},
+				"required": [
+					"id",
+					"email",
+					"name",
+					"role"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Attachment": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"filename": {
+						"type": "string"
+					},
+					"fileKey": {
+						"type": "string"
+					},
+					"presignedUrl": {
+						"type": "string"
+					},
+					"mimeType": {
+						"type": "string"
+					},
+					"fileSize": {
+						"type": "number",
+						"format": "double"
+					},
+					"taskId": {
+						"type": "string"
+					},
+					"commentId": {
+						"type": "string",
+						"nullable": true
+					},
+					"uploadedById": {
+						"type": "string"
+					},
+					"createdAt": {
+						"anyOf": [
+							{
+								"type": "string",
+								"format": "date-time"
+							},
+							{
+								"type": "string"
+							}
+						]
+					}
+				},
+				"required": [
+					"id",
+					"filename",
+					"fileKey",
+					"mimeType",
+					"fileSize",
+					"taskId",
+					"commentId",
+					"uploadedById",
+					"createdAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Comment": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"content": {
+						"type": "string"
+					},
+					"taskId": {
+						"type": "string"
+					},
+					"authorId": {
+						"type": "string"
+					},
+					"author": {
+						"$ref": "#/components/schemas/CommentAuthor"
+					},
+					"createdAt": {
+						"anyOf": [
+							{
+								"type": "string",
+								"format": "date-time"
+							},
+							{
+								"type": "string"
+							}
+						]
+					},
+					"updatedAt": {
+						"anyOf": [
+							{
+								"type": "string",
+								"format": "date-time"
+							},
+							{
+								"type": "string"
+							}
+						]
+					},
+					"attachments": {
+						"items": {
+							"$ref": "#/components/schemas/Attachment"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"content",
+					"taskId",
+					"authorId",
+					"createdAt",
+					"updatedAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"SharedTask": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"title": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"dueDate": {
+						"anyOf": [
+							{
+								"type": "string",
+								"format": "date-time"
+							},
+							{
+								"type": "string"
+							}
+						]
+					},
+					"priority": {
+						"type": "string",
+						"enum": [
+							"LOW",
+							"MEDIUM",
+							"HIGH"
+						]
+					},
+					"status": {
+						"type": "string",
+						"enum": [
+							"TODO",
+							"IN_PROGRESS",
+							"COMPLETED"
+						]
+					},
+					"assignedUserId": {
+						"type": "string"
+					},
+					"createdAt": {
+						"anyOf": [
+							{
+								"type": "string",
+								"format": "date-time"
+							},
+							{
+								"type": "string"
+							}
+						]
+					},
+					"updatedAt": {
+						"anyOf": [
+							{
+								"type": "string",
+								"format": "date-time"
+							},
+							{
+								"type": "string"
+							}
+						]
+					},
+					"comments": {
+						"items": {
+							"$ref": "#/components/schemas/Comment"
+						},
+						"type": "array"
+					},
+					"attachments": {
+						"items": {
+							"$ref": "#/components/schemas/Attachment"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"title",
+					"priority",
+					"status",
+					"createdAt",
+					"updatedAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiResponse_SharedTask_": {
+				"properties": {
+					"status": {
+						"type": "string",
+						"enum": [
+							"success",
+							"error"
+						]
+					},
+					"message": {
+						"type": "string"
+					},
+					"data": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/SharedTask"
+							}
+						],
+						"nullable": true
+					},
+					"error": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"required": [
+					"status",
+					"message",
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"ApiResponse_Task_": {
 				"properties": {
 					"status": {
@@ -442,145 +702,6 @@
 				"required": [
 					"message",
 					"time"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"CommentAuthor": {
-				"properties": {
-					"id": {
-						"type": "string"
-					},
-					"email": {
-						"type": "string"
-					},
-					"name": {
-						"type": "string",
-						"nullable": true
-					},
-					"role": {
-						"$ref": "#/components/schemas/UserRole"
-					}
-				},
-				"required": [
-					"id",
-					"email",
-					"name",
-					"role"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Attachment": {
-				"properties": {
-					"id": {
-						"type": "string"
-					},
-					"filename": {
-						"type": "string"
-					},
-					"fileKey": {
-						"type": "string"
-					},
-					"presignedUrl": {
-						"type": "string"
-					},
-					"mimeType": {
-						"type": "string"
-					},
-					"fileSize": {
-						"type": "number",
-						"format": "double"
-					},
-					"taskId": {
-						"type": "string"
-					},
-					"commentId": {
-						"type": "string",
-						"nullable": true
-					},
-					"uploadedById": {
-						"type": "string"
-					},
-					"createdAt": {
-						"anyOf": [
-							{
-								"type": "string",
-								"format": "date-time"
-							},
-							{
-								"type": "string"
-							}
-						]
-					}
-				},
-				"required": [
-					"id",
-					"filename",
-					"fileKey",
-					"mimeType",
-					"fileSize",
-					"taskId",
-					"commentId",
-					"uploadedById",
-					"createdAt"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Comment": {
-				"properties": {
-					"id": {
-						"type": "string"
-					},
-					"content": {
-						"type": "string"
-					},
-					"taskId": {
-						"type": "string"
-					},
-					"authorId": {
-						"type": "string"
-					},
-					"author": {
-						"$ref": "#/components/schemas/CommentAuthor"
-					},
-					"createdAt": {
-						"anyOf": [
-							{
-								"type": "string",
-								"format": "date-time"
-							},
-							{
-								"type": "string"
-							}
-						]
-					},
-					"updatedAt": {
-						"anyOf": [
-							{
-								"type": "string",
-								"format": "date-time"
-							},
-							{
-								"type": "string"
-							}
-						]
-					},
-					"attachments": {
-						"items": {
-							"$ref": "#/components/schemas/Attachment"
-						},
-						"type": "array"
-					}
-				},
-				"required": [
-					"id",
-					"content",
-					"taskId",
-					"authorId",
-					"createdAt",
-					"updatedAt"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -1109,7 +1230,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_Task_"
+									"$ref": "#/components/schemas/ApiResponse_SharedTask_"
 								}
 							}
 						}
