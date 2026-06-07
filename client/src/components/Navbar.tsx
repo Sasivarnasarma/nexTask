@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 export function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
   return (
-    <nav className="h-16 border-b border-slate-200 flex items-center justify-between px-6 bg-white text-slate-800">
+    <nav className="h-16 border-b border-slate-200 flex items-center justify-between px-6 bg-background text-slate-800">
       <div className="flex items-center gap-4">
         <button
           type="button"

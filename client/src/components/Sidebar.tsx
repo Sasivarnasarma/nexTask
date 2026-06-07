@@ -23,10 +23,12 @@ export function Sidebar({ isOpen }: { isOpen: boolean }) {
   };
 
   return (
-    <aside className="w-full border-r border-slate-200 h-full py-6 bg-slate-50 flex flex-col justify-between transition-all duration-300">
+    // Changed bg-slate-50 to bg-background and border-slate-200 to border-border
+    <aside className="w-full border-r border-border h-full py-6 bg-background flex flex-col justify-between transition-all duration-300">
       <div className="flex flex-col gap-8">
         <div
-          className={`font-extrabold tracking-tight text-slate-900 transition-all duration-300 ${isOpen ? 'text-2xl px-6' : 'text-xl text-center'}`}
+          // Changed text-slate-900 to text-foreground
+          className={`font-extrabold tracking-tight text-foreground transition-all duration-300 ${isOpen ? 'text-2xl px-6' : 'text-xl text-center'}`}
         >
           {isOpen ? 'nexTask' : 'T'}
         </div>
@@ -34,7 +36,8 @@ export function Sidebar({ isOpen }: { isOpen: boolean }) {
         <div className="flex flex-col gap-6 px-3">
           <div className="flex flex-col gap-1.5">
             {isOpen && (
-              <div className="text-slate-400 font-bold text-[10px] tracking-widest uppercase mb-1.5 px-3">
+              // Changed text-slate-400 to text-muted-foreground
+              <div className="text-muted-foreground font-bold text-[10px] tracking-widest uppercase mb-1.5 px-3">
                 Main Menu
               </div>
             )}
@@ -43,12 +46,14 @@ export function Sidebar({ isOpen }: { isOpen: boolean }) {
               title="Dashboard"
               className={`flex items-center gap-3 ${isOpen ? 'px-4 py-2.5 justify-start' : 'h-10 w-10 justify-center mx-auto'} ${
                 isActive('/dashboard')
-                  ? 'bg-indigo-50 text-indigo-700 font-bold shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950'
+                  ? // Changed hardcoded indigo to theme primary colors
+                    'bg-primary/10 text-primary font-bold shadow-sm'
+                  : // Changed hover:bg-slate-100 to hover:bg-accent and text-slate-950 to text-accent-foreground
+                    'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
               } rounded-lg text-sm transition-all duration-200`}
             >
               <LayoutDashboard
-                className={`w-5 h-5 shrink-0 ${isActive('/dashboard') ? 'text-indigo-700' : 'text-slate-500'}`}
+                className={`w-5 h-5 shrink-0 ${isActive('/dashboard') ? 'text-primary' : 'text-muted-foreground'}`}
               />
               {isOpen && <span>Dashboard</span>}
             </Link>
@@ -56,7 +61,7 @@ export function Sidebar({ isOpen }: { isOpen: boolean }) {
 
           <div className="flex flex-col gap-1.5">
             {isOpen && (
-              <div className="text-slate-400 font-bold text-[10px] tracking-widest uppercase mb-1.5 px-3">
+              <div className="text-muted-foreground font-bold text-[10px] tracking-widest uppercase mb-1.5 px-3">
                 General
               </div>
             )}
@@ -65,12 +70,12 @@ export function Sidebar({ isOpen }: { isOpen: boolean }) {
               title="Settings"
               className={`flex items-center gap-3 ${isOpen ? 'px-4 py-2.5 justify-start' : 'h-10 w-10 justify-center mx-auto'} ${
                 isActive('/settings')
-                  ? 'bg-indigo-50 text-indigo-700 font-bold shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950'
+                  ? 'bg-primary/10 text-primary font-bold shadow-sm'
+                  : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
               } rounded-lg text-sm transition-all duration-200`}
             >
               <Settings
-                className={`w-5 h-5 shrink-0 ${isActive('/settings') ? 'text-indigo-700' : 'text-slate-500'}`}
+                className={`w-5 h-5 shrink-0 ${isActive('/settings') ? 'text-primary' : 'text-muted-foreground'}`}
               />
               {isOpen && <span>Settings</span>}
             </Link>
@@ -82,9 +87,10 @@ export function Sidebar({ isOpen }: { isOpen: boolean }) {
         <button
           onClick={handleLogout}
           title="Log Out"
-          className={`group flex items-center gap-3 w-full ${isOpen ? 'px-4 py-2.5 justify-start' : 'h-10 w-10 justify-center mx-auto'} text-slate-500 hover:bg-red-50 hover:text-red-600 rounded-lg font-bold text-sm transition-all duration-200`}
+          // Changed red hover states to use the theme's destructive color
+          className={`group flex items-center gap-3 w-full ${isOpen ? 'px-4 py-2.5 justify-start' : 'h-10 w-10 justify-center mx-auto'} text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg font-bold text-sm transition-all duration-200`}
         >
-          <LogOut className="w-5 h-5 shrink-0 text-slate-400 group-hover:text-red-600" />
+          <LogOut className="w-5 h-5 shrink-0 text-muted-foreground group-hover:text-destructive" />
           {isOpen && <span>Log Out</span>}
         </button>
       </div>
