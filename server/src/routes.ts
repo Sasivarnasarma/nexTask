@@ -57,13 +57,18 @@ const models: TsoaRoute.Models = {
         "type": {"ref":"User","validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Record_string.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"dataType":"string"},"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ApiResponse_UserProfile_": {
         "dataType": "refObject",
         "properties": {
-            "status": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["success"]},{"dataType":"enum","enums":["error"]}],"required":true},
+            "success": {"dataType":"boolean","required":true},
             "message": {"dataType":"string","required":true},
             "data": {"dataType":"union","subSchemas":[{"ref":"UserProfile"},{"dataType":"enum","enums":[null]}],"required":true},
-            "error": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "errors": {"dataType":"union","subSchemas":[{"ref":"Record_string.string_"},{"dataType":"enum","enums":[null]}],"required":true},
         },
         "additionalProperties": false,
     },
@@ -80,10 +85,10 @@ const models: TsoaRoute.Models = {
     "ApiResponse_null_": {
         "dataType": "refObject",
         "properties": {
-            "status": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["success"]},{"dataType":"enum","enums":["error"]}],"required":true},
+            "success": {"dataType":"boolean","required":true},
             "message": {"dataType":"string","required":true},
             "data": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":[null]},{"dataType":"enum","enums":[null]}],"required":true},
-            "error": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "errors": {"dataType":"union","subSchemas":[{"ref":"Record_string.string_"},{"dataType":"enum","enums":[null]}],"required":true},
         },
         "additionalProperties": false,
     },
@@ -110,7 +115,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "DefaultSelection_Prisma._36_TaskPayload_": {
         "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"assignedUserId":{"dataType":"string","required":true},"updatedAt":{"dataType":"datetime","required":true},"createdAt":{"dataType":"datetime","required":true},"status":{"ref":"_36_Enums.Status","required":true},"priority":{"ref":"_36_Enums.Priority","required":true},"dueDate":{"dataType":"datetime","required":true},"description":{"dataType":"string","required":true},"title":{"dataType":"string","required":true},"id":{"dataType":"string","required":true}},"validators":{}},
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"projectId":{"dataType":"string","required":true},"updatedAt":{"dataType":"datetime","required":true},"createdAt":{"dataType":"datetime","required":true},"position":{"dataType":"double","required":true},"tags":{"dataType":"array","array":{"dataType":"string"},"required":true},"status":{"ref":"_36_Enums.Status","required":true},"priority":{"ref":"_36_Enums.Priority","required":true},"dueDate":{"dataType":"datetime","required":true},"description":{"dataType":"string","required":true},"title":{"dataType":"string","required":true},"id":{"dataType":"string","required":true}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Task": {
@@ -121,10 +126,10 @@ const models: TsoaRoute.Models = {
     "ApiResponse_Task-Array_": {
         "dataType": "refObject",
         "properties": {
-            "status": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["success"]},{"dataType":"enum","enums":["error"]}],"required":true},
+            "success": {"dataType":"boolean","required":true},
             "message": {"dataType":"string","required":true},
             "data": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refAlias","ref":"Task"}},{"dataType":"enum","enums":[null]}],"required":true},
-            "error": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "errors": {"dataType":"union","subSchemas":[{"ref":"Record_string.string_"},{"dataType":"enum","enums":[null]}],"required":true},
         },
         "additionalProperties": false,
     },
@@ -181,7 +186,9 @@ const models: TsoaRoute.Models = {
             "dueDate": {"dataType":"union","subSchemas":[{"dataType":"datetime"},{"dataType":"string"}]},
             "priority": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["LOW"]},{"dataType":"enum","enums":["MEDIUM"]},{"dataType":"enum","enums":["HIGH"]}],"required":true},
             "status": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["TODO"]},{"dataType":"enum","enums":["IN_PROGRESS"]},{"dataType":"enum","enums":["COMPLETED"]}],"required":true},
-            "assignedUserId": {"dataType":"string"},
+            "tags": {"dataType":"array","array":{"dataType":"string"},"required":true},
+            "position": {"dataType":"double","required":true},
+            "projectId": {"dataType":"string","required":true},
             "createdAt": {"dataType":"union","subSchemas":[{"dataType":"datetime"},{"dataType":"string"}],"required":true},
             "updatedAt": {"dataType":"union","subSchemas":[{"dataType":"datetime"},{"dataType":"string"}],"required":true},
             "comments": {"dataType":"array","array":{"dataType":"refObject","ref":"Comment"}},
@@ -193,10 +200,10 @@ const models: TsoaRoute.Models = {
     "ApiResponse_SharedTask_": {
         "dataType": "refObject",
         "properties": {
-            "status": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["success"]},{"dataType":"enum","enums":["error"]}],"required":true},
+            "success": {"dataType":"boolean","required":true},
             "message": {"dataType":"string","required":true},
             "data": {"dataType":"union","subSchemas":[{"ref":"SharedTask"},{"dataType":"enum","enums":[null]}],"required":true},
-            "error": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "errors": {"dataType":"union","subSchemas":[{"ref":"Record_string.string_"},{"dataType":"enum","enums":[null]}],"required":true},
         },
         "additionalProperties": false,
     },
@@ -204,10 +211,10 @@ const models: TsoaRoute.Models = {
     "ApiResponse_Task_": {
         "dataType": "refObject",
         "properties": {
-            "status": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["success"]},{"dataType":"enum","enums":["error"]}],"required":true},
+            "success": {"dataType":"boolean","required":true},
             "message": {"dataType":"string","required":true},
             "data": {"dataType":"union","subSchemas":[{"ref":"Task"},{"dataType":"enum","enums":[null]}],"required":true},
-            "error": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "errors": {"dataType":"union","subSchemas":[{"ref":"Record_string.string_"},{"dataType":"enum","enums":[null]}],"required":true},
         },
         "additionalProperties": false,
     },
@@ -227,10 +234,12 @@ const models: TsoaRoute.Models = {
         "properties": {
             "title": {"dataType":"string","required":true},
             "description": {"dataType":"string"},
-            "assignedUserId": {"dataType":"string"},
+            "projectId": {"dataType":"string","required":true},
             "dueDate": {"dataType":"datetime"},
             "priority": {"ref":"Priority"},
             "status": {"ref":"Status"},
+            "tags": {"dataType":"array","array":{"dataType":"string"}},
+            "position": {"dataType":"double"},
         },
         "additionalProperties": false,
     },
@@ -240,10 +249,11 @@ const models: TsoaRoute.Models = {
         "properties": {
             "title": {"dataType":"string"},
             "description": {"dataType":"string"},
-            "assignedUserId": {"dataType":"string"},
             "dueDate": {"dataType":"datetime"},
             "priority": {"ref":"Priority"},
             "status": {"ref":"Status"},
+            "tags": {"dataType":"array","array":{"dataType":"string"}},
+            "position": {"dataType":"double"},
         },
         "additionalProperties": false,
     },
@@ -251,10 +261,10 @@ const models: TsoaRoute.Models = {
     "ApiResponse__publicKey-string__": {
         "dataType": "refObject",
         "properties": {
-            "status": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["success"]},{"dataType":"enum","enums":["error"]}],"required":true},
+            "success": {"dataType":"boolean","required":true},
             "message": {"dataType":"string","required":true},
             "data": {"dataType":"union","subSchemas":[{"dataType":"nestedObjectLiteral","nestedProperties":{"publicKey":{"dataType":"string","required":true}}},{"dataType":"enum","enums":[null]}],"required":true},
-            "error": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "errors": {"dataType":"union","subSchemas":[{"ref":"Record_string.string_"},{"dataType":"enum","enums":[null]}],"required":true},
         },
         "additionalProperties": false,
     },
@@ -289,10 +299,10 @@ const models: TsoaRoute.Models = {
     "ApiResponse_Comment-Array_": {
         "dataType": "refObject",
         "properties": {
-            "status": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["success"]},{"dataType":"enum","enums":["error"]}],"required":true},
+            "success": {"dataType":"boolean","required":true},
             "message": {"dataType":"string","required":true},
             "data": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refObject","ref":"Comment"}},{"dataType":"enum","enums":[null]}],"required":true},
-            "error": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "errors": {"dataType":"union","subSchemas":[{"ref":"Record_string.string_"},{"dataType":"enum","enums":[null]}],"required":true},
         },
         "additionalProperties": false,
     },
@@ -300,10 +310,10 @@ const models: TsoaRoute.Models = {
     "ApiResponse_Comment_": {
         "dataType": "refObject",
         "properties": {
-            "status": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["success"]},{"dataType":"enum","enums":["error"]}],"required":true},
+            "success": {"dataType":"boolean","required":true},
             "message": {"dataType":"string","required":true},
             "data": {"dataType":"union","subSchemas":[{"ref":"Comment"},{"dataType":"enum","enums":[null]}],"required":true},
-            "error": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "errors": {"dataType":"union","subSchemas":[{"ref":"Record_string.string_"},{"dataType":"enum","enums":[null]}],"required":true},
         },
         "additionalProperties": false,
     },
@@ -340,10 +350,10 @@ const models: TsoaRoute.Models = {
     "ApiResponse_AuthData_": {
         "dataType": "refObject",
         "properties": {
-            "status": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["success"]},{"dataType":"enum","enums":["error"]}],"required":true},
+            "success": {"dataType":"boolean","required":true},
             "message": {"dataType":"string","required":true},
             "data": {"dataType":"union","subSchemas":[{"ref":"AuthData"},{"dataType":"enum","enums":[null]}],"required":true},
-            "error": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "errors": {"dataType":"union","subSchemas":[{"ref":"Record_string.string_"},{"dataType":"enum","enums":[null]}],"required":true},
         },
         "additionalProperties": false,
     },
@@ -379,10 +389,10 @@ const models: TsoaRoute.Models = {
     "ApiResponse_Attachment-Array_": {
         "dataType": "refObject",
         "properties": {
-            "status": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["success"]},{"dataType":"enum","enums":["error"]}],"required":true},
+            "success": {"dataType":"boolean","required":true},
             "message": {"dataType":"string","required":true},
             "data": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refObject","ref":"Attachment"}},{"dataType":"enum","enums":[null]}],"required":true},
-            "error": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "errors": {"dataType":"union","subSchemas":[{"ref":"Record_string.string_"},{"dataType":"enum","enums":[null]}],"required":true},
         },
         "additionalProperties": false,
     },
@@ -390,10 +400,10 @@ const models: TsoaRoute.Models = {
     "ApiResponse_Attachment_": {
         "dataType": "refObject",
         "properties": {
-            "status": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["success"]},{"dataType":"enum","enums":["error"]}],"required":true},
+            "success": {"dataType":"boolean","required":true},
             "message": {"dataType":"string","required":true},
             "data": {"dataType":"union","subSchemas":[{"ref":"Attachment"},{"dataType":"enum","enums":[null]}],"required":true},
-            "error": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "errors": {"dataType":"union","subSchemas":[{"ref":"Record_string.string_"},{"dataType":"enum","enums":[null]}],"required":true},
         },
         "additionalProperties": false,
     },
@@ -410,10 +420,10 @@ const models: TsoaRoute.Models = {
     "ApiResponse_GetPresignedUrlResponse_": {
         "dataType": "refObject",
         "properties": {
-            "status": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["success"]},{"dataType":"enum","enums":["error"]}],"required":true},
+            "success": {"dataType":"boolean","required":true},
             "message": {"dataType":"string","required":true},
             "data": {"dataType":"union","subSchemas":[{"ref":"GetPresignedUrlResponse"},{"dataType":"enum","enums":[null]}],"required":true},
-            "error": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "errors": {"dataType":"union","subSchemas":[{"ref":"Record_string.string_"},{"dataType":"enum","enums":[null]}],"required":true},
         },
         "additionalProperties": false,
     },
@@ -541,6 +551,7 @@ export function RegisterRoutes(app: Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsTaskController_getTasks: Record<string, TsoaRoute.ParameterSchema> = {
+                projectId: {"in":"query","name":"projectId","dataType":"string"},
         };
         app.get('/tasks',
             authenticateMiddleware([{"jwt":[]}]),

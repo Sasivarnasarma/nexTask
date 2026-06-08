@@ -39,11 +39,16 @@ app.use((err: unknown, req: Request, res: Response, _next: NextFunction) => {
     err.name === 'ValidateError' &&
     'fields' in err
   ) {
+    const fields = (err as { fields: Record<string, any> }).fields;
+    const errors: Record<string, string> = {};
+    for (const key of Object.keys(fields)) {
+      errors[key] = fields[key].message || 'Invalid validation format';
+    }
     return res.status(422).json({
-      status: 'error',
+      success: false,
       message: 'Request validation failed.',
-      data: (err as { fields: Record<string, unknown> }).fields,
-      error: 'VALIDATION_ERROR',
+      data: null,
+      errors,
     });
   }
 

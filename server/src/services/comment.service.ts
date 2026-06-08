@@ -78,18 +78,25 @@ export const postComment = async (
     };
   });
 
-  // Send push notification to assigned user if they are not the author
-  if (task.assignedUserId && task.assignedUserId !== userId) {
-    const author = comment.author;
-    const authorName = author?.name || author?.email || 'A teammate';
+  // Send push notification to all assigned users (except the author of the comment)
+  const assignments = await prisma.taskAssignment.findMany({
+    where: { taskId },
+    select: { userId: true },
+  });
 
-    PushService.sendNotificationToUser(task.assignedUserId, {
-      title: 'New Comment on Task',
-      body: `${authorName} commented: "${content.substring(0, 60)}${content.length > 60 ? '...' : ''}"`,
-      data: { url: `/tasks/${taskId}` },
-    }).catch((err) => {
-      console.error('Failed to dispatch comment push notification:', err);
-    });
+  const author = comment.author;
+  const authorName = author?.name || author?.email || 'A teammate';
+
+  for (const assign of assignments) {
+    if (assign.userId !== userId) {
+      PushService.sendNotificationToUser(assign.userId, {
+        title: 'New Comment on Task',
+        body: `${authorName} commented: "${content.substring(0, 60)}${content.length > 60 ? '...' : ''}"`,
+        data: { url: `/tasks/${taskId}` },
+      }).catch((err) => {
+        console.error('Failed to dispatch comment push notification:', err);
+      });
+    }
   }
 
   return comment;

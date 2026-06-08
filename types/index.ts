@@ -19,7 +19,9 @@ export interface Task {
   dueDate?: Date | string;
   priority: 'LOW' | 'MEDIUM' | 'HIGH';
   status: 'TODO' | 'IN_PROGRESS' | 'COMPLETED';
-  assignedUserId?: string;
+  tags: string[];
+  position: number;
+  projectId: string;
   createdAt: Date | string;
   updatedAt: Date | string;
   comments?: Comment[];
@@ -111,11 +113,38 @@ export function validatePasswordComplexity(password: string): PasswordValidation
 
 // ─── API Response Wrapper ─────────────────────────────────────────────────────
 
-export interface ApiResponse<T = null> {
-  status: 'success' | 'error';
+export interface ApiResponse<T = any> {
+  success: boolean;
   message: string;
   data: T | null;
-  error: string | null;
+  errors: Record<string, string> | null;
+}
+
+export type ProjectStatus = 'ACTIVE' | 'ARCHIVED' | 'COMPLETED';
+export type ProjectRole = 'PROJECT_MANAGER' | 'COLLABORATOR';
+
+export interface Project {
+  id: string;
+  name: string;
+  description: string | null;
+  status: ProjectStatus;
+  endDate: Date | string | null;
+  ownerId: string;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+}
+
+export interface ProjectMember {
+  projectId: string;
+  userId: string;
+  role: ProjectRole;
+  joinedAt: Date | string;
+}
+
+export interface TaskAssignment {
+  taskId: string;
+  userId: string;
+  assignedAt: Date | string;
 }
 
 // ─── Web Push Subscription Payloads ───────────────────────────────────────────

@@ -1,4 +1,4 @@
-# **nexTask - Consolidated API Specification**
+# **nexTask - API Specification**
 
 This document serves as the single source of truth for the nexTask Collaborative Task Management System (TMS) API. It consolidates all details, incorporating the direct-to-S3 upload process, VAPID push notification subscriptions alongside database-stored notifications, Argon2 password hashing, and support for multiple projects and multiple task assignees.
 
@@ -10,8 +10,8 @@ The nexTask API is a secure RESTful API built on Node.js/Express (TypeScript), w
 
 ### **Base URL**
 
-- **Development:** `http://localhost:3000/api/v1`
-- **Production:** `https://api.nextask.com/api/v1` _(or configured production domain)_
+- **Development:** `http://localhost:3000`
+- **Production:** `https://api.nextask.com` _(or configured production domain)_
 
 ### **Technology Stack**
 
@@ -31,6 +31,7 @@ The nexTask API is a secure RESTful API built on Node.js/Express (TypeScript), w
 ### **Developer Environment Configuration (.env Templates)**
 
 #### **Backend Config (`server/.env`)**
+
 ```env
 # Server Configuration
 PORT=3000
@@ -64,8 +65,9 @@ VAPID_PRIVATE_KEY="your-vapid-private-key"
 ```
 
 #### **Frontend Config (`client/.env`)**
+
 ```env
-VITE_API_URL="http://localhost:3000/api/v1"
+VITE_API_URL="http://localhost:3000"
 VITE_WS_URL="http://localhost:3000"
 VITE_VAPID_PUBLIC_KEY="your-vapid-public-key"
 ```
@@ -129,6 +131,7 @@ _Example (Form Validation Error):_
   }
 }
 ```
+
 ```
 
 ### **Standard HTTP Status Codes**
@@ -148,28 +151,30 @@ _Example (Form Validation Error):_
 ### **Authentication and Authorization Flow**
 
 ```
+
 User Login
-  ↓
+↓
 Submit Email and Password
-  ↓
+↓
 Backend Validates Credentials (Argon2 Verify)
-  ↓
+↓
 JWT Token Generated (contains userId, role, mustResetPassword)
-  ↓
+↓
 Token Returned to Client (stored in local storage / memory)
-  ↓
+↓
 Client Sends Token in Authorization Header (Authorization: Bearer <jwt_token>)
-  ↓
+↓
 Backend Validates JWT Middleware
-  ↓
+↓
 Access Granted
-```
+
+````
 
 #### **Authorization Header Format**
 
 ```http
 Authorization: Bearer <jwt_token>
-```
+````
 
 _Example:_
 
@@ -254,14 +259,17 @@ Permissions:
 ### **Frontend-Only System Capabilities**
 
 #### **1. Markdown Rendering**
+
 - **Descriptions:** Task descriptions render using a React Markdown processor component.
 - **Comments:** User comments render with basic markdown (bold, italic, list formatting, inline code).
 
 #### **2. Task Calendar View**
+
 - A weekly and monthly calendar layout plotting task items based on their `dueDate` values.
 - Supported interactions include clicking a calendar task card to open the standard task detail modal.
 
 #### **3. Basic Dashboard Analytics**
+
 - Graphical visualizations summarizing task completion percentage rates, task priorities, and status distributions utilizing client-side chart libraries.
 
 ---
@@ -277,7 +285,7 @@ Permissions:
 
 #### **1. Login User**
 
-- **Endpoint:** `POST /api/v1/auth/login`
+- **Endpoint:** `POST /auth/login`
 - **Access:** Public
 - **Request Body:**
   ```json
@@ -298,13 +306,7 @@ Permissions:
     "message": "Login successful",
     "data": {
       "token": "jwt_access_token",
-      "user": {
-        "id": "uuid-john-doe",
-        "name": "John Doe",
-        "email": "john@example.com",
-        "role": "PROJECT_MANAGER",
-        "mustResetPassword": false
-      }
+      "mustResetPassword": false
     },
     "errors": null
   }
@@ -335,7 +337,7 @@ Permissions:
 
 #### **2. Logout User**
 
-- **Endpoint:** `POST /api/v1/auth/logout`
+- **Endpoint:** `POST /auth/logout`
 - **Access:** Authenticated Users (JWT Required)
 - **Request Body:** None
 - **Success Response (200 OK):**
@@ -362,7 +364,7 @@ Permissions:
 
 #### **3. Get Current User**
 
-- **Endpoint:** `GET /api/v1/auth/me` _(Maps to retrieve current user)_
+- **Endpoint:** `GET /users/me`
 - **Access:** Authenticated Users (JWT Required)
 - **Request Body:** None
 - **Success Response (200 OK):**
@@ -384,7 +386,7 @@ Permissions:
 
 #### **4. Change Password**
 
-- **Endpoint:** `PUT /api/v1/auth/change-password` _(Also mapped to POST /api/v1/users/me/change-password)_
+- **Endpoint:** `POST /users/me/change-password`
 - **Access:** Authenticated Users (JWT Required)
 - **Request Body:**
   ```json
@@ -429,7 +431,7 @@ Permissions:
 
 #### **5. Forgot Password**
 
-- **Endpoint:** `POST /api/v1/auth/forgot-password`
+- **Endpoint:** `POST /auth/forgot-password`
 - **Access:** Public
 - **Request Body:**
   ```json
@@ -463,7 +465,7 @@ Permissions:
 
 #### **6. Reset Password**
 
-- **Endpoint:** `POST /api/v1/auth/reset-password`
+- **Endpoint:** `POST /auth/reset-password`
 - **Access:** Public
 - **Request Body:**
   ```json
@@ -501,7 +503,7 @@ Permissions:
 
 #### **7. First Login Password Setup**
 
-- **Endpoint:** `POST /api/v1/auth/first-login-reset`
+- **Endpoint:** `POST /auth/first-login-reset`
 - **Access:** Authenticated Users (JWT Required)
 - **Request Body:**
   ```json
@@ -539,7 +541,7 @@ Permissions:
 
 #### **8. Refresh Session**
 
-- **Endpoint:** `POST /api/v1/auth/refresh-token`
+- **Endpoint:** `POST /auth/refresh-token`
 - **Access:** Authenticated Users (Refresh Token Required)
 - **Request Body:** None
 - **Success Response (200 OK):**
@@ -575,7 +577,7 @@ Permissions:
 
 #### **1. Create User**
 
-- **Endpoint:** `POST /api/v1/users`
+- **Endpoint:** `POST /users`
 - **Access:** Administrator
 - **Request Body:**
   ```json
@@ -644,7 +646,7 @@ Permissions:
 
 #### **2. View All Users**
 
-- **Endpoint:** `GET /api/v1/users`
+- **Endpoint:** `GET /users`
 - **Access:** Administrator
 - **Query Parameters:**
   - `page`: Integer (default 1)
@@ -690,7 +692,7 @@ Permissions:
 
 #### **3. View User**
 
-- **Endpoint:** `GET /api/v1/users/:id`
+- **Endpoint:** `GET /users/:id`
 - **Access:** Administrator
 - **Path Parameters:**
   - `id`: User ID (UUID string)
@@ -723,7 +725,7 @@ Permissions:
 
 #### **4. Update User**
 
-- **Endpoint:** `PUT /api/v1/users/:id`
+- **Endpoint:** `PUT /users/:id`
 - **Access:** Administrator
 - **Path Parameters:**
   - `id`: User ID
@@ -753,7 +755,7 @@ Permissions:
 
 #### **5. Deactivate User**
 
-- **Endpoint:** `PATCH /api/v1/users/:id/deactivate`
+- **Endpoint:** `PATCH /users/:id/deactivate`
 - **Access:** Administrator
 - **System Behavior:** Sets user `isActive = false`, preventing active logins.
 - **Success Response (200 OK):**
@@ -768,7 +770,7 @@ Permissions:
 
 #### **6. Activate User**
 
-- **Endpoint:** `PATCH /api/v1/users/:id/activate`
+- **Endpoint:** `PATCH /users/:id/activate`
 - **Access:** Administrator
 - **System Behavior:** Sets user `isActive = true`, restoring login rights.
 - **Success Response (200 OK):**
@@ -783,7 +785,7 @@ Permissions:
 
 #### **7. Delete User**
 
-- **Endpoint:** `DELETE /api/v1/users/:id`
+- **Endpoint:** `DELETE /users/:id`
 - **Access:** Administrator
 - **Validation Rules:**
   - User must exist.
@@ -801,7 +803,7 @@ Permissions:
 
 #### **8. Search Users**
 
-- **Endpoint:** `GET /api/v1/users/search`
+- **Endpoint:** `GET /users/search`
 - **Access:** Administrator
 - **Query Parameters:** `?q=john`
 - **Success Response (200 OK):**
@@ -822,7 +824,7 @@ Permissions:
 
 #### **9. Filter Users**
 
-- **Endpoint:** `GET /api/v1/users/filter`
+- **Endpoint:** `GET /users/filter`
 - **Access:** Administrator
 - **Query Parameters:** `?role=Project Manager&status=active`
 - **Success Response (200 OK):**
@@ -844,7 +846,7 @@ Permissions:
 
 #### **1. Create Project**
 
-- **Endpoint:** `POST /api/v1/projects`
+- **Endpoint:** `POST /projects`
 - **Access:** Administrator, Project Manager
 - **Request Body:**
   ```json
@@ -904,7 +906,7 @@ Permissions:
 
 #### **2. View All Projects**
 
-- **Endpoint:** `GET /api/v1/projects`
+- **Endpoint:** `GET /projects`
 - **Access:** Administrator, Project Manager, Collaborator (Filtered to memberships)
 - **Query Parameters:** `?page=1&limit=10&status=ACTIVE`
 - **Success Response (200 OK):**
@@ -927,7 +929,7 @@ Permissions:
 
 #### **3. View Project**
 
-- **Endpoint:** `GET /api/v1/projects/:id`
+- **Endpoint:** `GET /projects/:id`
 - **Access:** Administrator, Project Manager, Project Member
 - **Path Parameters:**
   - `id`: Project ID
@@ -960,7 +962,7 @@ Permissions:
 
 #### **4. Update Project**
 
-- **Endpoint:** `PUT /api/v1/projects/:id`
+- **Endpoint:** `PUT /projects/:id`
 - **Access:** Administrator, Project Manager
 - **Path Parameters:**
   - `id`: Project ID
@@ -989,7 +991,7 @@ Permissions:
 
 #### **5. Change Project Status**
 
-- **Endpoint:** `PATCH /api/v1/projects/:id/status`
+- **Endpoint:** `PATCH /projects/:id/status`
 - **Access:** Administrator, Project Manager
 - **Request Body:**
   ```json
@@ -1010,7 +1012,7 @@ Permissions:
 
 #### **6. Archive Project**
 
-- **Endpoint:** `PATCH /api/v1/projects/:id/archive`
+- **Endpoint:** `PATCH /projects/:id/archive`
 - **Access:** Administrator, Project Manager
 - **System Behavior:** Sets project status to `ARCHIVED`.
 - **Success Response (200 OK):**
@@ -1025,7 +1027,7 @@ Permissions:
 
 #### **7. Complete Project**
 
-- **Endpoint:** `PATCH /api/v1/projects/:id/complete`
+- **Endpoint:** `PATCH /projects/:id/complete`
 - **Access:** Administrator, Project Manager
 - **System Behavior:** Sets project status to `COMPLETED`.
 - **Success Response (200 OK):**
@@ -1040,7 +1042,7 @@ Permissions:
 
 #### **8. Delete Project**
 
-- **Endpoint:** `DELETE /api/v1/projects/:id`
+- **Endpoint:** `DELETE /projects/:id`
 - **Access:** Administrator Only
 - **Validation Rules:**
   - Project must exist.
@@ -1058,7 +1060,7 @@ Permissions:
 
 #### **9. Search Projects**
 
-- **Endpoint:** `GET /api/v1/projects/search`
+- **Endpoint:** `GET /projects/search`
 - **Access:** Administrator, Project Manager
 - **Query Parameters:** `?q=task`
 - **Success Response (200 OK):**
@@ -1073,7 +1075,7 @@ Permissions:
 
 #### **10. Filter Projects**
 
-- **Endpoint:** `GET /api/v1/projects/filter`
+- **Endpoint:** `GET /projects/filter`
 - **Access:** Administrator, Project Manager
 - **Query Parameters:** `?status=ACTIVE`
 - **Success Response (200 OK):**
@@ -1095,7 +1097,7 @@ Permissions:
 
 #### **1. Add Member to Project**
 
-- **Endpoint:** `POST /api/v1/projects/:id/members`
+- **Endpoint:** `POST /projects/:id/members`
 - **Access:** Administrator, Project Manager
 - **Path Parameters:**
   - `id`: Project ID
@@ -1147,7 +1149,7 @@ Permissions:
 
 #### **2. View Project Members**
 
-- **Endpoint:** `GET /api/v1/projects/:id/members`
+- **Endpoint:** `GET /projects/:id/members`
 - **Access:** Administrator, Project Manager, Project Member
 - **Path Parameters:**
   - `id`: Project ID
@@ -1170,7 +1172,7 @@ Permissions:
 
 #### **3. View Member Details**
 
-- **Endpoint:** `GET /api/v1/projects/:id/members/:userId`
+- **Endpoint:** `GET /projects/:id/members/:userId`
 - **Access:** Administrator, Project Manager
 - **Path Parameters:**
   - `id`: Project ID
@@ -1192,7 +1194,7 @@ Permissions:
 
 #### **4. Update Member Role**
 
-- **Endpoint:** `PATCH /api/v1/projects/:id/members/:userId`
+- **Endpoint:** `PATCH /projects/:id/members/:userId`
 - **Access:** Administrator, Project Manager
 - **Path Parameters:**
   - `id`: Project ID
@@ -1216,7 +1218,7 @@ Permissions:
 
 #### **5. Assign Project Manager**
 
-- **Endpoint:** `PATCH /api/v1/projects/:id/members/:userId/project-manager`
+- **Endpoint:** `PATCH /projects/:id/members/:userId/project-manager`
 - **Access:** Administrator Only
 - **Success Response (200 OK):**
   ```json
@@ -1230,7 +1232,7 @@ Permissions:
 
 #### **6. Assign Collaborator**
 
-- **Endpoint:** `PATCH /api/v1/projects/:id/members/:userId/collaborator`
+- **Endpoint:** `PATCH /projects/:id/members/:userId/collaborator`
 - **Access:** Administrator, Project Manager
 - **Success Response (200 OK):**
   ```json
@@ -1244,7 +1246,7 @@ Permissions:
 
 #### **7. Remove Member from Project**
 
-- **Endpoint:** `DELETE /api/v1/projects/:id/members/:userId`
+- **Endpoint:** `DELETE /projects/:id/members/:userId`
 - **Access:** Administrator, Project Manager
 - **Path Parameters:**
   - `id`: Project ID
@@ -1282,7 +1284,7 @@ Permissions:
 
 #### **1. Create Task**
 
-- **Endpoint:** `POST /api/v1/tasks`
+- **Endpoint:** `POST /tasks`
 - **Access:** Project Manager
 - **Request Body:**
   ```json
@@ -1349,7 +1351,7 @@ Permissions:
 
 #### **2. View All Tasks**
 
-- **Endpoint:** `GET /api/v1/tasks`
+- **Endpoint:** `GET /tasks`
 - **Access:** Project Manager, Collaborator
 - **Query Parameters:** `?page=1&limit=10&status=TODO&priority=HIGH&tags=Backend`
 - **Success Response (200 OK):**
@@ -1373,7 +1375,7 @@ Permissions:
 
 #### **3. View Task**
 
-- **Endpoint:** `GET /api/v1/tasks/:id`
+- **Endpoint:** `GET /tasks/:id`
 - **Access:** Project Manager, Collaborator
 - **Path Parameters:**
   - `id`: Task ID
@@ -1398,7 +1400,7 @@ Permissions:
 
 #### **4. Update Task**
 
-- **Endpoint:** `PUT /api/v1/tasks/:id`
+- **Endpoint:** `PUT /tasks/:id`
 - **Access:** Project Manager
 - **Path Parameters:**
   - `id`: Task ID
@@ -1432,7 +1434,7 @@ Permissions:
 
 #### **5. Delete Task**
 
-- **Endpoint:** `DELETE /api/v1/tasks/:id`
+- **Endpoint:** `DELETE /tasks/:id`
 - **Access:** Project Manager
 - **Validation Rules:**
   - Task must exist.
@@ -1449,7 +1451,7 @@ Permissions:
 
 #### **6. Change Task Status**
 
-- **Endpoint:** `PATCH /api/v1/tasks/:id/status`
+- **Endpoint:** `PATCH /tasks/:id/status`
 - **Access:** Project Manager, Collaborator
 - **Request Body:**
   ```json
@@ -1473,7 +1475,7 @@ Permissions:
 
 #### **7. Change Task Priority**
 
-- **Endpoint:** `PATCH /api/v1/tasks/:id/priority`
+- **Endpoint:** `PATCH /tasks/:id/priority`
 - **Access:** Project Manager
 - **Request Body:**
   ```json
@@ -1494,7 +1496,7 @@ Permissions:
 
 #### **8. Set Due Date**
 
-- **Endpoint:** `PATCH /api/v1/tasks/:id/due-date`
+- **Endpoint:** `PATCH /tasks/:id/due-date`
 - **Access:** Project Manager
 - **Request Body:**
   ```json
@@ -1514,7 +1516,7 @@ Permissions:
 
 #### **9. Search Tasks**
 
-- **Endpoint:** `GET /api/v1/tasks/search`
+- **Endpoint:** `GET /tasks/search`
 - **Access:** Project Manager, Collaborator
 - **Query Parameters:** `?q=authentication`
 - **Success Response (200 OK):**
@@ -1529,7 +1531,7 @@ Permissions:
 
 #### **10. Filter Tasks**
 
-- **Endpoint:** `GET /api/v1/tasks/filter`
+- **Endpoint:** `GET /tasks/filter`
 - **Access:** Project Manager, Collaborator
 - **Query Parameters:** `?status=TODO&priority=HIGH&projectId=uuid-project-1&tags=Backend`
 - **Success Response (200 OK):**
@@ -1544,7 +1546,7 @@ Permissions:
 
 #### **11. Track Task Progress**
 
-- **Endpoint:** `GET /api/v1/tasks/:id/progress`
+- **Endpoint:** `GET /tasks/:id/progress`
 - **Access:** Project Manager, Collaborator
 - **Success Response (200 OK):**
   ```json
@@ -1569,7 +1571,7 @@ Permissions:
 
 #### **1. Assign Task**
 
-- **Endpoint:** `POST /api/v1/tasks/:id/assignments`
+- **Endpoint:** `POST /tasks/:id/assignments`
 - **Access:** Project Manager
 - **Path Parameters:**
   - `id`: Task ID
@@ -1594,7 +1596,7 @@ Permissions:
 
 #### **2. Reassign Task**
 
-- **Endpoint:** `PUT /api/v1/tasks/:id/assignments/:userId`
+- **Endpoint:** `PUT /tasks/:id/assignments/:userId`
 - **Access:** Project Manager
 - **Path Parameters:**
   - `id`: Task ID
@@ -1617,7 +1619,7 @@ Permissions:
 
 #### **3. Remove Assignment**
 
-- **Endpoint:** `DELETE /api/v1/tasks/:id/assignments/:userId`
+- **Endpoint:** `DELETE /tasks/:id/assignments/:userId`
 - **Access:** Project Manager
 - **Path Parameters:**
   - `id`: Task ID
@@ -1634,7 +1636,7 @@ Permissions:
 
 #### **4. View Task Assignees**
 
-- **Endpoint:** `GET /api/v1/tasks/:id/assignments`
+- **Endpoint:** `GET /tasks/:id/assignments`
 - **Access:** Project Manager
 - **Path Parameters:**
   - `id`: Task ID
@@ -1656,7 +1658,7 @@ Permissions:
 
 #### **5. View Assigned Tasks**
 
-- **Endpoint:** `GET /api/v1/users/:id/tasks`
+- **Endpoint:** `GET /users/:id/tasks`
 - **Access:** Project Manager, Collaborator
 - **Path Parameters:**
   - `id`: User ID
@@ -1678,7 +1680,7 @@ Permissions:
 
 #### **6. Track Assignment History**
 
-- **Endpoint:** `GET /api/v1/tasks/:id/assignment-history`
+- **Endpoint:** `GET /tasks/:id/assignment-history`
 - **Access:** Project Manager
 - **Path Parameters:**
   - `id`: Task ID
@@ -1707,7 +1709,7 @@ Permissions:
 
 #### **1. Add Comment**
 
-- **Endpoint:** `POST /api/v1/tasks/:id/comments`
+- **Endpoint:** `POST /tasks/:id/comments`
 - **Access:** Project Manager, Collaborator
 - **Path Parameters:**
   - `id`: Task ID
@@ -1756,7 +1758,7 @@ Permissions:
 
 #### **2. View Comments**
 
-- **Endpoint:** `GET /api/v1/tasks/:id/comments`
+- **Endpoint:** `GET /tasks/:id/comments`
 - **Access:** Project Manager, Collaborator
 - **Path Parameters:**
   - `id`: Task ID
@@ -1780,7 +1782,7 @@ Permissions:
 
 #### **3. Update Comment**
 
-- **Endpoint:** `PUT /api/v1/comments/:id`
+- **Endpoint:** `PUT /comments/:id`
 - **Access:** Comment Owner, Administrator
 - **Path Parameters:**
   - `id`: Comment ID
@@ -1825,7 +1827,7 @@ Permissions:
 
 #### **4. Delete Comment**
 
-- **Endpoint:** `DELETE /api/v1/comments/:id`
+- **Endpoint:** `DELETE /comments/:id`
 - **Access:** Comment Owner, Administrator
 - **Path Parameters:**
   - `id`: Comment ID
@@ -1851,7 +1853,7 @@ Permissions:
 
 #### **5. View Comment History**
 
-- **Endpoint:** `GET /api/v1/comments/:id/history`
+- **Endpoint:** `GET /comments/:id/history`
 - **Access:** Administrator, Project Manager
 - **Path Parameters:**
   - `id`: Comment ID
@@ -1873,7 +1875,7 @@ Permissions:
 
 #### **6. View Task Discussions**
 
-- **Endpoint:** `GET /api/v1/tasks/:id/discussions`
+- **Endpoint:** `GET /tasks/:id/discussions`
 - **Access:** Project Manager, Collaborator
 - **Success Response (200 OK):**
   ```json
@@ -1899,15 +1901,15 @@ Permissions:
 
 To prevent server throughput bottlenecking:
 
-1. Client requests presigned upload URL: `POST /api/v1/attachments/presigned-url`
+1. Client requests presigned upload URL: `POST /attachments/presigned-url`
 2. Server generates presigned PUT URL and `fileKey`.
 3. Client PUTs file object binary directly to the S3 bucket URL.
-4. Client logs metadata on task: `POST /api/v1/tasks/:id/attachments`
+4. Client logs metadata on task: `POST /tasks/:id/attachments`
 5. Viewing and downloads are served using short-lived (15 minutes) GET URLs returned in task payload queries.
 
 #### **1. Request Presigned Upload URL**
 
-- **Endpoint:** `POST /api/v1/attachments/presigned-url`
+- **Endpoint:** `POST /attachments/presigned-url`
 - **Access:** Project Manager, Collaborator
 - **Request Body:**
   ```json
@@ -1932,7 +1934,7 @@ To prevent server throughput bottlenecking:
 
 #### **2. Register Uploaded Attachment Metadata**
 
-- **Endpoint:** `POST /api/v1/tasks/:id/attachments`
+- **Endpoint:** `POST /tasks/:id/attachments`
 - **Access:** Project Manager, Collaborator
 - **Path Parameters:**
   - `id`: Task ID
@@ -1968,7 +1970,7 @@ To prevent server throughput bottlenecking:
 
 #### **3. View Attachment Metadata**
 
-- **Endpoint:** `GET /api/v1/attachments/:id`
+- **Endpoint:** `GET /attachments/:id`
 - **Access:** Project Manager, Collaborator
 - **Path Parameters:**
   - `id`: Attachment ID
@@ -1989,7 +1991,7 @@ To prevent server throughput bottlenecking:
 
 #### **4. Download Attachment**
 
-- **Endpoint:** `GET /api/v1/attachments/:id/download`
+- **Endpoint:** `GET /attachments/:id/download`
 - **Access:** Project Manager, Collaborator
 - **Success Response (200 OK):**
   Returns redirect stream or presigned download URL endpoint structure.
@@ -2006,7 +2008,7 @@ To prevent server throughput bottlenecking:
 
 #### **5. Delete Attachment**
 
-- **Endpoint:** `DELETE /api/v1/attachments/:id`
+- **Endpoint:** `DELETE /attachments/:id`
 - **Access:** Attachment Owner, PM, Admin
 - **System Behavior:**
   - Delete object from physical S3 storage.
@@ -2024,7 +2026,7 @@ To prevent server throughput bottlenecking:
 
 #### **6. View All Attachments on Task**
 
-- **Endpoint:** `GET /api/v1/tasks/:id/attachments`
+- **Endpoint:** `GET /tasks/:id/attachments`
 - **Access:** Project Manager, Collaborator
 - **Success Response (200 OK):**
   ```json
@@ -2044,7 +2046,7 @@ To prevent server throughput bottlenecking:
 
 #### **7. Manage Task Files**
 
-- **Endpoint:** `GET /api/v1/tasks/:id/files`
+- **Endpoint:** `GET /tasks/:id/files`
 - **Success Response (200 OK):**
   ```json
   {
@@ -2072,7 +2074,7 @@ To prevent server throughput bottlenecking:
 
 #### **1. View Notifications**
 
-- **Endpoint:** `GET /api/v1/notifications`
+- **Endpoint:** `GET /notifications`
 - **Query Parameters:** `?page=1&limit=10&isRead=false`
 - **Success Response (200 OK):**
   ```json
@@ -2094,7 +2096,7 @@ To prevent server throughput bottlenecking:
 
 #### **2. View Notification History**
 
-- **Endpoint:** `GET /api/v1/notifications/history`
+- **Endpoint:** `GET /notifications/history`
 - **Success Response (200 OK):**
   ```json
   {
@@ -2107,7 +2109,7 @@ To prevent server throughput bottlenecking:
 
 #### **3. Mark Notification as Read**
 
-- **Endpoint:** `PATCH /api/v1/notifications/:id/read`
+- **Endpoint:** `PATCH /notifications/:id/read`
 - **System Behavior:** Sets notification `isRead = true`.
 - **Success Response (200 OK):**
   ```json
@@ -2121,7 +2123,7 @@ To prevent server throughput bottlenecking:
 
 #### **4. Mark All Notifications as Read**
 
-- **Endpoint:** `PATCH /api/v1/notifications/read-all`
+- **Endpoint:** `PATCH /notifications/read-all`
 - **Success Response (200 OK):**
   ```json
   {
@@ -2134,7 +2136,7 @@ To prevent server throughput bottlenecking:
 
 #### **5. Get Unread Notification Count**
 
-- **Endpoint:** `GET /api/v1/notifications/unread-count`
+- **Endpoint:** `GET /notifications/unread-count`
 - **Success Response (200 OK):**
   ```json
   {
@@ -2149,7 +2151,7 @@ To prevent server throughput bottlenecking:
 
 #### **6. Delete Notification**
 
-- **Endpoint:** `DELETE /api/v1/notifications/:id`
+- **Endpoint:** `DELETE /notifications/:id`
 - **Success Response (200 OK):**
   ```json
   {
@@ -2162,7 +2164,7 @@ To prevent server throughput bottlenecking:
 
 #### **7. Get VAPID Public Key**
 
-- **Endpoint:** `GET /api/v1/push/key`
+- **Endpoint:** `GET /push/key`
 - **Success Response (200 OK):**
   ```json
   {
@@ -2177,7 +2179,7 @@ To prevent server throughput bottlenecking:
 
 #### **8. Subscribe to Push Notifications**
 
-- **Endpoint:** `POST /api/v1/push/subscribe`
+- **Endpoint:** `POST /push/subscribe`
 - **Request Body:**
   ```json
   {
@@ -2200,7 +2202,7 @@ To prevent server throughput bottlenecking:
 
 #### **9. Unsubscribe from Push Notifications**
 
-- **Endpoint:** `POST /api/v1/push/unsubscribe`
+- **Endpoint:** `POST /push/unsubscribe`
 - **Request Body:**
   ```json
   {
@@ -2237,7 +2239,7 @@ For scalability, efficiency, and security, clients do not receive a global feed 
 3. **Event Broadcasting:**
    - When a task action occurs (e.g., status changed on the Kanban board, new comment posted), the update is broadcasted only to the relevant project room:
      ```typescript
-     io.to(`project:${projectId}`).emit("STATUS_CHANGED", payload);
+     io.to(`project:${projectId}`).emit('STATUS_CHANGED', payload);
      ```
    - This ensures data isolation and that only project members receive notifications.
 
@@ -2295,7 +2297,7 @@ For scalability, efficiency, and security, clients do not receive a global feed 
 
 #### **1. View Task Activity Log**
 
-- **Endpoint:** `GET /api/v1/tasks/:id/activity`
+- **Endpoint:** `GET /tasks/:id/activity`
 - **Query Parameters:** `?page=1&limit=10&action=UPDATED`
 - **Success Response (200 OK):**
   ```json
@@ -2319,7 +2321,7 @@ For scalability, efficiency, and security, clients do not receive a global feed 
 
 #### **2. View Task Status Changes**
 
-- **Endpoint:** `GET /api/v1/tasks/:id/activity/status-changes`
+- **Endpoint:** `GET /tasks/:id/activity/status-changes`
 - **Success Response (200 OK):**
   ```json
   {
@@ -2342,7 +2344,7 @@ For scalability, efficiency, and security, clients do not receive a global feed 
 
 #### **3. View Task Assignment History**
 
-- **Endpoint:** `GET /api/v1/tasks/:id/activity/assignments`
+- **Endpoint:** `GET /tasks/:id/activity/assignments`
 - **Success Response (200 OK):**
   ```json
   {
@@ -2365,7 +2367,7 @@ For scalability, efficiency, and security, clients do not receive a global feed 
 
 #### **4. View Task Comment Activities**
 
-- **Endpoint:** `GET /api/v1/tasks/:id/activity/comments`
+- **Endpoint:** `GET /tasks/:id/activity/comments`
 - **Success Response (200 OK):**
   ```json
   {
@@ -2388,7 +2390,7 @@ For scalability, efficiency, and security, clients do not receive a global feed 
 
 #### **5. View Task Attachment Activities**
 
-- **Endpoint:** `GET /api/v1/tasks/:id/activity/attachments`
+- **Endpoint:** `GET /tasks/:id/activity/attachments`
 - **Success Response (200 OK):**
   ```json
   {
@@ -2411,7 +2413,7 @@ For scalability, efficiency, and security, clients do not receive a global feed 
 
 #### **6. Audit User Actions**
 
-- **Endpoint:** `GET /api/v1/users/:id/activity`
+- **Endpoint:** `GET /users/:id/activity`
 - **Access:** Administrator Only
 - **Success Response (200 OK):**
   ```json
