@@ -8,6 +8,7 @@ import {
   Path,
   Post,
   Put,
+  Query,
   Route,
   Security,
   SuccessResponse,
@@ -32,8 +33,8 @@ import { ApiResponse, successResponse } from '../utils/response.util';
 export class TaskController extends Controller {
   // GET /tasks
   @Get('/')
-  public async getTasks(): Promise<ApiResponse<Task[]>> {
-    const tasks = await getAllTasks();
+  public async getTasks(@Query() projectId: string): Promise<ApiResponse<Task[]>> {
+    const tasks = await getAllTasks(projectId);
     return successResponse('Tasks retrieved successfully.', tasks);
   }
 

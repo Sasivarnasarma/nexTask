@@ -4,18 +4,21 @@ export type { ApiResponse };
 
 export function successResponse<T>(message: string, data: T): ApiResponse<T> {
   return {
-    status: 'success',
+    success: true,
     message,
     data,
-    error: null,
+    errors: null,
   };
 }
 
-export function errorResponse(message: string, error?: string): ApiResponse<null> {
+export function errorResponse(
+  message: string,
+  errors: Record<string, string> | null = null,
+): ApiResponse<null> {
   return {
-    status: 'error',
+    success: false,
     message,
     data: null,
-    error: error || message,
+    errors: errors || { error: message },
   };
 }

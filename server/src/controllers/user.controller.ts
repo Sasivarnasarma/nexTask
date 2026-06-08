@@ -68,4 +68,15 @@ export class UserController extends Controller {
     await this.userService.changePassword(userId, requestBody);
     return successResponse('Password changed successfully.', null);
   }
+
+  /**
+   * Returns a list of projects the authenticated user belongs to.
+   */
+  @SuccessResponse('200', 'OK')
+  @Get('me/projects')
+  public async getMyProjects(@Request() request: ExRequest): Promise<ApiResponse<any[]>> {
+    const { userId } = (request as any).user;
+    const projects = await this.userService.getUserProjects(userId);
+    return successResponse('Projects retrieved successfully.', projects);
+  }
 }

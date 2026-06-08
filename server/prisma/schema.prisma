@@ -8,45 +8,83 @@ datasource db {
 }
 
 model User {
-  id                String   @id @default(uuid())
-  email             String   @unique
+  id                String             @id @default(uuid())
+  email             String             @unique
   password          String
   name              String?
-  role              Role     @default(COLLABORATOR)
-  mustResetPassword Boolean  @default(true)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  role              Role               @default(COLLABORATOR)
+  mustResetPassword Boolean            @default(true)
+  isActive          Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
 
-  tasksAssigned     Task[]
-  pushSubscriptions PushSubscription[]
-  comments          Comment[]
-  attachments       Attachment[]
+  // Relations
+  projectMemberships ProjectMember[]
+  ownedProjects      Project[]         @relation("ProjectOwner")
+  tasksAssigned      TaskAssignment[]
+  pushSubscriptions  PushSubscription[]
+  notifications      Notification[]
+  comments           Comment[]
+  attachments        Attachment[]
+  taskActivities     TaskActivity[]
+}
+
+model Project {
+  id          String         @id @default(uuid())
+  name        String
+  description String?
+  status      ProjectStatus  @default(ACTIVE)
+  endDate     DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  // Relations
+  ownerId     String
+  owner       User           @relation("ProjectOwner", fields: [ownerId], references: [id])
+  members     ProjectMember[]
+  tasks       Task[]
+}
+
+model ProjectMember {
+  projectId String
+  project   Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      ProjectRole @default(COLLABORATOR)
+  joinedAt  DateTime    @default(now())
+
+  @@id([projectId, userId])
 }
 
 model Task {
-  id             String    @id @default(uuid())
-  title          String
-  description    String?
-  dueDate        DateTime?
-  priority       Priority  @default(MEDIUM)
-  status         Status    @default(TODO)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  id          String           @id @default(uuid())
+  title       String
+  description String?
+  dueDate     DateTime?
+  priority    Priority         @default(MEDIUM)
+  status      Status           @default(TODO)
+  tags        String[]
+  position    Float            @default(0)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
 
-  assignedUserId String?
-  assignedUser   User?     @relation(fields: [assignedUserId], references: [id])
-  comments       Comment[]
-  attachments    Attachment[]
+  // Relations
+  projectId   String
+  project     Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignments TaskAssignment[]
+  comments    Comment[]
+  attachments Attachment[]
+  activities  TaskActivity[]
 }
 
-model PushSubscription {
-  id        String   @id @default(uuid())
-  endpoint  String
-  p256dh    String
-  auth      String
+model TaskAssignment {
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignedAt DateTime @default(now())
+
+  @@id([taskId, userId])
 }
 
 model Comment {
@@ -54,6 +92,8 @@ model Comment {
   content     String
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+
+  // Relations
   taskId      String
   task        Task         @relation(fields: [taskId], references: [id], onDelete: Cascade)
   authorId    String
@@ -68,6 +108,8 @@ model Attachment {
   mimeType     String
   fileSize     Int
   createdAt    DateTime @default(now())
+
+  // Relations
   taskId       String
   task         Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
   commentId    String?
@@ -76,10 +118,59 @@ model Attachment {
   uploadedBy   User     @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
 }
 
+model Notification {
+  id        String           @id @default(uuid())
+  message   String
+  type      NotificationType
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  // Relations
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  taskId    String?
+}
+
+model PushSubscription {
+  id        String   @id @default(uuid())
+  endpoint  String
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  // Relations
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model TaskActivity {
+  id          String       @id @default(uuid())
+  action      ActivityType
+  description String?
+  createdAt   DateTime     @default(now())
+
+  // Relations
+  taskId      String
+  task        Task         @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 enum Role {
   ADMIN
   PROJECT_MANAGER
   COLLABORATOR
+}
+
+enum ProjectRole {
+  PROJECT_MANAGER
+  COLLABORATOR
+}
+
+enum ProjectStatus {
+  ACTIVE
+  ARCHIVED
+  COMPLETED
 }
 
 enum Priority {
@@ -92,4 +183,21 @@ enum Status {
   TODO
   IN_PROGRESS
   COMPLETED
+}
+
+enum NotificationType {
+  TASK_ASSIGNED
+  STATUS_CHANGED
+  DEADLINE_ALERT
+  COMMENT_ADDED
+  ADMIN_UPDATE
+}
+
+enum ActivityType {
+  CREATED
+  UPDATED
+  ASSIGNED
+  COMMENTED
+  COMPLETED
+  DELETED
 }

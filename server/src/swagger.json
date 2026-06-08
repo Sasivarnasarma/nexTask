@@ -71,14 +71,18 @@
 			"UserProfile": {
 				"$ref": "#/components/schemas/User"
 			},
+			"Record_string.string_": {
+				"properties": {},
+				"additionalProperties": {
+					"type": "string"
+				},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
 			"ApiResponse_UserProfile_": {
 				"properties": {
-					"status": {
-						"type": "string",
-						"enum": [
-							"success",
-							"error"
-						]
+					"success": {
+						"type": "boolean"
 					},
 					"message": {
 						"type": "string"
@@ -91,16 +95,20 @@
 						],
 						"nullable": true
 					},
-					"error": {
-						"type": "string",
+					"errors": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Record_string.string_"
+							}
+						],
 						"nullable": true
 					}
 				},
 				"required": [
-					"status",
+					"success",
 					"message",
 					"data",
-					"error"
+					"errors"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -119,12 +127,8 @@
 			},
 			"ApiResponse_null_": {
 				"properties": {
-					"status": {
-						"type": "string",
-						"enum": [
-							"success",
-							"error"
-						]
+					"success": {
+						"type": "boolean"
 					},
 					"message": {
 						"type": "string"
@@ -133,16 +137,20 @@
 						"anyOf": [],
 						"nullable": true
 					},
-					"error": {
-						"type": "string",
+					"errors": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Record_string.string_"
+							}
+						],
 						"nullable": true
 					}
 				},
 				"required": [
-					"status",
+					"success",
 					"message",
 					"data",
-					"error"
+					"errors"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -167,6 +175,37 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"ApiResponse_any-Array_": {
+				"properties": {
+					"success": {
+						"type": "boolean"
+					},
+					"message": {
+						"type": "string"
+					},
+					"data": {
+						"items": {},
+						"type": "array",
+						"nullable": true
+					},
+					"errors": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Record_string.string_"
+							}
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"success",
+					"message",
+					"data",
+					"errors"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"_36_Enums.Priority": {
 				"type": "string",
 				"enum": [
@@ -185,7 +224,7 @@
 			},
 			"DefaultSelection_Prisma._36_TaskPayload_": {
 				"properties": {
-					"assignedUserId": {
+					"projectId": {
 						"type": "string"
 					},
 					"updatedAt": {
@@ -195,6 +234,16 @@
 					"createdAt": {
 						"type": "string",
 						"format": "date-time"
+					},
+					"position": {
+						"type": "number",
+						"format": "double"
+					},
+					"tags": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
 					},
 					"status": {
 						"$ref": "#/components/schemas/_36_Enums.Status"
@@ -217,9 +266,11 @@
 					}
 				},
 				"required": [
-					"assignedUserId",
+					"projectId",
 					"updatedAt",
 					"createdAt",
+					"position",
+					"tags",
 					"status",
 					"priority",
 					"dueDate",
@@ -235,12 +286,8 @@
 			},
 			"ApiResponse_Task-Array_": {
 				"properties": {
-					"status": {
-						"type": "string",
-						"enum": [
-							"success",
-							"error"
-						]
+					"success": {
+						"type": "boolean"
 					},
 					"message": {
 						"type": "string"
@@ -252,16 +299,20 @@
 						"type": "array",
 						"nullable": true
 					},
-					"error": {
-						"type": "string",
+					"errors": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Record_string.string_"
+							}
+						],
 						"nullable": true
 					}
 				},
 				"required": [
-					"status",
+					"success",
 					"message",
 					"data",
-					"error"
+					"errors"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -443,7 +494,17 @@
 							"COMPLETED"
 						]
 					},
-					"assignedUserId": {
+					"tags": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"position": {
+						"type": "number",
+						"format": "double"
+					},
+					"projectId": {
 						"type": "string"
 					},
 					"createdAt": {
@@ -486,6 +547,9 @@
 					"title",
 					"priority",
 					"status",
+					"tags",
+					"position",
+					"projectId",
 					"createdAt",
 					"updatedAt"
 				],
@@ -494,12 +558,8 @@
 			},
 			"ApiResponse_SharedTask_": {
 				"properties": {
-					"status": {
-						"type": "string",
-						"enum": [
-							"success",
-							"error"
-						]
+					"success": {
+						"type": "boolean"
 					},
 					"message": {
 						"type": "string"
@@ -512,28 +572,28 @@
 						],
 						"nullable": true
 					},
-					"error": {
-						"type": "string",
+					"errors": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Record_string.string_"
+							}
+						],
 						"nullable": true
 					}
 				},
 				"required": [
-					"status",
+					"success",
 					"message",
 					"data",
-					"error"
+					"errors"
 				],
 				"type": "object",
 				"additionalProperties": false
 			},
 			"ApiResponse_Task_": {
 				"properties": {
-					"status": {
-						"type": "string",
-						"enum": [
-							"success",
-							"error"
-						]
+					"success": {
+						"type": "boolean"
 					},
 					"message": {
 						"type": "string"
@@ -546,16 +606,20 @@
 						],
 						"nullable": true
 					},
-					"error": {
-						"type": "string",
+					"errors": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Record_string.string_"
+							}
+						],
 						"nullable": true
 					}
 				},
 				"required": [
-					"status",
+					"success",
 					"message",
 					"data",
-					"error"
+					"errors"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -574,7 +638,7 @@
 					"description": {
 						"type": "string"
 					},
-					"assignedUserId": {
+					"projectId": {
 						"type": "string"
 					},
 					"dueDate": {
@@ -586,10 +650,21 @@
 					},
 					"status": {
 						"$ref": "#/components/schemas/Status"
+					},
+					"tags": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"position": {
+						"type": "number",
+						"format": "double"
 					}
 				},
 				"required": [
-					"title"
+					"title",
+					"projectId"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -602,9 +677,6 @@
 					"description": {
 						"type": "string"
 					},
-					"assignedUserId": {
-						"type": "string"
-					},
 					"dueDate": {
 						"type": "string",
 						"format": "date-time"
@@ -614,6 +686,16 @@
 					},
 					"status": {
 						"$ref": "#/components/schemas/Status"
+					},
+					"tags": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"position": {
+						"type": "number",
+						"format": "double"
 					}
 				},
 				"type": "object",
@@ -621,12 +703,8 @@
 			},
 			"ApiResponse__publicKey-string__": {
 				"properties": {
-					"status": {
-						"type": "string",
-						"enum": [
-							"success",
-							"error"
-						]
+					"success": {
+						"type": "boolean"
 					},
 					"message": {
 						"type": "string"
@@ -643,16 +721,20 @@
 						"type": "object",
 						"nullable": true
 					},
-					"error": {
-						"type": "string",
+					"errors": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Record_string.string_"
+							}
+						],
 						"nullable": true
 					}
 				},
 				"required": [
-					"status",
+					"success",
 					"message",
 					"data",
-					"error"
+					"errors"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -708,12 +790,8 @@
 			},
 			"ApiResponse_Comment-Array_": {
 				"properties": {
-					"status": {
-						"type": "string",
-						"enum": [
-							"success",
-							"error"
-						]
+					"success": {
+						"type": "boolean"
 					},
 					"message": {
 						"type": "string"
@@ -725,28 +803,28 @@
 						"type": "array",
 						"nullable": true
 					},
-					"error": {
-						"type": "string",
+					"errors": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Record_string.string_"
+							}
+						],
 						"nullable": true
 					}
 				},
 				"required": [
-					"status",
+					"success",
 					"message",
 					"data",
-					"error"
+					"errors"
 				],
 				"type": "object",
 				"additionalProperties": false
 			},
 			"ApiResponse_Comment_": {
 				"properties": {
-					"status": {
-						"type": "string",
-						"enum": [
-							"success",
-							"error"
-						]
+					"success": {
+						"type": "boolean"
 					},
 					"message": {
 						"type": "string"
@@ -759,16 +837,20 @@
 						],
 						"nullable": true
 					},
-					"error": {
-						"type": "string",
+					"errors": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Record_string.string_"
+							}
+						],
 						"nullable": true
 					}
 				},
 				"required": [
-					"status",
+					"success",
 					"message",
 					"data",
-					"error"
+					"errors"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -834,12 +916,8 @@
 			},
 			"ApiResponse_AuthData_": {
 				"properties": {
-					"status": {
-						"type": "string",
-						"enum": [
-							"success",
-							"error"
-						]
+					"success": {
+						"type": "boolean"
 					},
 					"message": {
 						"type": "string"
@@ -852,16 +930,20 @@
 						],
 						"nullable": true
 					},
-					"error": {
-						"type": "string",
+					"errors": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Record_string.string_"
+							}
+						],
 						"nullable": true
 					}
 				},
 				"required": [
-					"status",
+					"success",
 					"message",
 					"data",
-					"error"
+					"errors"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -920,12 +1002,8 @@
 			},
 			"ApiResponse_Attachment-Array_": {
 				"properties": {
-					"status": {
-						"type": "string",
-						"enum": [
-							"success",
-							"error"
-						]
+					"success": {
+						"type": "boolean"
 					},
 					"message": {
 						"type": "string"
@@ -937,28 +1015,28 @@
 						"type": "array",
 						"nullable": true
 					},
-					"error": {
-						"type": "string",
+					"errors": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Record_string.string_"
+							}
+						],
 						"nullable": true
 					}
 				},
 				"required": [
-					"status",
+					"success",
 					"message",
 					"data",
-					"error"
+					"errors"
 				],
 				"type": "object",
 				"additionalProperties": false
 			},
 			"ApiResponse_Attachment_": {
 				"properties": {
-					"status": {
-						"type": "string",
-						"enum": [
-							"success",
-							"error"
-						]
+					"success": {
+						"type": "boolean"
 					},
 					"message": {
 						"type": "string"
@@ -971,16 +1049,20 @@
 						],
 						"nullable": true
 					},
-					"error": {
-						"type": "string",
+					"errors": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Record_string.string_"
+							}
+						],
 						"nullable": true
 					}
 				},
 				"required": [
-					"status",
+					"success",
 					"message",
 					"data",
-					"error"
+					"errors"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -1003,12 +1085,8 @@
 			},
 			"ApiResponse_GetPresignedUrlResponse_": {
 				"properties": {
-					"status": {
-						"type": "string",
-						"enum": [
-							"success",
-							"error"
-						]
+					"success": {
+						"type": "boolean"
 					},
 					"message": {
 						"type": "string"
@@ -1021,16 +1099,20 @@
 						],
 						"nullable": true
 					},
-					"error": {
-						"type": "string",
+					"errors": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Record_string.string_"
+							}
+						],
 						"nullable": true
 					}
 				},
 				"required": [
-					"status",
+					"success",
 					"message",
 					"data",
-					"error"
+					"errors"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -1161,6 +1243,30 @@
 				}
 			}
 		},
+		"/users/me/projects": {
+			"get": {
+				"operationId": "GetMyProjects",
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_any-Array_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Returns a list of projects the authenticated user belongs to.",
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": []
+			}
+		},
 		"/tasks": {
 			"get": {
 				"operationId": "GetTasks",
@@ -1184,7 +1290,16 @@
 						"jwt": []
 					}
 				],
-				"parameters": []
+				"parameters": [
+					{
+						"in": "query",
+						"name": "projectId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			},
 			"post": {
 				"operationId": "CreateNewTask",
