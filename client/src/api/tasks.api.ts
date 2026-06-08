@@ -5,6 +5,7 @@ import apiClient from './client';
 export interface CreateTaskPayload {
   title: string;
   description?: string;
+  projectId: string;
   assignedUserId?: string;
   dueDate?: string;
   priority?: 'LOW' | 'MEDIUM' | 'HIGH';
@@ -82,8 +83,10 @@ export function mapPriorityToFrontend(priority: string): string {
 
 // ─── API Requests ───────────────────────────────────────────────────────────
 
-export async function fetchTasks(): Promise<Task[]> {
-  const { data } = await apiClient.get<ApiResponse<Task[]>>('/tasks');
+export async function fetchTasks(projectId: string): Promise<Task[]> {
+  const { data } = await apiClient.get<ApiResponse<Task[]>>('/tasks', {
+    params: { projectId },
+  });
   return data.data ?? [];
 }
 

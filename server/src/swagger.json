@@ -175,6 +175,37 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"ApiResponse_any-Array_": {
+				"properties": {
+					"success": {
+						"type": "boolean"
+					},
+					"message": {
+						"type": "string"
+					},
+					"data": {
+						"items": {},
+						"type": "array",
+						"nullable": true
+					},
+					"errors": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Record_string.string_"
+							}
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"success",
+					"message",
+					"data",
+					"errors"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"_36_Enums.Priority": {
 				"type": "string",
 				"enum": [
@@ -1212,6 +1243,30 @@
 				}
 			}
 		},
+		"/users/me/projects": {
+			"get": {
+				"operationId": "GetMyProjects",
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_any-Array_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Returns a list of projects the authenticated user belongs to.",
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": []
+			}
+		},
 		"/tasks": {
 			"get": {
 				"operationId": "GetTasks",
@@ -1239,7 +1294,7 @@
 					{
 						"in": "query",
 						"name": "projectId",
-						"required": false,
+						"required": true,
 						"schema": {
 							"type": "string"
 						}

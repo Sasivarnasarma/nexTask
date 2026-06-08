@@ -14,7 +14,9 @@ import { CSS } from '@dnd-kit/utilities';
 import { Task } from '@nextask/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  ChevronDown,
   Filter,
+  Folder,
   LayoutGrid,
   List,
   MessageSquare,
@@ -35,6 +37,7 @@ import {
   uploadFileToS3,
 } from '../api/attachments.api';
 import { deleteComment, fetchComments, postComment } from '../api/comments.api';
+import { fetchUserProjects } from '../api/profile.api';
 import {
   UpdateTaskPayload,
   createTask,
@@ -176,12 +179,24 @@ export function Dashboard() {
   const [commentText, setCommentText] = useState('');
   const [isUploading, setIsUploading] = useState(false);
 
-  // ─── Task Queries & Mutations ──────────────────────────────────────────────
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
-  const { data: serverTasks = [], isLoading } = useQuery({
-    queryKey: ['tasks'],
-    queryFn: fetchTasks,
+  // ─── Project & Task Queries ────────────────────────────────────────────────
+
+  const { data: projects = [], isLoading: isProjectsLoading } = useQuery({
+    queryKey: ['projects'],
+    queryFn: fetchUserProjects,
   });
+
+  const activeProjectId = selectedProjectId || projects[0]?.id;
+
+  const { data: serverTasks = [], isLoading: isTasksLoading } = useQuery({
+    queryKey: ['tasks', activeProjectId],
+    queryFn: () => fetchTasks(activeProjectId!),
+    enabled: !!activeProjectId,
+  });
+
+  const isLoading = isProjectsLoading || (!!activeProjectId && isTasksLoading);
 
   const tasks = serverTasks.map((t) => ({
     ...t,
@@ -287,12 +302,13 @@ export function Dashboard() {
   };
 
   const handleCreateTask = () => {
-    if (!newTaskForm.title.trim()) return;
+    if (!newTaskForm.title.trim() || !activeProjectId) return;
     createTaskMutation.mutate({
       title: newTaskForm.title.trim(),
       description: newTaskForm.description.trim() || undefined,
       priority: mapPriorityToBackend(newTaskForm.priority),
       status: 'TODO',
+      projectId: activeProjectId,
     });
   };
 
@@ -382,8 +398,41 @@ export function Dashboard() {
   return (
     <div className="p-8 h-full flex flex-col bg-background text-foreground min-h-screen transition-colors duration-300">
       <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h1 className="text-3xl font-extrabold mb-2">Project Board</h1>
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-extrabold tracking-tight">Project Board</h1>
+            {projects.length > 0 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2 border-border bg-background hover:bg-muted text-foreground text-sm font-semibold h-9 px-3"
+                  >
+                    <Folder className="h-4 w-4 text-primary" />
+                    <span>
+                      {projects.find((p) => p.id === activeProjectId)?.name || 'Select Project'}
+                    </span>
+                    <ChevronDown className="h-4 w-4 opacity-50" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-popover border-border text-popover-foreground w-56">
+                  {projects.map((project) => (
+                    <DropdownMenuItem
+                      key={project.id}
+                      onClick={() => setSelectedProjectId(project.id)}
+                      className={
+                        project.id === activeProjectId
+                          ? 'bg-primary/10 text-primary font-medium'
+                          : ''
+                      }
+                    >
+                      {project.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
           <p className="text-muted-foreground">Manage and track your project tasks in real time.</p>
         </div>
 

@@ -1,4 +1,10 @@
-import { ApiResponse, ChangePasswordRequest, ProfileUpdateRequest, User } from '@nextask/types';
+import {
+  ApiResponse,
+  ChangePasswordRequest,
+  ProfileUpdateRequest,
+  Project,
+  User,
+} from '@nextask/types';
 
 import apiClient from './client';
 
@@ -24,4 +30,9 @@ export async function changePassword(payload: ChangePasswordRequest): Promise<vo
   await apiClient.post<ApiResponse<null>>('/users/me/change-password', payload, {
     skipGlobalToast: true,
   });
+}
+
+export async function fetchUserProjects(): Promise<Project[]> {
+  const { data } = await apiClient.get<ApiResponse<Project[]>>('/users/me/projects');
+  return data.data ?? [];
 }

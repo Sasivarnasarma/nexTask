@@ -102,4 +102,17 @@ export class UserService {
       data: { password: await hashPassword(data.newPassword) },
     });
   }
+
+  /**
+   * Returns a list of all projects the authenticated user belongs to.
+   */
+  public async getUserProjects(userId: string): Promise<any[]> {
+    const memberships = await prisma.projectMember.findMany({
+      where: { userId },
+      include: {
+        project: true,
+      },
+    });
+    return memberships.map((m) => m.project);
+  }
 }

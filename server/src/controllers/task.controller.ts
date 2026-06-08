@@ -33,10 +33,9 @@ import { ApiResponse, successResponse } from '../utils/response.util';
 export class TaskController extends Controller {
   // GET /tasks
   @Get('/')
-public async getTasks(@Query() projectId: string): Promise<ApiResponse<Task[]>> {
-  const tasks = await getAllTasks(projectId);
-  return successResponse('Tasks retrieved successfully.', tasks);
-}
+  public async getTasks(@Query() projectId: string): Promise<ApiResponse<Task[]>> {
+    const tasks = await getAllTasks(projectId);
+    return successResponse('Tasks retrieved successfully.', tasks);
   }
 
   // GET /tasks/:id

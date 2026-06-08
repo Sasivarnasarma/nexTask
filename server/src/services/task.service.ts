@@ -70,9 +70,9 @@ export const createTask = async (data: CreateTaskInput): Promise<Task> => {
 };
 
 // GET ALL
-export const getAllTasks = async (projectId?: string): Promise<Task[]> => {
+export const getAllTasks = async (projectId: string): Promise<Task[]> => {
   return prisma.task.findMany({
-    where: projectId ? { projectId } : undefined,
+    where: { projectId },
     orderBy: { position: 'asc' },
   });
 };
