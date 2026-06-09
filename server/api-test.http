@@ -4,9 +4,18 @@
 
 @baseUrl = http://localhost:3000
 @contentType = application/json
-@email = developer@nextask.com
-@password = SecurePassword123!
-@newPassword = NewSecurePassword@2026!
+
+# User Credentials for Tests
+@adminEmail = admin@example.com
+@adminPassword = ChangeMe!123
+
+@pmEmail = pm@example.com
+@pmPassword = Password123!
+
+@testEmail = test+{{$guid}}@example.com
+@testPassword = Temporary!1
+@testNewPassword = Password123!
+
 
 # ==========================================
 # 🔐 AUTHENTICATION & ONBOARDING
@@ -14,26 +23,27 @@
 
 ### 1. Register a New User
 # NOTE: Make sure ALLOW_PUBLIC_REGISTRATION="true" is set in server/.env
+# @name registerRequest
 POST {{baseUrl}}/auth/register
 Content-Type: {{contentType}}
 
 {
-  "email": "{{email}}",
-  "password": "{{password}}"
+  "email": "{{testEmail}}",
+  "password": "{{testPassword}}"
 }
 
-### 2. Login to Retrieve JWT Token (First login, mustResetPassword will be true)
-# @name loginRequest
+### 2. Login as Test Collaborator (First login, mustResetPassword will be true)
+# @name testLoginRequest
 POST {{baseUrl}}/auth/login
 Content-Type: {{contentType}}
 
 {
-  "email": "{{email}}",
-  "password": "{{password}}"
+  "email": "{{testEmail}}",
+  "password": "{{testPassword}}"
 }
 
-### 3. Extract Temporary JWT Token from Login Response
-@tempToken = {{loginRequest.response.body.data.token}}
+### 3. Extract Temporary JWT Token
+@tempToken = {{testLoginRequest.response.body.data.token}}
 
 ### 4. Mandatory First-Login Password Reset
 # @name resetPasswordRequest
@@ -42,66 +52,99 @@ Authorization: Bearer {{tempToken}}
 Content-Type: {{contentType}}
 
 {
-  "currentPassword": "{{password}}",
-  "newPassword": "{{newPassword}}",
-  "confirmNewPassword": "{{newPassword}}"
+  "currentPassword": "{{testPassword}}",
+  "newPassword": "{{testNewPassword}}",
+  "confirmNewPassword": "{{testNewPassword}}"
 }
 
-### 5. Extract Final Auth Token from Reset Password Response
-@authToken = {{resetPasswordRequest.response.body.data.token}}
+### 5. Extract Final Auth Token for Collaborator
+@collAuthToken = {{resetPasswordRequest.response.body.data.token}}
 
-
-# ==========================================
-# 👤 USER PROFILE
-# ==========================================
-
-### 6. Get Auth User Profile
-GET {{baseUrl}}/users/me
-Authorization: Bearer {{authToken}}
-
-### 7. Update User Profile Name & Email
-PATCH {{baseUrl}}/users/me
-Authorization: Bearer {{authToken}}
-Content-Type: {{contentType}}
-
-{
-  "name": "Lead Developer",
-  "email": "{{email}}"
-}
-
-### 8. Voluntary Password Change (voluntary, post-onboarding)
-POST {{baseUrl}}/users/me/change-password
-Authorization: Bearer {{authToken}}
-Content-Type: {{contentType}}
-
-{
-  "currentPassword": "{{newPassword}}",
-  "newPassword": "{{password}}",
-  "confirmNewPassword": "{{password}}"
-}
-
-### 8b. Re-login to get a fresh token with the current password
-# @name reLoginRequest
+### 6. Login as Project Manager
+# @name pmLoginRequest
 POST {{baseUrl}}/auth/login
 Content-Type: {{contentType}}
 
 {
-  "email": "{{email}}",
-  "password": "{{password}}"
+  "email": "{{pmEmail}}",
+  "password": "{{pmPassword}}"
 }
 
-### Extract Fresh Auth Token
-@freshToken = {{reLoginRequest.response.body.data.token}}
+### 7. Extract Auth Token for PM
+@pmAuthToken = {{pmLoginRequest.response.body.data.token}}
+
+### 8. Login as Admin
+# @name adminLoginRequest
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "{{adminEmail}}",
+  "password": "{{adminPassword}}"
+}
+
+### 9. Extract Auth Token for Admin
+@adminAuthToken = {{adminLoginRequest.response.body.data.token}}
 
 
 # ==========================================
-# 📋 TASKS CRUD
+# 👤 USER PROFILE & PROJECTS
 # ==========================================
 
-### 9. Create a Task (Valid Input)
+### 10. Get PM Profile
+# @name pmProfileRequest
+GET {{baseUrl}}/users/me
+Authorization: Bearer {{pmAuthToken}}
+
+### Extract PM User ID
+@pmUserId = {{pmProfileRequest.response.body.data.id}}
+
+### 11. Get Test Collaborator Profile
+# @name collProfileRequest
+GET {{baseUrl}}/users/me
+Authorization: Bearer {{collAuthToken}}
+
+### Extract Collaborator User ID
+@collUserId = {{collProfileRequest.response.body.data.id}}
+
+### 12. Update User Profile (Update PM's name)
+PATCH {{baseUrl}}/users/me
+Authorization: Bearer {{pmAuthToken}}
+Content-Type: {{contentType}}
+
+{
+  "name": "Project Manager Senior",
+  "email": "{{pmEmail}}"
+}
+
+### 13. Get Projects Authenticated User Belongs To (PM)
+# @name getProjectsRequest
+GET {{baseUrl}}/users/me/projects
+Authorization: Bearer {{pmAuthToken}}
+
+### Extract Project ID (Alpha Project)
+@projectId = {{getProjectsRequest.response.body.data[0].id}}
+
+### 14. Change Password Voluntarily (as Collaborator)
+POST {{baseUrl}}/users/me/change-password
+Authorization: Bearer {{collAuthToken}}
+Content-Type: {{contentType}}
+
+{
+  "currentPassword": "{{testNewPassword}}",
+  "newPassword": "{{testNewPassword}}",
+  "confirmNewPassword": "{{testNewPassword}}"
+}
+
+
+# ==========================================
+# 📋 TASKS CRUD (With Required Project Scoping)
+# ==========================================
+
+### 15. Create a Task (Valid Input - Scoped to Project)
 # @name createTaskRequest
 POST {{baseUrl}}/tasks
-Authorization: Bearer {{freshToken}}
+Authorization: Bearer {{pmAuthToken}}
 Content-Type: {{contentType}}
 
 {
@@ -109,59 +152,84 @@ Content-Type: {{contentType}}
   "description": "Double check all validation bounds, user assignment integrity, and authentication status handlers.",
   "priority": "HIGH",
   "status": "TODO",
-  "dueDate": "2027-12-31T23:59:59.000Z"
+  "dueDate": "2027-12-31T23:59:59.000Z",
+  "projectId": "{{projectId}}"
 }
 
-### Extract Task ID from Response
+### Extract Task ID
 @taskId = {{createTaskRequest.response.body.data.id}}
 
-### 10. Get All Tasks
-GET {{baseUrl}}/tasks
-Authorization: Bearer {{freshToken}}
+### 16. Get All Tasks (Requires projectId Query Parameter)
+GET {{baseUrl}}/tasks?projectId={{projectId}}
+Authorization: Bearer {{pmAuthToken}}
 
-### 11. Get Task By ID
+### 17. Get Task By ID
 GET {{baseUrl}}/tasks/{{taskId}}
-Authorization: Bearer {{freshToken}}
+Authorization: Bearer {{pmAuthToken}}
 
-### 12. Update Task Status & Details
+### 18. Update Task Status & Details
 PUT {{baseUrl}}/tasks/{{taskId}}
-Authorization: Bearer {{freshToken}}
+Authorization: Bearer {{pmAuthToken}}
 Content-Type: {{contentType}}
 
 {
   "status": "IN_PROGRESS",
-  "description": "Audited security endpoints: Added explicit JWT error catcher and assigned user lookup validators successfully."
+  "description": "Audited security endpoints: Verified required projectId parameter checks in the controller."
 }
 
 
 # ==========================================
-# 🔔 WEB PUSH NOTIFICATIONS
+# 👥 PROJECT MEMBERSHIP & ROLES (T2.5)
 # ==========================================
 
-### 13. Get VAPID Public Key for Web Push
-GET {{baseUrl}}/push/key
-Authorization: Bearer {{freshToken}}
+### 19. Get Project Members
+GET {{baseUrl}}/projects/{{projectId}}/members
+Authorization: Bearer {{pmAuthToken}}
 
-### 14. Register/Subscribe to Push Notifications
-POST {{baseUrl}}/push/subscribe
-Authorization: Bearer {{freshToken}}
+### 20. Add Collaborator to Project
+# @name addMemberRequest
+POST {{baseUrl}}/projects/{{projectId}}/members
+Authorization: Bearer {{pmAuthToken}}
 Content-Type: {{contentType}}
 
 {
-  "endpoint": "https://fcm.googleapis.com/fcm/send/mock-device-endpoint-12345",
-  "keys": {
-    "p256dh": "BFCxp-QcTjI...",
-    "auth": "5A8B..."
-  }
+  "userId": "{{collUserId}}",
+  "role": "COLLABORATOR"
 }
 
-### 15. Unsubscribe from Push Notifications
-POST {{baseUrl}}/push/unsubscribe
-Authorization: Bearer {{freshToken}}
+### 21. Get Member Details (Collaborator)
+GET {{baseUrl}}/projects/{{projectId}}/members/{{collUserId}}
+Authorization: Bearer {{pmAuthToken}}
+
+### 22. Update Member Role (to PROJECT_MANAGER)
+PATCH {{baseUrl}}/projects/{{projectId}}/members/{{collUserId}}
+Authorization: Bearer {{pmAuthToken}}
 Content-Type: {{contentType}}
 
 {
-  "endpoint": "https://fcm.googleapis.com/fcm/send/mock-device-endpoint-12345"
+  "role": "PROJECT_MANAGER"
+}
+
+### 23. Demote/Assign Member back as Collaborator
+PATCH {{baseUrl}}/projects/{{projectId}}/members/{{collUserId}}/collaborator
+Authorization: Bearer {{pmAuthToken}}
+
+### 24. Promote Member as Project Manager (Admin Only endpoint)
+PATCH {{baseUrl}}/projects/{{projectId}}/members/{{collUserId}}/project-manager
+Authorization: Bearer {{adminAuthToken}}
+
+### 25. Remove Member from Project
+DELETE {{baseUrl}}/projects/{{projectId}}/members/{{collUserId}}
+Authorization: Bearer {{pmAuthToken}}
+
+### 26. Add Member Back (so they can perform collaborative tasks below)
+POST {{baseUrl}}/projects/{{projectId}}/members
+Authorization: Bearer {{pmAuthToken}}
+Content-Type: {{contentType}}
+
+{
+  "userId": "{{collUserId}}",
+  "role": "COLLABORATOR"
 }
 
 
@@ -169,10 +237,10 @@ Content-Type: {{contentType}}
 # 💬 COLLABORATION (COMMENTS & ATTACHMENTS)
 # ==========================================
 
-### 16. Get Presigned Upload URL for attachment
+### 27. Get Presigned Upload URL for attachment
 # @name presignedUrlRequest
 POST {{baseUrl}}/attachments/presigned-url
-Authorization: Bearer {{freshToken}}
+Authorization: Bearer {{pmAuthToken}}
 Content-Type: {{contentType}}
 
 {
@@ -181,21 +249,13 @@ Content-Type: {{contentType}}
   "fileSize": 204857
 }
 
-### 16.5 Upload the local file to S3 using the presigned URL
-# NOTE: The REST Client extension supports uploading local files using "< <path>" syntax.
-# We will reference a dummy file named 'design_mockup.png' in the same directory.
-PUT {{presignedUrlRequest.response.body.data.uploadUrl}}
-Content-Type: image/png
-
-< ./design_mockup.png
-
-### Extract Upload Key from Presigned URL Response
+### 28. Extract Upload Key
 @uploadKey = {{presignedUrlRequest.response.body.data.fileKey}}
 
-### 17. Post a Comment to Task (with S3 upload fileKey)
+### 29. Post a Comment to Task (with S3 upload fileKey)
 # @name postCommentRequest
 POST {{baseUrl}}/tasks/{{taskId}}/comments
-Authorization: Bearer {{freshToken}}
+Authorization: Bearer {{pmAuthToken}}
 Content-Type: {{contentType}}
 
 {
@@ -210,17 +270,17 @@ Content-Type: {{contentType}}
   ]
 }
 
-### Extract Comment ID from Response
+### Extract Comment ID
 @commentId = {{postCommentRequest.response.body.data.id}}
 
-### 18. Get All Comments for Task
+### 30. Get All Comments for Task
 GET {{baseUrl}}/tasks/{{taskId}}/comments
-Authorization: Bearer {{freshToken}}
+Authorization: Bearer {{pmAuthToken}}
 
-### 19. Get Presigned Upload URL for standalone attachment
+### 31. Get Presigned Upload URL for standalone attachment
 # @name standalonePresignedRequest
 POST {{baseUrl}}/attachments/presigned-url
-Authorization: Bearer {{freshToken}}
+Authorization: Bearer {{pmAuthToken}}
 Content-Type: {{contentType}}
 
 {
@@ -232,10 +292,10 @@ Content-Type: {{contentType}}
 ### Extract Standalone Upload Key
 @standaloneKey = {{standalonePresignedRequest.response.body.data.fileKey}}
 
-### 20. Upload/Register Independent Attachment Metadata
+### 32. Upload/Register Independent Attachment Metadata
 # @name createAttachmentRequest
 POST {{baseUrl}}/tasks/{{taskId}}/attachments
-Authorization: Bearer {{freshToken}}
+Authorization: Bearer {{pmAuthToken}}
 Content-Type: {{contentType}}
 
 {
@@ -245,69 +305,90 @@ Content-Type: {{contentType}}
   "fileSize": 1048576
 }
 
-### Extract Attachment ID from Response
+### Extract Attachment ID
 @attachmentId = {{createAttachmentRequest.response.body.data.id}}
 
-### 21. Get All Attachments for Task
+### 33. Get All Attachments for Task
 GET {{baseUrl}}/tasks/{{taskId}}/attachments
-Authorization: Bearer {{freshToken}}
+Authorization: Bearer {{pmAuthToken}}
 
-### 22. Delete Attachment Metadata
+### 34. Delete Attachment Metadata (and S3 object)
 DELETE {{baseUrl}}/attachments/{{attachmentId}}
-Authorization: Bearer {{freshToken}}
+Authorization: Bearer {{pmAuthToken}}
 
-### 23. Delete Comment
+### 35. Delete Comment
 DELETE {{baseUrl}}/comments/{{commentId}}
-Authorization: Bearer {{freshToken}}
+Authorization: Bearer {{pmAuthToken}}
 
+
+# ==========================================
+# 🔔 WEB PUSH NOTIFICATIONS
+# ==========================================
+
+### 36. Get VAPID Public Key for Web Push
+GET {{baseUrl}}/push/key
+Authorization: Bearer {{pmAuthToken}}
+
+### 37. Register/Subscribe to Push Notifications
+POST {{baseUrl}}/push/subscribe
+Authorization: Bearer {{pmAuthToken}}
+Content-Type: {{contentType}}
+
+{
+  "endpoint": "https://fcm.googleapis.com/fcm/send/mock-device-endpoint-12345",
+  "keys": {
+    "p256dh": "BFCxp-QcTjI...",
+    "auth": "5A8B..."
+  }
+}
+
+### 38. Unsubscribe from Push Notifications
+POST {{baseUrl}}/push/unsubscribe
+Authorization: Bearer {{pmAuthToken}}
+Content-Type: {{contentType}}
+
+{
+  "endpoint": "https://fcm.googleapis.com/fcm/send/mock-device-endpoint-12345"
+}
 
 
 # ==========================================
 # 🧹 CLEANUP & TEARDOWN
 # ==========================================
 
-### 24. Delete Task (will cascade delete comments/attachments)
+### 39. Delete Task
 DELETE {{baseUrl}}/tasks/{{taskId}}
-Authorization: Bearer {{freshToken}}
+Authorization: Bearer {{pmAuthToken}}
 
 
 # ==========================================
 # ⚠️ NEGATIVE & VALIDATION TESTS
 # ==========================================
 
-### 25. Create a Task (Invalid Input - Past Due Date)
-# Should return 400 Bad Request
+### 40. Create a Task without projectId
+# Should return 422 Unprocessable Entity due to validation failure
 POST {{baseUrl}}/tasks
-Authorization: Bearer {{freshToken}}
-Content-Type: {{contentType}}
-
-{
-  "title": "Urgent Yesterday Fix",
-  "description": "This should fail because due date is in the past.",
-  "priority": "LOW",
-  "dueDate": "2020-01-01T00:00:00.000Z"
-}
-
-### 26. Create a Task (Invalid Input - Nonexistent User Assignment)
-# Should return 400 Bad Request
-POST {{baseUrl}}/tasks
-Authorization: Bearer {{freshToken}}
+Authorization: Bearer {{pmAuthToken}}
 Content-Type: {{contentType}}
 
 {
   "title": "Orphaned Task",
-  "description": "This should fail because the assigned user UUID does not exist.",
-  "assignedUserId": "00000000-0000-0000-0000-000000000000"
+  "description": "Should fail because projectId is required."
 }
 
-### 27. Weak Password Test
+### 41. Get Tasks without projectId
+# Should return 422 Unprocessable Entity
+GET {{baseUrl}}/tasks
+Authorization: Bearer {{pmAuthToken}}
+
+### 42. Weak Password Test
 # Should return 400 Bad Request
 POST {{baseUrl}}/auth/reset-password
 Authorization: Bearer {{tempToken}}
 Content-Type: {{contentType}}
 
 {
-  "currentPassword": "{{password}}",
+  "currentPassword": "{{testPassword}}",
   "newPassword": "weak",
   "confirmNewPassword": "weak"
 }
