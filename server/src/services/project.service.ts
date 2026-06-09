@@ -79,6 +79,9 @@ export class ProjectService {
       throw new ApiError(400, 'Project name must be at least 3 characters long.');
     }
 
+    const existing = await prisma.project.findUnique({ where: { id } });
+    if (!existing) throw new ApiError(404, 'Project not found.');
+
     return prisma.project.update({
       where: { id },
       data: {
@@ -86,10 +89,12 @@ export class ProjectService {
         description: description?.trim() || null,
       },
     });
-  }
 
   // 5. COMPLETE a project (Updates status to COMPLETED)
   public async completeProject(id: string): Promise<Project> {
+    const existing = await prisma.project.findUnique({ where: { id } });
+    if (!existing) throw new ApiError(404, 'Project not found.');
+
     return prisma.project.update({
       where: { id },
       data: { status: 'COMPLETED' },
@@ -98,6 +103,9 @@ export class ProjectService {
 
   // 6. ARCHIVE a project (Updates status to ARCHIVED)
   public async archiveProject(id: string): Promise<Project> {
+    const existing = await prisma.project.findUnique({ where: { id } });
+    if (!existing) throw new ApiError(404, 'Project not found.');
+
     return prisma.project.update({
       where: { id },
       data: { status: 'ARCHIVED' },
@@ -106,6 +114,9 @@ export class ProjectService {
 
   // 7. DELETE a project completely from the system
   public async deleteProject(id: string): Promise<Project> {
+    const existing = await prisma.project.findUnique({ where: { id } });
+    if (!existing) throw new ApiError(404, 'Project not found.');
+
     return prisma.project.delete({
       where: { id },
     });
