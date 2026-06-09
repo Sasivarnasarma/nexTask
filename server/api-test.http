@@ -138,6 +138,59 @@ Content-Type: {{contentType}}
 
 
 # ==========================================
+# 📂 PROJECTS CRUD
+# ==========================================
+
+### 14a. Create a New Project (as PM)
+# @name createProjectRequest
+POST {{baseUrl}}/projects
+Authorization: Bearer {{pmAuthToken}}
+Content-Type: {{contentType}}
+
+{
+  "name": "Beta Project",
+  "description": "Secondary workspace for testing T2.4 crud functions."
+}
+
+### Extract New Project ID
+@newProjectId = {{createProjectRequest.response.body.data.id}}
+
+### 14b. View All Projects (as PM)
+GET {{baseUrl}}/projects
+Authorization: Bearer {{pmAuthToken}}
+
+### 14c. View Single Project by ID (as PM)
+GET {{baseUrl}}/projects/{{newProjectId}}
+Authorization: Bearer {{pmAuthToken}}
+
+### 14d. Update Project Details (as PM)
+PUT {{baseUrl}}/projects/{{newProjectId}}
+Authorization: Bearer {{pmAuthToken}}
+Content-Type: {{contentType}}
+
+{
+  "name": "Beta Project Updated",
+  "description": "Updated project description."
+}
+
+### 14e. Complete Project (as PM)
+PATCH {{baseUrl}}/projects/{{newProjectId}}/complete
+Authorization: Bearer {{pmAuthToken}}
+
+### 14f. Archive Project (as PM)
+PATCH {{baseUrl}}/projects/{{newProjectId}}/archive
+Authorization: Bearer {{pmAuthToken}}
+
+### 14g. Try to Delete Project (as PM - should fail with 403)
+DELETE {{baseUrl}}/projects/{{newProjectId}}
+Authorization: Bearer {{pmAuthToken}}
+
+### 14h. Delete Project (as Admin - should succeed)
+DELETE {{baseUrl}}/projects/{{newProjectId}}
+Authorization: Bearer {{adminAuthToken}}
+
+
+# ==========================================
 # 📋 TASKS CRUD (With Required Project Scoping)
 # ==========================================
 
@@ -392,3 +445,45 @@ Content-Type: {{contentType}}
   "newPassword": "weak",
   "confirmNewPassword": "weak"
 }
+
+### 43. Create a Project as Collaborator (Should fail with 403)
+POST {{baseUrl}}/projects
+Authorization: Bearer {{collAuthToken}}
+Content-Type: {{contentType}}
+
+{
+  "name": "Collaborator Hack Project",
+  "description": "Should fail because collaborators are not authorized to create projects."
+}
+
+### 44. Create a Project with too short name (Should fail with 400)
+POST {{baseUrl}}/projects
+Authorization: Bearer {{pmAuthToken}}
+Content-Type: {{contentType}}
+
+{
+  "name": "Ab",
+  "description": "Should fail because name requires minimum 3 characters."
+}
+
+### 45. Create a Private Project (Admin) and Access it as Collaborator (Should fail with 403)
+# @name adminCreateProject
+POST {{baseUrl}}/projects
+Authorization: Bearer {{adminAuthToken}}
+Content-Type: {{contentType}}
+
+{
+  "name": "Top Secret Project",
+  "description": "Accessible only to Admin."
+}
+
+### Extract Secret Project ID
+@secretProjectId = {{adminCreateProject.response.body.data.id}}
+
+### 46. Attempt to Fetch Secret Project (as Collaborator - should return 403)
+GET {{baseUrl}}/projects/{{secretProjectId}}
+Authorization: Bearer {{collAuthToken}}
+
+### 47. Clean up Secret Project (as Admin)
+DELETE {{baseUrl}}/projects/{{secretProjectId}}
+Authorization: Bearer {{adminAuthToken}}

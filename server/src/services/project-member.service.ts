@@ -1,3 +1,5 @@
+import { Project } from '@prisma/client';
+
 import { prisma } from '../lib/prisma';
 import { ApiError } from '../utils/apiError.util';
 
@@ -7,7 +9,7 @@ import { ApiError } from '../utils/apiError.util';
  * 2. The project owner.
  * 3. A project member with PROJECT_MANAGER role.
  */
-async function verifyProjectManagerAccess(
+export async function verifyProjectManagerAccess(
   projectId: string,
   requestorId: string,
   requestorRole: string,
@@ -41,16 +43,16 @@ async function verifyProjectManagerAccess(
  * 2. The project owner.
  * 3. Any member of the project.
  */
-async function verifyProjectMemberAccess(
+export async function verifyProjectMemberAccess(
   projectId: string,
   requestorId: string,
   requestorRole: string,
-): Promise<void> {
+): Promise<Project> {
   const project = await prisma.project.findUnique({ where: { id: projectId } });
   if (!project) throw new ApiError(404, 'Project not found.');
-  if (requestorRole === 'ADMIN') return;
+  if (requestorRole === 'ADMIN') return project;
 
-  if (project.ownerId === requestorId) return;
+  if (project.ownerId === requestorId) return project;
 
   const membership = await prisma.projectMember.findUnique({
     where: {
@@ -64,6 +66,8 @@ async function verifyProjectMemberAccess(
   if (!membership) {
     throw new ApiError(403, 'Access denied. You must be a member of this project.');
   }
+
+  return project;
 }
 
 export class ProjectMemberService {
