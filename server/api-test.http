@@ -9,10 +9,10 @@
 @adminEmail = admin@example.com
 @adminPassword = ChangeMe!123
 
-@pmEmail = pm@nextask.com
+@pmEmail = pm@example.com
 @pmPassword = Password123!
 
-@testEmail = test@example.com
+@testEmail = test+{{$guid}}@example.com
 @testPassword = Temporary!1
 @testNewPassword = Password123!
 

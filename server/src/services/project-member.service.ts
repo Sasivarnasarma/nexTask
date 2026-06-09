@@ -12,10 +12,9 @@ async function verifyProjectManagerAccess(
   requestorId: string,
   requestorRole: string,
 ): Promise<void> {
-  if (requestorRole === 'ADMIN') return;
-
   const project = await prisma.project.findUnique({ where: { id: projectId } });
   if (!project) throw new ApiError(404, 'Project not found.');
+  if (requestorRole === 'ADMIN') return;
 
   if (project.ownerId === requestorId) return;
 
@@ -47,10 +46,9 @@ async function verifyProjectMemberAccess(
   requestorId: string,
   requestorRole: string,
 ): Promise<void> {
-  if (requestorRole === 'ADMIN') return;
-
   const project = await prisma.project.findUnique({ where: { id: projectId } });
   if (!project) throw new ApiError(404, 'Project not found.');
+  if (requestorRole === 'ADMIN') return;
 
   if (project.ownerId === requestorId) return;
 
