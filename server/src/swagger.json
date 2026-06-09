@@ -771,59 +771,79 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"_36_Enums.ProjectStatus": {
+			"ProjectStatus": {
 				"type": "string",
 				"enum": [
-					"COMPLETED",
 					"ACTIVE",
-					"ARCHIVED"
+					"ARCHIVED",
+					"COMPLETED"
 				]
 			},
-			"DefaultSelection_Prisma._36_ProjectPayload_": {
+			"Project": {
 				"properties": {
-					"ownerId": {
-						"type": "string"
-					},
-					"endDate": {
-						"type": "string",
-						"format": "date-time"
-					},
-					"updatedAt": {
-						"type": "string",
-						"format": "date-time"
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time"
-					},
-					"status": {
-						"$ref": "#/components/schemas/_36_Enums.ProjectStatus"
-					},
-					"description": {
-						"type": "string"
-					},
 					"id": {
 						"type": "string"
 					},
 					"name": {
 						"type": "string"
+					},
+					"description": {
+						"type": "string",
+						"nullable": true
+					},
+					"status": {
+						"$ref": "#/components/schemas/ProjectStatus"
+					},
+					"endDate": {
+						"anyOf": [
+							{
+								"type": "string",
+								"format": "date-time"
+							},
+							{
+								"type": "string"
+							}
+						],
+						"nullable": true
+					},
+					"ownerId": {
+						"type": "string"
+					},
+					"createdAt": {
+						"anyOf": [
+							{
+								"type": "string",
+								"format": "date-time"
+							},
+							{
+								"type": "string"
+							}
+						]
+					},
+					"updatedAt": {
+						"anyOf": [
+							{
+								"type": "string",
+								"format": "date-time"
+							},
+							{
+								"type": "string"
+							}
+						]
 					}
 				},
 				"required": [
-					"ownerId",
-					"endDate",
-					"updatedAt",
-					"createdAt",
-					"status",
-					"description",
 					"id",
-					"name"
+					"name",
+					"description",
+					"status",
+					"endDate",
+					"ownerId",
+					"createdAt",
+					"updatedAt"
 				],
-				"type": "object"
-			},
-			"Project": {
-				"$ref": "#/components/schemas/DefaultSelection_Prisma._36_ProjectPayload_",
-				"description": "Model Project"
+				"type": "object",
+				"additionalProperties": false
 			},
 			"ApiResponse_Project_": {
 				"properties": {

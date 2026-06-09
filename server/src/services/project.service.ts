@@ -89,6 +89,7 @@ export class ProjectService {
         description: description?.trim() || null,
       },
     });
+  }
 
   // 5. COMPLETE a project (Updates status to COMPLETED)
   public async completeProject(id: string): Promise<Project> {

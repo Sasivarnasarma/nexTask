@@ -302,19 +302,24 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "_36_Enums.ProjectStatus": {
+    "ProjectStatus": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["COMPLETED"]},{"dataType":"enum","enums":["ACTIVE"]},{"dataType":"enum","enums":["ARCHIVED"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "DefaultSelection_Prisma._36_ProjectPayload_": {
-        "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"ownerId":{"dataType":"string","required":true},"endDate":{"dataType":"datetime","required":true},"updatedAt":{"dataType":"datetime","required":true},"createdAt":{"dataType":"datetime","required":true},"status":{"ref":"_36_Enums.ProjectStatus","required":true},"description":{"dataType":"string","required":true},"id":{"dataType":"string","required":true},"name":{"dataType":"string","required":true}},"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["ACTIVE"]},{"dataType":"enum","enums":["ARCHIVED"]},{"dataType":"enum","enums":["COMPLETED"]}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Project": {
-        "dataType": "refAlias",
-        "type": {"ref":"DefaultSelection_Prisma._36_ProjectPayload_","validators":{}},
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string","required":true},
+            "name": {"dataType":"string","required":true},
+            "description": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "status": {"ref":"ProjectStatus","required":true},
+            "endDate": {"dataType":"union","subSchemas":[{"dataType":"datetime"},{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "ownerId": {"dataType":"string","required":true},
+            "createdAt": {"dataType":"union","subSchemas":[{"dataType":"datetime"},{"dataType":"string"}],"required":true},
+            "updatedAt": {"dataType":"union","subSchemas":[{"dataType":"datetime"},{"dataType":"string"}],"required":true},
+        },
+        "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ApiResponse_Project_": {
@@ -342,7 +347,7 @@ const models: TsoaRoute.Models = {
         "properties": {
             "success": {"dataType":"boolean","required":true},
             "message": {"dataType":"string","required":true},
-            "data": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refAlias","ref":"Project"}},{"dataType":"enum","enums":[null]}],"required":true},
+            "data": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refObject","ref":"Project"}},{"dataType":"enum","enums":[null]}],"required":true},
             "errors": {"dataType":"union","subSchemas":[{"ref":"Record_string.string_"},{"dataType":"enum","enums":[null]}],"required":true},
         },
         "additionalProperties": false,

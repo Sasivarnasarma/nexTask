@@ -1,4 +1,4 @@
-import { Project } from '@prisma/client';
+import { Project } from '@nextask/types';
 import type { Request as ExRequest } from 'express';
 import {
   Body,
@@ -86,10 +86,7 @@ export class ProjectController extends Controller {
     @Request() request: ExRequest,
   ): Promise<ApiResponse<Project>> {
     const { userId: requestorId, role: requestorRole } = (request as any).user;
-    await verifyProjectMemberAccess(id, requestorId, requestorRole);
-
-    const project = await this.projectService.getProjectById(id);
-    if (!project) throw new ApiError(404, 'Project not found.');
+    const project = await verifyProjectMemberAccess(id, requestorId, requestorRole);
 
     return successResponse('Project retrieved successfully.', project);
   }
