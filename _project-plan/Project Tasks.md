@@ -36,7 +36,7 @@ _Focuses on multi-project infrastructure and key user collaboration capabilities
 | T2.2    | **Collaboration & S3 Upload** - Implement comment models and services. Build backend and frontend logic for direct client S3 upload (signed PUT URLs, private bucket access, and short-lived GET links). Expose comment & attachment APIs with self-cleaning cascade S3 deletion.             | Member B    | Completed |
 | T2.3    | **Task Visualization** - Build the interactive Kanban Board UI using shadcn. - Implement Task Cards with priority-based color coding. - Create a filterable List/Table view for detailed tracking. - Build a Task Details modal supporting comment threads and S3 attachment upload/download. | Member C    | Completed |
 | T2.4    | **Project Management APIs** - Create Prisma-based CRUD service methods and TSOA controllers for Projects. Expose endpoints to create, view, update, delete, complete, and archive projects.                                                                                                   | Member D    | Pending   |
-| T2.5    | **Project Membership APIs** - Build membership join endpoints to register users as project members. Implement project-specific role assignments (`PROJECT_MANAGER`, `COLLABORATOR`).                                                                                                          | Member E    | Pending   |
+| T2.5    | **Project Membership APIs** - Build membership join endpoints to register users as project members. Implement project-specific role assignments (`PROJECT_MANAGER`, `COLLABORATOR`).                                                                                                          | Member E    | Completed |
 
 ## **🔒 Phase 3: Security, Assignments & Queries**
 
