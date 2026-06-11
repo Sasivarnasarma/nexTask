@@ -69,10 +69,9 @@ export const getTaskById = async (id: string): Promise<SharedTask | null> => {
         include: {
           user: {
             select: {
-              id: true,
               name: true,
               email: true,
-            },
+            }
           },
         },
         orderBy: { assignedAt: 'asc' },

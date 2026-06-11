@@ -26,14 +26,16 @@ export async function assignUserToTask(
   // Requester must be a PM/Owner/Admin of the project
   await verifyProjectManagerAccess(task.projectId, requestorId, requestorRole);
 
-  // Target user must exist
+  // Target user must exist and be active
   const user = await prisma.user.findUnique({
     where: { id: userId },
   });
   if (!user) {
     throw new ApiError(404, 'User not found.');
   }
-
+  if (!user.isActive) {
+    throw new ApiError(400, 'User is inactive.');
+  }
   // Target user must be a member of the project (or the project owner)
   const isOwner = task.project.ownerId === userId;
   const membership = await prisma.projectMember.findUnique({
@@ -157,12 +159,16 @@ export async function bulkAssignUsersToTask(
   // De-duplicate userIds
   const uniqueUserIds = Array.from(new Set(userIds));
 
-  // Check if all users exist
+  // Check if all users exist and are active
   const users = await prisma.user.findMany({
     where: { id: { in: uniqueUserIds } },
+    select: { id: true, isActive: true },
   });
   if (users.length !== uniqueUserIds.length) {
     throw new ApiError(404, 'One or more users not found.');
+  }
+  if (users.some((u) => !u.isActive)) {
+    throw new ApiError(400, 'One or more users are inactive.');
   }
 
   // Check if all users are members of the project (or the project owner)
@@ -209,8 +215,8 @@ export async function bulkAssignUsersToTask(
     // 3. Query and return the new assignments
     return tx.taskAssignment.findMany({
       where: { taskId },
+      orderBy: [{ assignedAt: 'asc' }, { userId: 'asc' }],
     });
-  });
 
   // Notify newly assigned users
   for (const uid of uniqueUserIds) {
