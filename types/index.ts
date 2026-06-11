@@ -26,6 +26,7 @@ export interface Task {
   updatedAt: Date | string;
   comments?: Comment[];
   attachments?: Attachment[];
+  assignees?: TaskAssignee[];
 }
 
 export interface CreateTaskRequest {
@@ -175,6 +176,13 @@ export interface ProjectMember {
 export interface TaskAssignment {
   taskId: string;
   userId: string;
+  assignedAt: Date | string;
+}
+
+export interface TaskAssignee {
+  userId: string;
+  name: string | null;
+  email: string;
   assignedAt: Date | string;
 }
 

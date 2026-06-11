@@ -232,6 +232,46 @@ Content-Type: {{contentType}}
 
 
 # ==========================================
+# 📋 TASK ASSIGNMENTS (T3.1)
+# ==========================================
+
+### 18a. Assign User to Task (as PM)
+POST {{baseUrl}}/tasks/{{taskId}}/assignees
+Authorization: Bearer {{pmAuthToken}}
+Content-Type: {{contentType}}
+
+{
+  "userId": "{{collUserId}}"
+}
+
+### 18b. List Assignees for Task (as Collaborator)
+GET {{baseUrl}}/tasks/{{taskId}}/assignees
+Authorization: Bearer {{collAuthToken}}
+
+### 18c. Assign User to Task as Collaborator (Should fail with 403)
+POST {{baseUrl}}/tasks/{{taskId}}/assignees
+Authorization: Bearer {{collAuthToken}}
+Content-Type: {{contentType}}
+
+{
+  "userId": "{{collUserId}}"
+}
+
+### 18d. Bulk Assign Users to Task (as PM)
+PUT {{baseUrl}}/tasks/{{taskId}}/assignees
+Authorization: Bearer {{pmAuthToken}}
+Content-Type: {{contentType}}
+
+{
+  "userIds": ["{{collUserId}}"]
+}
+
+### 18e. Unassign User from Task (as PM)
+DELETE {{baseUrl}}/tasks/{{taskId}}/assignees/{{collUserId}}
+Authorization: Bearer {{pmAuthToken}}
+
+
+# ==========================================
 # 👥 PROJECT MEMBERSHIP & ROLES (T2.5)
 # ==========================================
 
