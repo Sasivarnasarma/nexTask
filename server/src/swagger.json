@@ -456,6 +456,39 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"TaskAssignee": {
+				"properties": {
+					"userId": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string",
+						"nullable": true
+					},
+					"email": {
+						"type": "string"
+					},
+					"assignedAt": {
+						"anyOf": [
+							{
+								"type": "string",
+								"format": "date-time"
+							},
+							{
+								"type": "string"
+							}
+						]
+					}
+				},
+				"required": [
+					"userId",
+					"name",
+					"email",
+					"assignedAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"SharedTask": {
 				"properties": {
 					"id": {
@@ -538,6 +571,12 @@
 					"attachments": {
 						"items": {
 							"$ref": "#/components/schemas/Attachment"
+						},
+						"type": "array"
+					},
+					"assignees": {
+						"items": {
+							"$ref": "#/components/schemas/TaskAssignee"
 						},
 						"type": "array"
 					}
@@ -726,6 +765,157 @@
 						"format": "double"
 					}
 				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"DefaultSelection_Prisma._36_TaskAssignmentPayload_": {
+				"properties": {
+					"assignedAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"userId": {
+						"type": "string"
+					},
+					"taskId": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"assignedAt",
+					"userId",
+					"taskId"
+				],
+				"type": "object"
+			},
+			"TaskAssignment": {
+				"$ref": "#/components/schemas/DefaultSelection_Prisma._36_TaskAssignmentPayload_",
+				"description": "Model TaskAssignment"
+			},
+			"ApiResponse_TaskAssignment_": {
+				"properties": {
+					"success": {
+						"type": "boolean"
+					},
+					"message": {
+						"type": "string"
+					},
+					"data": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/TaskAssignment"
+							}
+						],
+						"nullable": true
+					},
+					"errors": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Record_string.string_"
+							}
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"success",
+					"message",
+					"data",
+					"errors"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"AssignUserInput": {
+				"properties": {
+					"userId": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"userId"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiResponse_TaskAssignment-Array_": {
+				"properties": {
+					"success": {
+						"type": "boolean"
+					},
+					"message": {
+						"type": "string"
+					},
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/TaskAssignment"
+						},
+						"type": "array",
+						"nullable": true
+					},
+					"errors": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Record_string.string_"
+							}
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"success",
+					"message",
+					"data",
+					"errors"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"BulkAssignInput": {
+				"properties": {
+					"userIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"userIds"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiResponse_TaskAssignee-Array_": {
+				"properties": {
+					"success": {
+						"type": "boolean"
+					},
+					"message": {
+						"type": "string"
+					},
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/TaskAssignee"
+						},
+						"type": "array",
+						"nullable": true
+					},
+					"errors": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Record_string.string_"
+							}
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"success",
+					"message",
+					"data",
+					"errors"
+				],
 				"type": "object",
 				"additionalProperties": false
 			},
@@ -1713,6 +1903,182 @@
 					{
 						"in": "path",
 						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/tasks/{taskId}/assignees": {
+			"post": {
+				"operationId": "AssignUser",
+				"responses": {
+					"201": {
+						"description": "Created",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_TaskAssignment_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Assigns a user to a task.",
+				"tags": [
+					"Task Assignments"
+				],
+				"security": [
+					{
+						"jwt": [
+							"project:manager"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "taskId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/AssignUserInput"
+							}
+						}
+					}
+				}
+			},
+			"put": {
+				"operationId": "BulkAssign",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_TaskAssignment-Array_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Bulk assigns users to a task, overwriting existing assignments.",
+				"tags": [
+					"Task Assignments"
+				],
+				"security": [
+					{
+						"jwt": [
+							"project:manager"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "taskId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/BulkAssignInput"
+							}
+						}
+					}
+				}
+			},
+			"get": {
+				"operationId": "GetAssignees",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_TaskAssignee-Array_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Retrieves all assignees for a given task.",
+				"tags": [
+					"Task Assignments"
+				],
+				"security": [
+					{
+						"jwt": [
+							"project:member"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "taskId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/tasks/{taskId}/assignees/{userId}": {
+			"delete": {
+				"operationId": "UnassignUser",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Unassigns a user from a task.",
+				"tags": [
+					"Task Assignments"
+				],
+				"security": [
+					{
+						"jwt": [
+							"project:manager"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "taskId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "userId",
 						"required": true,
 						"schema": {
 							"type": "string"
