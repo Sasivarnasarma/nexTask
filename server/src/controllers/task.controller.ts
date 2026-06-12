@@ -38,8 +38,8 @@ export class TaskController extends Controller {
   public async getTasks(
     @Query() projectId: string,
     @Query() search?: string,
-    @Query() status?: string,
-    @Query() priority?: string,
+    @Query() status?: SharedTask['status'],
+    @Query() priority?: SharedTask['priority'],
     @Query() tags?: string[],
   ): Promise<ApiResponse<Task[]>> {
     const tasks = await getAllTasks(projectId, search, status, priority, tags);

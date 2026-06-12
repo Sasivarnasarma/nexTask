@@ -51,15 +51,15 @@ export const createTask = async (data: CreateTaskInput): Promise<Task> => {
 export const getAllTasks = async (
   projectId: string,
   search?: string,
-  status?: string,
-  priority?: string,
+  status?: SharedTask['status'],
+  priority?: SharedTask['priority'],
   tags?: string[],
 ): Promise<Task[]> => {
   return prisma.task.findMany({
     where: {
       projectId,
-      status: status ? (status as Status) : undefined,
-      priority: priority ? (priority as Priority) : undefined, // <-- Casts the string safely here
+      status: status ?? undefined,
+      priority: priority ?? undefined,
       tags: tags && tags.length > 0 ? { hasSome: tags } : undefined,
       OR: search
         ? [

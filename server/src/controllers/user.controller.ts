@@ -40,7 +40,6 @@ export class UserController extends Controller {
       return successResponse('Search term empty.', []);
     }
 
-    // Now it safely finds searchUsersAutocomplete inside your service class instance!
     const users = await this.userService.searchUsersAutocomplete(search);
     return successResponse('Autocomplete users retrieved successfully.', users);
   }
