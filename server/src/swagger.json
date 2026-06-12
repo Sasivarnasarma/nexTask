@@ -1435,10 +1435,20 @@
 				"description": "Returns a list of team members for autocomplete search dropdowns (Task 3.4)",
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"project:member"
+						]
 					}
 				],
 				"parameters": [
+					{
+						"in": "query",
+						"name": "projectId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
 					{
 						"in": "query",
 						"name": "search",
@@ -1521,7 +1531,7 @@
 						}
 					}
 				},
-				"description": "Allows an authenticated user to change their password voluntarily.",
+				"description": "Allows an authenticated, onboarded user to change their password voluntarily.\r\n(First-login forced reset uses POST /auth/reset-password instead.)",
 				"security": [
 					{
 						"jwt": []
@@ -1611,7 +1621,12 @@
 						"name": "status",
 						"required": false,
 						"schema": {
-							"type": "string"
+							"type": "string",
+							"enum": [
+								"TODO",
+								"IN_PROGRESS",
+								"COMPLETED"
+							]
 						}
 					},
 					{
@@ -1619,7 +1634,12 @@
 						"name": "priority",
 						"required": false,
 						"schema": {
-							"type": "string"
+							"type": "string",
+							"enum": [
+								"LOW",
+								"MEDIUM",
+								"HIGH"
+							]
 						}
 					},
 					{

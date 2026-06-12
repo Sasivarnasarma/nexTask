@@ -20,7 +20,7 @@ WORKDIR /app/server
 RUN pnpm prisma:generate
 RUN pnpm build
 
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 WORKDIR /app
 
 RUN corepack enable

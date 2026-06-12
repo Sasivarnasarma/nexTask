@@ -1,5 +1,5 @@
 import { CreateTaskRequest, Task as SharedTask, UpdateTaskRequest } from '@nextask/types';
-import { Priority, Status, Task } from '@prisma/client';
+import { Status, Task } from '@prisma/client';
 
 import { prisma } from '../lib/prisma';
 import { ApiError } from '../utils/apiError.util';

@@ -549,10 +549,11 @@ export function RegisterRoutes(app: Router) {
 
     
         const argsUserController_getUserAutocomplete: Record<string, TsoaRoute.ParameterSchema> = {
+                projectId: {"in":"query","name":"projectId","required":true,"dataType":"string"},
                 search: {"in":"query","name":"search","required":true,"dataType":"string"},
         };
         app.get('/users/search/autocomplete',
-            authenticateMiddleware([{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":["project:member"]}]),
             ...(fetchMiddlewares<RequestHandler>(UserController)),
             ...(fetchMiddlewares<RequestHandler>(UserController.prototype.getUserAutocomplete)),
 
@@ -708,8 +709,8 @@ export function RegisterRoutes(app: Router) {
         const argsTaskController_getTasks: Record<string, TsoaRoute.ParameterSchema> = {
                 projectId: {"in":"query","name":"projectId","required":true,"dataType":"string"},
                 search: {"in":"query","name":"search","dataType":"string"},
-                status: {"in":"query","name":"status","dataType":"string"},
-                priority: {"in":"query","name":"priority","dataType":"string"},
+                status: {"in":"query","name":"status","dataType":"union","subSchemas":[{"dataType":"enum","enums":["TODO"]},{"dataType":"enum","enums":["IN_PROGRESS"]},{"dataType":"enum","enums":["COMPLETED"]}]},
+                priority: {"in":"query","name":"priority","dataType":"union","subSchemas":[{"dataType":"enum","enums":["LOW"]},{"dataType":"enum","enums":["MEDIUM"]},{"dataType":"enum","enums":["HIGH"]}]},
                 tags: {"in":"query","name":"tags","dataType":"array","array":{"dataType":"string"}},
         };
         app.get('/tasks',

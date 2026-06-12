@@ -35,12 +35,16 @@ export class UserController extends Controller {
    */
   @SuccessResponse('200', 'OK')
   @Get('search/autocomplete')
-  public async getUserAutocomplete(@Query() search: string): Promise<ApiResponse<any[]>> {
+  @Security('jwt', ['project:member'])
+  public async getUserAutocomplete(
+    @Query() projectId: string,
+    @Query() search: string
+  ): Promise<ApiResponse<any[]>> {
     if (!search || search.trim() === '') {
       return successResponse('Search term empty.', []);
     }
 
-    const users = await this.userService.searchUsersAutocomplete(search);
+    const users = await this.userService.searchUsersAutocomplete(projectId, search);
     return successResponse('Autocomplete users retrieved successfully.', users);
   }
 
@@ -70,7 +74,8 @@ export class UserController extends Controller {
   }
 
   /**
-   * Allows an authenticated user to change their password voluntarily.
+   * Allows an authenticated, onboarded user to change their password voluntarily.
+   * (First-login forced reset uses POST /auth/reset-password instead.)
    */
   @SuccessResponse('200', 'OK')
   @Post('me/change-password')

@@ -119,12 +119,23 @@ export class UserService {
   /**
    * USER AUTOCOMPLETE SEARCH (Task 3.4)
    */
-  public async searchUsersAutocomplete(search: string) {
+  public async searchUsersAutocomplete(projectId: string, search: string) {
     return prisma.user.findMany({
       where: {
-        OR: [
-          { name: { contains: search, mode: 'insensitive' } },
-          { email: { contains: search, mode: 'insensitive' } },
+        AND: [
+          {
+            projectMemberships: {
+              some: {
+                projectId,
+              },
+            },
+          },
+          {
+            OR: [
+              { name: { contains: search, mode: 'insensitive' } },
+              { email: { contains: search, mode: 'insensitive' } },
+            ],
+          },
         ],
       },
       select: {
