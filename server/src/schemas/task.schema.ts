@@ -52,4 +52,3 @@ export const deleteTaskSchema = z.object({
     id: z.uuid({ message: 'Invalid Task ID' }),
   }),
 });
-

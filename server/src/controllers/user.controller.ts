@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Get,
+  Middlewares,
   Patch,
   Post,
   Query,
@@ -10,13 +11,11 @@ import {
   Route,
   Security,
   SuccessResponse,
-  Middlewares,
   Tags,
 } from 'tsoa';
 
 import { validateRequest } from '../middlewares/validate.middleware';
 import { userAutocompleteQuerySchema } from '../schemas/user.schema';
-
 import {
   ChangePasswordRequest,
   UpdateProfileRequest,
@@ -45,7 +44,7 @@ export class UserController extends Controller {
   @Security('jwt', ['project:member'])
   public async getUserAutocomplete(
     @Query() projectId: string,
-    @Query() search: string
+    @Query() search: string,
   ): Promise<ApiResponse<any[]>> {
     if (!search || search.trim() === '') {
       return successResponse('Search term empty.', []);

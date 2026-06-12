@@ -6,6 +6,7 @@ import {
   Controller,
   Delete,
   Get,
+  Middlewares,
   Path,
   Post,
   Put,
@@ -14,7 +15,6 @@ import {
   Security,
   SuccessResponse,
   Tags,
-  Middlewares,
 } from 'tsoa';
 
 import { validateRequest } from '../middlewares/validate.middleware';
@@ -24,7 +24,6 @@ import {
   getAssigneesSchema,
   unassignUserSchema,
 } from '../schemas/task-assignment.schema';
-
 import {
   assignUserToTask,
   bulkAssignUsersToTask,

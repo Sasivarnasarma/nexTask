@@ -15,14 +15,14 @@ export const validateRequest = (schema: ZodType) => {
 
       if (parsed && typeof parsed === 'object') {
         if ('body' in parsed) req.body = (parsed as any).body;
-        
+
         if ('query' in parsed && parsed.query) {
           for (const key of Object.keys(req.query)) {
             delete req.query[key];
           }
           Object.assign(req.query, parsed.query);
         }
-        
+
         if ('params' in parsed && parsed.params) {
           for (const key of Object.keys(req.params)) {
             delete req.params[key];

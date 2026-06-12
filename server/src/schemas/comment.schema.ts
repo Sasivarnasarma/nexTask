@@ -30,4 +30,3 @@ export const deleteCommentSchema = z.object({
     commentId: z.uuid({ message: 'Invalid Comment ID' }),
   }),
 });
-

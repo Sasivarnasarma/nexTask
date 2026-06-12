@@ -31,4 +31,3 @@ export const deleteAttachmentSchema = z.object({
     attachmentId: z.uuid({ message: 'Invalid Attachment ID' }),
   }),
 });
-

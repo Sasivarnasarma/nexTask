@@ -40,4 +40,3 @@ export const deleteProjectSchema = z.object({
     id: z.uuid({ message: 'Invalid Project ID' }),
   }),
 });
-
