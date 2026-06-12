@@ -14,4 +14,5 @@ export const getPresignedUrlSchema = z.object({
     filename: z.string().min(1, 'Filename is required'),
     mimeType: z.string().min(1, 'Mime type is required'),
     fileSize: z.number().int().positive('File size must be greater than 0'),
+  }),
 });
