@@ -919,6 +919,62 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"PingResponse": {
+				"properties": {
+					"message": {
+						"type": "string"
+					},
+					"time": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"required": [
+					"message",
+					"time"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiResponse__time-Date__": {
+				"properties": {
+					"success": {
+						"type": "boolean"
+					},
+					"message": {
+						"type": "string"
+					},
+					"data": {
+						"properties": {
+							"time": {
+								"type": "string",
+								"format": "date-time"
+							}
+						},
+						"required": [
+							"time"
+						],
+						"type": "object",
+						"nullable": true
+					},
+					"errors": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Record_string.string_"
+							}
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"success",
+					"message",
+					"data",
+					"errors"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"ApiResponse__publicKey-string__": {
 				"properties": {
 					"success": {
@@ -1221,23 +1277,6 @@
 				},
 				"required": [
 					"role"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"PingResponse": {
-				"properties": {
-					"message": {
-						"type": "string"
-					},
-					"time": {
-						"type": "string",
-						"format": "date-time"
-					}
-				},
-				"required": [
-					"message",
-					"time"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -1623,6 +1662,9 @@
 					}
 				},
 				"description": "Returns a list of team members for autocomplete search dropdowns (Task 3.4)",
+				"tags": [
+					"Users"
+				],
 				"security": [
 					{
 						"jwt": [
@@ -1666,6 +1708,9 @@
 					}
 				},
 				"description": "Returns the authenticated user's profile.",
+				"tags": [
+					"Users"
+				],
 				"security": [
 					{
 						"jwt": []
@@ -1688,6 +1733,9 @@
 					}
 				},
 				"description": "Updates the authenticated user's name and/or email.",
+				"tags": [
+					"Users"
+				],
 				"security": [
 					{
 						"jwt": []
@@ -1722,6 +1770,9 @@
 					}
 				},
 				"description": "Allows an authenticated, onboarded user to change their password voluntarily.\r\n(First-login forced reset uses POST /auth/reset-password instead.)",
+				"tags": [
+					"Users"
+				],
 				"security": [
 					{
 						"jwt": []
@@ -1756,6 +1807,9 @@
 					}
 				},
 				"description": "Returns a list of projects the authenticated user belongs to.",
+				"tags": [
+					"Users"
+				],
 				"security": [
 					{
 						"jwt": []
@@ -2173,6 +2227,72 @@
 						}
 					}
 				]
+			}
+		},
+		"/": {
+			"get": {
+				"operationId": "GetWelcome",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"System"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/ping": {
+			"get": {
+				"operationId": "GetPing",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PingResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"System"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/health": {
+			"get": {
+				"operationId": "GetHealth",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse__time-Date__"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"System"
+				],
+				"security": [],
+				"parameters": []
 			}
 		},
 		"/push/key": {
@@ -2857,25 +2977,6 @@
 				]
 			}
 		},
-		"/ping": {
-			"get": {
-				"operationId": "GetMessage",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/PingResponse"
-								}
-							}
-						}
-					}
-				},
-				"security": [],
-				"parameters": []
-			}
-		},
 		"/tasks/{taskId}/comments": {
 			"get": {
 				"operationId": "GetComments",
@@ -3013,6 +3114,9 @@
 						}
 					}
 				},
+				"tags": [
+					"Auth"
+				],
 				"security": [],
 				"parameters": [],
 				"requestBody": {
@@ -3042,6 +3146,9 @@
 						}
 					}
 				},
+				"tags": [
+					"Auth"
+				],
 				"security": [],
 				"parameters": [],
 				"requestBody": {
@@ -3072,6 +3179,9 @@
 					}
 				},
 				"description": "First-login password reset (and any subsequent voluntary reset).\r\nRequires a valid JWT — users with mustResetPassword=true are ONLY\r\nallowed to call this endpoint until they complete the reset.",
+				"tags": [
+					"Auth"
+				],
 				"security": [
 					{
 						"jwt": []
@@ -3252,6 +3362,35 @@
 	"servers": [
 		{
 			"url": "/"
+		}
+	],
+	"tags": [
+		{
+			"name": "System"
+		},
+		{
+			"name": "Auth"
+		},
+		{
+			"name": "Users"
+		},
+		{
+			"name": "Projects"
+		},
+		{
+			"name": "Project Members"
+		},
+		{
+			"name": "Tasks"
+		},
+		{
+			"name": "Task Assignments"
+		},
+		{
+			"name": "Comments"
+		},
+		{
+			"name": "Attachments"
 		}
 	]
 }

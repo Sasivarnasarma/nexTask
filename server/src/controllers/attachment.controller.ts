@@ -4,7 +4,11 @@ import { Middlewares } from 'tsoa';
 import { Body, Controller, Delete, Get, Path, Post, Request, Route, Security, Tags } from 'tsoa';
 
 import { validateRequest } from '../middlewares/validate.middleware';
-import { uploadAttachmentSchema } from '../schemas/attachment.schema';
+import {
+  deleteAttachmentSchema,
+  getAttachmentsSchema,
+  uploadAttachmentSchema,
+} from '../schemas/attachment.schema';
 import {
   createTaskAttachment,
   deleteAttachment,
@@ -20,6 +24,7 @@ export class AttachmentController extends Controller {
    * Retrieves all attachments for a specific task.
    */
   @Get('{taskId}/attachments')
+  @Middlewares(validateRequest(getAttachmentsSchema))
   @Security('jwt', ['project:member'])
   public async getAttachments(@Path() taskId: string): Promise<ApiResponse<Attachment[]>> {
     const attachments = await getAttachmentsByTaskId(taskId);
@@ -51,6 +56,7 @@ export class AttachmentDeleteController extends Controller {
    * Deletes an attachment metadata record by ID.
    */
   @Delete('{attachmentId}')
+  @Middlewares(validateRequest(deleteAttachmentSchema))
   @Security('jwt', ['project:member'])
   public async removeAttachment(
     @Path() attachmentId: string,

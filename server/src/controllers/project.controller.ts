@@ -18,7 +18,14 @@ import {
 } from 'tsoa';
 
 import { validateRequest } from '../middlewares/validate.middleware';
-import { createProjectSchema, updateProjectSchema } from '../schemas/project.schema';
+import {
+  archiveProjectSchema,
+  completeProjectSchema,
+  createProjectSchema,
+  deleteProjectSchema,
+  getProjectSchema,
+  updateProjectSchema,
+} from '../schemas/project.schema';
 import { ProjectService } from '../services/project.service';
 import { ApiError } from '../utils/apiError.util';
 import { ApiResponse, successResponse } from '../utils/response.util';
@@ -64,6 +71,7 @@ export class ProjectController extends Controller {
 
   // 3. GET /projects/{id} (View single project by ID)
   @Get('{id}')
+  @Middlewares(validateRequest(getProjectSchema))
   @Security('jwt', ['project:member'])
   public async getById(@Path() id: string): Promise<ApiResponse<Project>> {
     const project = await this.projectService.getProjectById(id);
@@ -89,6 +97,7 @@ export class ProjectController extends Controller {
 
   // 5. PATCH /projects/{id}/complete (Complete project)
   @Patch('{id}/complete')
+  @Middlewares(validateRequest(completeProjectSchema))
   @Security('jwt', ['project:manager'])
   public async complete(@Path() id: string): Promise<ApiResponse<Project>> {
     const completedProject = await this.projectService.completeProject(id);
@@ -97,6 +106,7 @@ export class ProjectController extends Controller {
 
   // 6. PATCH /projects/{id}/archive (Archive project)
   @Patch('{id}/archive')
+  @Middlewares(validateRequest(archiveProjectSchema))
   @Security('jwt', ['project:manager'])
   public async archive(@Path() id: string): Promise<ApiResponse<Project>> {
     const archivedProject = await this.projectService.archiveProject(id);
@@ -105,6 +115,7 @@ export class ProjectController extends Controller {
 
   // 7. DELETE /projects/{id} (Delete project - Admin Only)
   @Delete('{id}')
+  @Middlewares(validateRequest(deleteProjectSchema))
   @Security('jwt', ['global:admin'])
   public async delete(@Path() id: string): Promise<ApiResponse<null>> {
     const project = await this.projectService.getProjectById(id);

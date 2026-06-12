@@ -14,7 +14,16 @@ import {
   Security,
   SuccessResponse,
   Tags,
+  Middlewares,
 } from 'tsoa';
+
+import { validateRequest } from '../middlewares/validate.middleware';
+import {
+  assignUserSchema,
+  bulkAssignSchema,
+  getAssigneesSchema,
+  unassignUserSchema,
+} from '../schemas/task-assignment.schema';
 
 import {
   assignUserToTask,
@@ -40,6 +49,7 @@ export class TaskAssignmentController extends Controller {
    * Assigns a user to a task.
    */
   @Post('/')
+  @Middlewares(validateRequest(assignUserSchema))
   @SuccessResponse('201', 'Created')
   @Security('jwt', ['project:manager'])
   public async assignUser(
@@ -57,6 +67,7 @@ export class TaskAssignmentController extends Controller {
    * Unassigns a user from a task.
    */
   @Delete('{userId}')
+  @Middlewares(validateRequest(unassignUserSchema))
   @Security('jwt', ['project:manager'])
   public async unassignUser(
     @Path() taskId: string,
@@ -72,6 +83,7 @@ export class TaskAssignmentController extends Controller {
    * Bulk assigns users to a task, overwriting existing assignments.
    */
   @Put('/')
+  @Middlewares(validateRequest(bulkAssignSchema))
   @Security('jwt', ['project:manager'])
   public async bulkAssign(
     @Path() taskId: string,
@@ -92,6 +104,7 @@ export class TaskAssignmentController extends Controller {
    * Retrieves all assignees for a given task.
    */
   @Get('/')
+  @Middlewares(validateRequest(getAssigneesSchema))
   @Security('jwt', ['project:member'])
   public async getAssignees(
     @Path() taskId: string,

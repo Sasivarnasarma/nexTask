@@ -10,7 +10,12 @@ import {
   Route,
   Security,
   SuccessResponse,
+  Middlewares,
+  Tags,
 } from 'tsoa';
+
+import { validateRequest } from '../middlewares/validate.middleware';
+import { userAutocompleteQuerySchema } from '../schemas/user.schema';
 
 import {
   ChangePasswordRequest,
@@ -21,6 +26,7 @@ import {
 import { ApiResponse, successResponse } from '../utils/response.util';
 
 @Route('users')
+@Tags('Users')
 @Security('jwt')
 export class UserController extends Controller {
   private userService: UserService;
@@ -35,6 +41,7 @@ export class UserController extends Controller {
    */
   @SuccessResponse('200', 'OK')
   @Get('search/autocomplete')
+  @Middlewares(validateRequest(userAutocompleteQuerySchema))
   @Security('jwt', ['project:member'])
   public async getUserAutocomplete(
     @Query() projectId: string,

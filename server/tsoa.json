@@ -11,7 +11,18 @@
         "name": "Authorization",
         "in": "header"
       }
-    }
+    },
+    "tags": [
+      { "name": "System" },
+      { "name": "Auth" },
+      { "name": "Users" },
+      { "name": "Projects" },
+      { "name": "Project Members" },
+      { "name": "Tasks" },
+      { "name": "Task Assignments" },
+      { "name": "Comments" },
+      { "name": "Attachments" }
+    ]
   },
   "routes": {
     "routesDir": "src",

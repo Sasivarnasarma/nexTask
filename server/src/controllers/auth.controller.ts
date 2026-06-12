@@ -1,5 +1,5 @@
 import type { Request as ExRequest } from 'express';
-import { Body, Controller, Post, Request, Route, Security, SuccessResponse } from 'tsoa';
+import { Body, Controller, Post, Request, Route, Security, SuccessResponse, Tags } from 'tsoa';
 
 import {
   AuthData,
@@ -11,6 +11,7 @@ import {
 import { ApiResponse, successResponse } from '../utils/response.util';
 
 @Route('auth')
+@Tags('Auth')
 export class AuthController extends Controller {
   private authService: AuthService;
 

@@ -16,7 +16,15 @@ import {
 } from 'tsoa';
 
 import { validateRequest } from '../middlewares/validate.middleware';
-import { addProjectMemberSchema, updateProjectMemberSchema } from '../schemas/membership.schema';
+import {
+  addProjectMemberSchema,
+  assignCollaboratorSchema,
+  assignProjectManagerSchema,
+  getProjectMemberDetailsSchema,
+  getProjectMembersSchema,
+  removeProjectMemberSchema,
+  updateProjectMemberSchema,
+} from '../schemas/membership.schema';
 import { ProjectMemberService } from '../services/project-member.service';
 import { ApiResponse, successResponse } from '../utils/response.util';
 
@@ -68,6 +76,7 @@ export class ProjectMemberController extends Controller {
    * Retrieves all members of the project.
    */
   @Get('/')
+  @Middlewares(validateRequest(getProjectMembersSchema))
   @Security('jwt', ['project:member'])
   public async getMembers(
     @Path() id: string,
@@ -82,6 +91,7 @@ export class ProjectMemberController extends Controller {
    * Retrieves details of a specific project member.
    */
   @Get('{userId}')
+  @Middlewares(validateRequest(getProjectMemberDetailsSchema))
   @Security('jwt', ['project:member'])
   public async getMemberDetails(
     @Path() id: string,
@@ -126,6 +136,7 @@ export class ProjectMemberController extends Controller {
    * Assigns the Project Manager role to a project member (Admin only).
    */
   @Patch('{userId}/project-manager')
+  @Middlewares(validateRequest(assignProjectManagerSchema))
   @Security('jwt', ['global:admin'])
   public async assignProjectManager(
     @Path() id: string,
@@ -148,6 +159,7 @@ export class ProjectMemberController extends Controller {
    * Assigns the Collaborator role to a project member.
    */
   @Patch('{userId}/collaborator')
+  @Middlewares(validateRequest(assignCollaboratorSchema))
   @Security('jwt', ['project:manager'])
   public async assignCollaborator(
     @Path() id: string,
@@ -170,6 +182,7 @@ export class ProjectMemberController extends Controller {
    * Removes a member from the project.
    */
   @Delete('{userId}')
+  @Middlewares(validateRequest(removeProjectMemberSchema))
   @Security('jwt', ['project:manager'])
   public async removeMember(
     @Path() id: string,

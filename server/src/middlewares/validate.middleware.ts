@@ -13,8 +13,22 @@ export const validateRequest = (schema: ZodType) => {
         params: req.params,
       });
 
-      if (parsed && typeof parsed === 'object' && 'body' in parsed) {
-        req.body = (parsed as any).body;
+      if (parsed && typeof parsed === 'object') {
+        if ('body' in parsed) req.body = (parsed as any).body;
+        
+        if ('query' in parsed && parsed.query) {
+          for (const key of Object.keys(req.query)) {
+            delete req.query[key];
+          }
+          Object.assign(req.query, parsed.query);
+        }
+        
+        if ('params' in parsed && parsed.params) {
+          for (const key of Object.keys(req.params)) {
+            delete req.params[key];
+          }
+          Object.assign(req.params, parsed.params);
+        }
       }
 
       // 2. If Zod approves, move to the next function

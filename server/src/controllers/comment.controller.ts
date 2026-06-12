@@ -15,7 +15,11 @@ import {
 } from 'tsoa';
 
 import { validateRequest } from '../middlewares/validate.middleware';
-import { createCommentSchema } from '../schemas/comment.schema';
+import {
+  createCommentSchema,
+  deleteCommentSchema,
+  getCommentsSchema,
+} from '../schemas/comment.schema';
 import { deleteComment, getCommentsByTaskId, postComment } from '../services/comment.service';
 import { ApiResponse, successResponse } from '../utils/response.util';
 
@@ -27,6 +31,7 @@ export class CommentController extends Controller {
    * Retrieves all comments for a specific task.
    */
   @Get('{taskId}/comments')
+  @Middlewares(validateRequest(getCommentsSchema))
   @Security('jwt', ['project:member'])
   public async getComments(@Path() taskId: string): Promise<ApiResponse<Comment[]>> {
     const comments = await getCommentsByTaskId(taskId);
@@ -58,6 +63,7 @@ export class CommentDeleteController extends Controller {
    * Deletes a comment by ID.
    */
   @Delete('{commentId}')
+  @Middlewares(validateRequest(deleteCommentSchema))
   @Security('jwt', ['project:member'])
   public async removeComment(
     @Path() commentId: string,
