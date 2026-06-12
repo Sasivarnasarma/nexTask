@@ -1,5 +1,6 @@
 import { CreateProjectRequest, Project, UpdateProjectRequest } from '@nextask/types';
 import type { Request as ExRequest } from 'express';
+import { Middlewares } from 'tsoa';
 import {
   Body,
   Controller,
@@ -16,6 +17,8 @@ import {
   Tags,
 } from 'tsoa';
 
+import { validateRequest } from '../middlewares/validate.middleware';
+import { createProjectSchema, updateProjectSchema } from '../schemas/project.schema';
 import { ProjectService } from '../services/project.service';
 import { ApiError } from '../utils/apiError.util';
 import { ApiResponse, successResponse } from '../utils/response.util';
@@ -33,6 +36,7 @@ export class ProjectController extends Controller {
 
   // 1. POST /projects (Create a project)
   @Post('/')
+  @Middlewares(validateRequest(createProjectSchema))
   @SuccessResponse('201', 'Created')
   @Security('jwt', ['global:pm'])
   public async create(
@@ -69,6 +73,7 @@ export class ProjectController extends Controller {
 
   // 4. PUT /projects/{id} (Update details)
   @Put('{id}')
+  @Middlewares(validateRequest(updateProjectSchema))
   @Security('jwt', ['project:manager'])
   public async update(
     @Path() id: string,

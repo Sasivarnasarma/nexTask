@@ -1,7 +1,21 @@
 import { Comment, CreateCommentRequest } from '@nextask/types';
 import type { Request as ExRequest } from 'express';
-import { Body, Controller, Delete, Get, Path, Post, Request, Route, Security, Tags } from 'tsoa';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Middlewares,
+  Path,
+  Post,
+  Request,
+  Route,
+  Security,
+  Tags,
+} from 'tsoa';
 
+import { validateRequest } from '../middlewares/validate.middleware';
+import { createCommentSchema } from '../schemas/comment.schema';
 import { deleteComment, getCommentsByTaskId, postComment } from '../services/comment.service';
 import { ApiResponse, successResponse } from '../utils/response.util';
 
@@ -23,6 +37,7 @@ export class CommentController extends Controller {
    * Posts a new comment to a specific task.
    */
   @Post('{taskId}/comments')
+  @Middlewares(validateRequest(createCommentSchema))
   @Security('jwt', ['project:member'])
   public async createComment(
     @Path() taskId: string,
