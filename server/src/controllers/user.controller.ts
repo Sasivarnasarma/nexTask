@@ -35,13 +35,11 @@ export class UserController extends Controller {
    */
   @SuccessResponse('200', 'OK')
   @Get('search/autocomplete')
-  public async getUserAutocomplete(
-    @Query() search: string
-  ): Promise<ApiResponse<any[]>> {
+  public async getUserAutocomplete(@Query() search: string): Promise<ApiResponse<any[]>> {
     if (!search || search.trim() === '') {
       return successResponse('Search term empty.', []);
     }
-    
+
     // Now it safely finds searchUsersAutocomplete inside your service class instance!
     const users = await this.userService.searchUsersAutocomplete(search);
     return successResponse('Autocomplete users retrieved successfully.', users);

@@ -1,5 +1,5 @@
 import { CreateTaskRequest, Task as SharedTask, UpdateTaskRequest } from '@nextask/types';
-import { Status, Priority, Task } from '@prisma/client';
+import { Priority, Status, Task } from '@prisma/client';
 
 import { prisma } from '../lib/prisma';
 import { ApiError } from '../utils/apiError.util';
@@ -53,7 +53,7 @@ export const getAllTasks = async (
   search?: string,
   status?: string,
   priority?: string,
-  tags?: string[]
+  tags?: string[],
 ): Promise<Task[]> => {
   return prisma.task.findMany({
     where: {

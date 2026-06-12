@@ -40,7 +40,7 @@ export class TaskController extends Controller {
     @Query() search?: string,
     @Query() status?: string,
     @Query() priority?: string,
-    @Query() tags?: string[]
+    @Query() tags?: string[],
   ): Promise<ApiResponse<Task[]>> {
     const tasks = await getAllTasks(projectId, search, status, priority, tags);
     return successResponse('Tasks retrieved successfully.', tasks);

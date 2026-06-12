@@ -46,31 +46,69 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"UserProfile": {
+			"UserRole": {
+				"type": "string",
+				"enum": [
+					"ADMIN",
+					"PROJECT_MANAGER",
+					"COLLABORATOR"
+				]
+			},
+			"User": {
 				"properties": {
 					"id": {
+						"type": "string"
+					},
+					"email": {
 						"type": "string"
 					},
 					"name": {
 						"type": "string",
 						"nullable": true
 					},
-					"email": {
-						"type": "string"
+					"role": {
+						"$ref": "#/components/schemas/UserRole"
 					},
-					"avatarUrl": {
-						"type": "string",
-						"nullable": true
+					"mustResetPassword": {
+						"type": "boolean"
+					},
+					"createdAt": {
+						"anyOf": [
+							{
+								"type": "string",
+								"format": "date-time"
+							},
+							{
+								"type": "string"
+							}
+						]
+					},
+					"updatedAt": {
+						"anyOf": [
+							{
+								"type": "string",
+								"format": "date-time"
+							},
+							{
+								"type": "string"
+							}
+						]
 					}
 				},
 				"required": [
 					"id",
-					"name",
 					"email",
-					"avatarUrl"
+					"name",
+					"role",
+					"mustResetPassword",
+					"createdAt",
+					"updatedAt"
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"UserProfile": {
+				"$ref": "#/components/schemas/User"
 			},
 			"ApiResponse_UserProfile_": {
 				"properties": {
@@ -150,13 +188,21 @@
 			},
 			"ChangePasswordRequest": {
 				"properties": {
-					"oldPassword": {
+					"currentPassword": {
 						"type": "string"
 					},
 					"newPassword": {
 						"type": "string"
+					},
+					"confirmNewPassword": {
+						"type": "string"
 					}
 				},
+				"required": [
+					"currentPassword",
+					"newPassword",
+					"confirmNewPassword"
+				],
 				"type": "object",
 				"additionalProperties": false
 			},
@@ -270,14 +316,6 @@
 				],
 				"type": "object",
 				"additionalProperties": false
-			},
-			"UserRole": {
-				"type": "string",
-				"enum": [
-					"ADMIN",
-					"PROJECT_MANAGER",
-					"COLLABORATOR"
-				]
 			},
 			"CommentAuthor": {
 				"properties": {
