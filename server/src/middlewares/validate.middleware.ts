@@ -6,12 +6,16 @@ import { errorResponse } from '../utils/response.util';
 export const validateRequest = (schema: ZodType) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // 1. Hand the incoming request to Zod for inspection
-      await schema.parseAsync({
+      // 1. Hand the incoming request to Zod for inspection (and apply any transforms/defaults)
+      const parsed = await schema.parseAsync({
         body: req.body,
         query: req.query,
         params: req.params,
       });
+
+      if (parsed && typeof parsed === 'object' && 'body' in parsed) {
+        req.body = (parsed as any).body;
+      }
 
       // 2. If Zod approves, move to the next function
       return next();
@@ -23,7 +27,7 @@ export const validateRequest = (schema: ZodType) => {
           const fieldName = issue.path.map(String).join('.') || 'global';
           mappedErrors[fieldName] = issue.message;
         }
-        return res.status(400).json(errorResponse('Data validation failed', mappedErrors));
+        return res.status(422).json(errorResponse('Data validation failed', mappedErrors));
       }
       return next(error);
     }

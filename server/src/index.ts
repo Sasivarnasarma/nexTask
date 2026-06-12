@@ -14,7 +14,6 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use(express.json());
 
 // --- NATIVE XSS SHIELD ---
 app.use((req: Request, res: Response, next: NextFunction) => {

@@ -9,7 +9,7 @@ export const createCommentSchema = z.object({
           filename: z.string(),
           fileKey: z.string(),
           mimeType: z.string(),
-          fileSize: z.number(),
+          fileSize: z.number().int(),
         }),
       )
       .optional(),
