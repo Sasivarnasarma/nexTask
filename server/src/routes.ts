@@ -930,7 +930,7 @@ export function RegisterRoutes(app: Router) {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
         app.post('/projects',
-            authenticateMiddleware([{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":["global:pm"]}]),
             ...(fetchMiddlewares<RequestHandler>(ProjectController)),
             ...(fetchMiddlewares<RequestHandler>(ProjectController.prototype.create)),
 

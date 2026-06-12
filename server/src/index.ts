@@ -3,7 +3,6 @@ import dotenv from 'dotenv';
 import express, { NextFunction, Request, Response } from 'express';
 import swaggerUi from 'swagger-ui-express';
 
-
 import { RegisterRoutes } from './routes';
 import swaggerDocument from './swagger.json';
 import { ApiError } from './utils/apiError.util';

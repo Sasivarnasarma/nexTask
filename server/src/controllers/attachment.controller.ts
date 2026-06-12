@@ -1,11 +1,10 @@
-import { Middlewares } from 'tsoa';
-import { validateRequest } from '../middlewares/validate.middleware';
-import { uploadAttachmentSchema } from '../schemas/attachment.schema';
-
 import { Attachment, CreateAttachmentRequest } from '@nextask/types';
 import type { Request as ExRequest } from 'express';
+import { Middlewares } from 'tsoa';
 import { Body, Controller, Delete, Get, Path, Post, Request, Route, Security, Tags } from 'tsoa';
 
+import { validateRequest } from '../middlewares/validate.middleware';
+import { uploadAttachmentSchema } from '../schemas/attachment.schema';
 import {
   createTaskAttachment,
   deleteAttachment,

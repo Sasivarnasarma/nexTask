@@ -1,8 +1,5 @@
-import { Middlewares } from 'tsoa';
-import { validateRequest } from '../middlewares/validate.middleware';
-import { addProjectMemberSchema } from '../schemas/membership.schema';
-
 import type { Request as ExRequest } from 'express';
+import { Middlewares } from 'tsoa';
 import {
   Body,
   Controller,
@@ -18,6 +15,8 @@ import {
   Tags,
 } from 'tsoa';
 
+import { validateRequest } from '../middlewares/validate.middleware';
+import { addProjectMemberSchema, updateProjectMemberSchema } from '../schemas/membership.schema';
 import { ProjectMemberService } from '../services/project-member.service';
 import { ApiResponse, successResponse } from '../utils/response.util';
 
@@ -103,6 +102,7 @@ export class ProjectMemberController extends Controller {
    * Updates the role of a project member.
    */
   @Patch('{userId}')
+  @Middlewares(validateRequest(updateProjectMemberSchema))
   @Security('jwt', ['project:manager'])
   public async updateMemberRole(
     @Path() id: string,

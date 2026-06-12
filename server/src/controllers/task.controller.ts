@@ -1,9 +1,7 @@
 import { CreateTaskRequest, Task as SharedTask, UpdateTaskRequest } from '@nextask/types';
-import { Middlewares } from 'tsoa';
-import { validateRequest } from '../middlewares/validate.middleware';
-import { createTaskSchema } from '../schemas/task.schema';
 import { Task } from '@prisma/client';
 import type { Request as ExRequest } from 'express';
+import { Middlewares } from 'tsoa';
 import {
   Body,
   Controller,
@@ -20,6 +18,8 @@ import {
   Tags,
 } from 'tsoa';
 
+import { validateRequest } from '../middlewares/validate.middleware';
+import { createTaskSchema, updateTaskSchema } from '../schemas/task.schema';
 import { verifyProjectManagerAccess } from '../services/project-member.service';
 import {
   createTask,
@@ -54,7 +54,7 @@ export class TaskController extends Controller {
 
   // POST /tasks
   @Post('/')
-  @Middlewares(validateRequest(createTaskSchema)) 
+  @Middlewares(validateRequest(createTaskSchema))
   @SuccessResponse('201', 'Task Created')
   @Security('jwt', ['project:manager'])
   public async createNewTask(@Body() body: CreateTaskRequest): Promise<ApiResponse<Task>> {
@@ -65,6 +65,7 @@ export class TaskController extends Controller {
 
   // PUT /tasks/:id
   @Put('{id}')
+  @Middlewares(validateRequest(updateTaskSchema))
   @Security('jwt', ['project:member'])
   public async updateExistingTask(
     @Path() id: string,
