@@ -1,4 +1,7 @@
 import { CreateTaskRequest, Task as SharedTask, UpdateTaskRequest } from '@nextask/types';
+import { Middlewares } from 'tsoa';
+import { validateRequest } from '../middlewares/validate.middleware';
+import { createTaskSchema } from '../schemas/task.schema';
 import { Task } from '@prisma/client';
 import type { Request as ExRequest } from 'express';
 import {
@@ -51,6 +54,7 @@ export class TaskController extends Controller {
 
   // POST /tasks
   @Post('/')
+  @Middlewares(validateRequest(createTaskSchema)) 
   @SuccessResponse('201', 'Task Created')
   @Security('jwt', ['project:manager'])
   public async createNewTask(@Body() body: CreateTaskRequest): Promise<ApiResponse<Task>> {

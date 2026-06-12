@@ -1,3 +1,7 @@
+import { Middlewares } from 'tsoa';
+import { validateRequest } from '../middlewares/validate.middleware';
+import { uploadAttachmentSchema } from '../schemas/attachment.schema';
+
 import { Attachment, CreateAttachmentRequest } from '@nextask/types';
 import type { Request as ExRequest } from 'express';
 import { Body, Controller, Delete, Get, Path, Post, Request, Route, Security, Tags } from 'tsoa';
@@ -27,6 +31,7 @@ export class AttachmentController extends Controller {
    * Uploads file metadata directly to a task.
    */
   @Post('{taskId}/attachments')
+  @Middlewares(validateRequest(uploadAttachmentSchema))
   @Security('jwt', ['project:member'])
   public async uploadAttachmentMetadata(
     @Path() taskId: string,

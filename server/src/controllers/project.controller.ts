@@ -1,3 +1,7 @@
+import { Middlewares } from 'tsoa';
+import { validateRequest } from '../middlewares/validate.middleware';
+import { createProjectSchema } from '../schemas/project.schema';
+
 import { CreateProjectRequest, Project, UpdateProjectRequest } from '@nextask/types';
 import type { Request as ExRequest } from 'express';
 import {
@@ -33,8 +37,9 @@ export class ProjectController extends Controller {
 
   // 1. POST /projects (Create a project)
   @Post('/')
+  @Middlewares(validateRequest(createProjectSchema))
   @SuccessResponse('201', 'Created')
-  @Security('jwt', ['global:pm'])
+  @Security('jwt')
   public async create(
     @Body() requestBody: CreateProjectRequest,
     @Request() request: ExRequest,

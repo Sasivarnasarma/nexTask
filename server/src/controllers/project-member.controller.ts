@@ -1,3 +1,7 @@
+import { Middlewares } from 'tsoa';
+import { validateRequest } from '../middlewares/validate.middleware';
+import { addProjectMemberSchema } from '../schemas/membership.schema';
+
 import type { Request as ExRequest } from 'express';
 import {
   Body,
@@ -41,6 +45,7 @@ export class ProjectMemberController extends Controller {
    * Adds a new member to the project.
    */
   @Post('/')
+  @Middlewares(validateRequest(addProjectMemberSchema))
   @SuccessResponse('201', 'Created')
   @Security('jwt', ['project:manager'])
   public async addMember(

@@ -1850,9 +1850,7 @@
 				],
 				"security": [
 					{
-						"jwt": [
-							"global:pm"
-						]
+						"jwt": []
 					}
 				],
 				"parameters": [],

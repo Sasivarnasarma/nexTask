@@ -7,3 +7,5 @@ allowBuilds:
   '@scarf/scarf': true
   argon2: true
   prisma: true
+minimumReleaseAgeExclude:
+  - prettier@3.8.4

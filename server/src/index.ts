@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import express, { NextFunction, Request, Response } from 'express';
 import swaggerUi from 'swagger-ui-express';
 
+
 import { RegisterRoutes } from './routes';
 import swaggerDocument from './swagger.json';
 import { ApiError } from './utils/apiError.util';
@@ -14,6 +15,29 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
+app.use(express.json());
+
+// --- NATIVE XSS SHIELD ---
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const sanitize = (obj: any) => {
+    if (!obj || typeof obj !== 'object') return;
+    for (const key of Object.keys(obj)) {
+      if (typeof obj[key] === 'string') {
+        // Convert dangerous script tags into safe text
+        obj[key] = obj[key].replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      } else if (typeof obj[key] === 'object') {
+        sanitize(obj[key]); // Check nested objects
+      }
+    }
+  };
+
+  if (req.body) sanitize(req.body);
+  if (req.query) sanitize(req.query);
+  if (req.params) sanitize(req.params);
+  next();
+});
+// -------------------------
+
 app.use(cors());
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
