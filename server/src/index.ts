@@ -6,7 +6,7 @@ import swaggerUi from 'swagger-ui-express';
 import { RegisterRoutes } from './routes';
 import swaggerDocument from './swagger.json';
 import { ApiError } from './utils/apiError.util';
-import { errorResponse, successResponse } from './utils/response.util';
+import { errorResponse } from './utils/response.util';
 
 dotenv.config();
 
@@ -19,14 +19,6 @@ app.use(cors());
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 RegisterRoutes(app);
-
-app.get('/', (req: Request, res: Response) => {
-  res.json(successResponse('Welcome to the nexTask API!', null));
-});
-
-app.get('/health', (req: Request, res: Response) => {
-  res.json(successResponse('Server is healthy.', { time: new Date() }));
-});
 
 app.use((err: unknown, req: Request, res: Response, _next: NextFunction) => {
   if (err instanceof ApiError) {

@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Get,
+  Middlewares,
   Patch,
   Post,
   Query,
@@ -10,8 +11,11 @@ import {
   Route,
   Security,
   SuccessResponse,
+  Tags,
 } from 'tsoa';
 
+import { validateRequest } from '../middlewares/validate.middleware';
+import { userAutocompleteQuerySchema } from '../schemas/user.schema';
 import {
   ChangePasswordRequest,
   UpdateProfileRequest,
@@ -21,6 +25,7 @@ import {
 import { ApiResponse, successResponse } from '../utils/response.util';
 
 @Route('users')
+@Tags('Users')
 @Security('jwt')
 export class UserController extends Controller {
   private userService: UserService;
@@ -35,10 +40,11 @@ export class UserController extends Controller {
    */
   @SuccessResponse('200', 'OK')
   @Get('search/autocomplete')
+  @Middlewares(validateRequest(userAutocompleteQuerySchema))
   @Security('jwt', ['project:member'])
   public async getUserAutocomplete(
     @Query() projectId: string,
-    @Query() search: string
+    @Query() search: string,
   ): Promise<ApiResponse<any[]>> {
     if (!search || search.trim() === '') {
       return successResponse('Search term empty.', []);

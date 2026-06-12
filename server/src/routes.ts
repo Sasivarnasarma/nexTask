@@ -10,13 +10,13 @@ import { TaskController } from './controllers/task.controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { TaskAssignmentController } from './controllers/task-assignment.controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { SystemController } from './controllers/system.controller';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { PushController } from './controllers/push.controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { ProjectController } from './controllers/project.controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { ProjectMemberController } from './controllers/project-member.controller';
-// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-import { PingController } from './controllers/ping.controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { CommentController } from './controllers/comment.controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -336,6 +336,26 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "PingResponse": {
+        "dataType": "refObject",
+        "properties": {
+            "message": {"dataType":"string","required":true},
+            "time": {"dataType":"datetime","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ApiResponse__time-Date__": {
+        "dataType": "refObject",
+        "properties": {
+            "success": {"dataType":"boolean","required":true},
+            "message": {"dataType":"string","required":true},
+            "data": {"dataType":"union","subSchemas":[{"dataType":"nestedObjectLiteral","nestedProperties":{"time":{"dataType":"datetime","required":true}}},{"dataType":"enum","enums":[null]}],"required":true},
+            "errors": {"dataType":"union","subSchemas":[{"ref":"Record_string.string_"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ApiResponse__publicKey-string__": {
         "dataType": "refObject",
         "properties": {
@@ -449,15 +469,6 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "role": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["PROJECT_MANAGER"]},{"dataType":"enum","enums":["COLLABORATOR"]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "PingResponse": {
-        "dataType": "refObject",
-        "properties": {
-            "message": {"dataType":"string","required":true},
-            "time": {"dataType":"datetime","required":true},
         },
         "additionalProperties": false,
     },
@@ -1071,6 +1082,93 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsSystemController_getWelcome: Record<string, TsoaRoute.ParameterSchema> = {
+        };
+        app.get('/',
+            ...(fetchMiddlewares<RequestHandler>(SystemController)),
+            ...(fetchMiddlewares<RequestHandler>(SystemController.prototype.getWelcome)),
+
+            async function SystemController_getWelcome(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsSystemController_getWelcome, request, response });
+
+                const controller = new SystemController();
+
+              await templateService.apiHandler({
+                methodName: 'getWelcome',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsSystemController_getPing: Record<string, TsoaRoute.ParameterSchema> = {
+        };
+        app.get('/ping',
+            ...(fetchMiddlewares<RequestHandler>(SystemController)),
+            ...(fetchMiddlewares<RequestHandler>(SystemController.prototype.getPing)),
+
+            async function SystemController_getPing(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsSystemController_getPing, request, response });
+
+                const controller = new SystemController();
+
+              await templateService.apiHandler({
+                methodName: 'getPing',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsSystemController_getHealth: Record<string, TsoaRoute.ParameterSchema> = {
+        };
+        app.get('/health',
+            ...(fetchMiddlewares<RequestHandler>(SystemController)),
+            ...(fetchMiddlewares<RequestHandler>(SystemController.prototype.getHealth)),
+
+            async function SystemController_getHealth(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsSystemController_getHealth, request, response });
+
+                const controller = new SystemController();
+
+              await templateService.apiHandler({
+                methodName: 'getHealth',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsPushController_getPublicKey: Record<string, TsoaRoute.ParameterSchema> = {
         };
         app.get('/push/key',
@@ -1604,35 +1702,6 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'removeMember',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: undefined,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsPingController_getMessage: Record<string, TsoaRoute.ParameterSchema> = {
-        };
-        app.get('/ping',
-            ...(fetchMiddlewares<RequestHandler>(PingController)),
-            ...(fetchMiddlewares<RequestHandler>(PingController.prototype.getMessage)),
-
-            async function PingController_getMessage(request: ExRequest, response: ExResponse, next: any) {
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsPingController_getMessage, request, response });
-
-                const controller = new PingController();
-
-              await templateService.apiHandler({
-                methodName: 'getMessage',
                 controller,
                 response,
                 next,

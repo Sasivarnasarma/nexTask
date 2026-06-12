@@ -19,7 +19,13 @@ import {
 } from 'tsoa';
 
 import { validateRequest } from '../middlewares/validate.middleware';
-import { createTaskSchema, updateTaskSchema } from '../schemas/task.schema';
+import {
+  createTaskSchema,
+  deleteTaskSchema,
+  getTaskSchema,
+  getTasksQuerySchema,
+  updateTaskSchema,
+} from '../schemas/task.schema';
 import { verifyProjectManagerAccess } from '../services/project-member.service';
 import {
   createTask,
@@ -37,6 +43,7 @@ import { ApiResponse, successResponse } from '../utils/response.util';
 export class TaskController extends Controller {
   // GET /tasks with Query Filtering (Task 3.4)
   @Get('/')
+  @Middlewares(validateRequest(getTasksQuerySchema))
   @Security('jwt', ['project:member'])
   public async getTasks(
     @Query() projectId: string,
@@ -51,6 +58,7 @@ export class TaskController extends Controller {
 
   // GET /tasks/:id
   @Get('{id}')
+  @Middlewares(validateRequest(getTaskSchema))
   @Security('jwt', ['project:member'])
   public async getTask(@Path() id: string): Promise<ApiResponse<SharedTask>> {
     const task = await getTaskById(id);
@@ -112,6 +120,7 @@ export class TaskController extends Controller {
 
   // DELETE /tasks/:id
   @Delete('{id}')
+  @Middlewares(validateRequest(deleteTaskSchema))
   @Security('jwt', ['project:manager'])
   public async deleteExistingTask(@Path() id: string): Promise<ApiResponse<null>> {
     await deleteTask(id);

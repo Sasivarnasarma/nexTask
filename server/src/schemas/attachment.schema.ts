@@ -1,6 +1,9 @@
 import { z } from 'zod';
 
 export const uploadAttachmentSchema = z.object({
+  params: z.object({
+    taskId: z.uuid({ message: 'Invalid Task ID' }),
+  }),
   body: z.object({
     filename: z.string().min(1, 'Filename is required'),
     fileKey: z.string().min(1, 'File key is required'),
@@ -14,5 +17,17 @@ export const getPresignedUrlSchema = z.object({
     filename: z.string().min(1, 'Filename is required'),
     mimeType: z.string().min(1, 'Mime type is required'),
     fileSize: z.number().int().positive('File size must be greater than 0'),
+  }),
+});
+
+export const getAttachmentsSchema = z.object({
+  params: z.object({
+    taskId: z.uuid({ message: 'Invalid Task ID' }),
+  }),
+});
+
+export const deleteAttachmentSchema = z.object({
+  params: z.object({
+    attachmentId: z.uuid({ message: 'Invalid Attachment ID' }),
   }),
 });
