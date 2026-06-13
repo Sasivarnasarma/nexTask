@@ -64,9 +64,23 @@ export function mapPriorityToFrontend(priority: string): string {
 
 // ─── API Requests ───────────────────────────────────────────────────────────
 
-export async function fetchTasks(projectId: string): Promise<Task[]> {
+export async function fetchTasks(
+  projectId: string,
+  filters?: {
+    search?: string;
+    status?: string;
+    priority?: string;
+    tags?: string[];
+  },
+): Promise<Task[]> {
+  const params: Record<string, any> = { projectId };
+  if (filters?.search) params.search = filters.search;
+  if (filters?.status) params.status = mapStatusToBackend(filters.status);
+  if (filters?.priority) params.priority = mapPriorityToBackend(filters.priority);
+  if (filters?.tags && filters.tags.length > 0) params.tags = filters.tags;
+
   const { data } = await apiClient.get<ApiResponse<Task[]>>('/tasks', {
-    params: { projectId },
+    params,
   });
   return data.data ?? [];
 }

@@ -14,6 +14,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { Task, UpdateTaskRequest } from '@nextask/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  Check,
   ChevronDown,
   Filter,
   Folder,
@@ -27,6 +28,9 @@ import {
   Send,
   Sun,
   Trash2,
+  UserPlus,
+  Users,
+  X,
 } from 'lucide-react';
 import React, { useState } from 'react';
 
@@ -38,6 +42,15 @@ import {
 } from '../api/attachments.api';
 import { deleteComment, fetchComments, postComment } from '../api/comments.api';
 import { fetchUserProjects } from '../api/profile.api';
+import {
+  addProjectMember,
+  assignTaskUser,
+  fetchProjectMembers,
+  fetchTeamMembersAutocomplete,
+  removeProjectMember,
+  unassignTaskUser,
+  updateProjectMemberRole,
+} from '../api/projects.api';
 import {
   createTask,
   deleteTask,
@@ -78,6 +91,9 @@ import {
 } from '../components/ui/table';
 import { Textarea } from '../components/ui/textarea';
 import { useTheme } from '../hooks/useTheme';
+import { useAuthStore } from '../store/auth.store';
+import { useProjectStore } from '../store/project.store';
+import { useToastStore } from '../store/toast.store';
 
 export interface FrontendTask extends Omit<Task, 'priority' | 'status'> {
   priority: string;
@@ -164,6 +180,7 @@ export function Dashboard() {
   const queryClient = useQueryClient();
   const { theme, setTheme } = useTheme();
 
+  const user = useAuthStore((s) => s.user);
   const [activeTask, setActiveTask] = useState<FrontendTask | null>(null);
   const [selectedTask, setSelectedTask] = useState<FrontendTask | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -175,10 +192,28 @@ export function Dashboard() {
   const [viewMode, setViewMode] = useState<'board' | 'table'>('board');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [priorityFilter, setPriorityFilter] = useState<string | null>(null);
   const [commentText, setCommentText] = useState('');
   const [isUploading, setIsUploading] = useState(false);
 
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  // Global Project Switcher store
+  const { activeProjectId, setActiveProjectId } = useProjectStore();
+
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Project Members management console states
+  const [isMembersModalOpen, setIsMembersModalOpen] = useState(false);
+  const [memberSearch, setMemberSearch] = useState('');
+  const [selectedAutocompleteUser, setSelectedAutocompleteUser] = useState<any | null>(null);
+  const [newMemberRole, setNewMemberRole] = useState<'PROJECT_MANAGER' | 'COLLABORATOR'>(
+    'COLLABORATOR',
+  );
 
   // ─── Project & Task Queries ────────────────────────────────────────────────
 
@@ -187,15 +222,54 @@ export function Dashboard() {
     queryFn: fetchUserProjects,
   });
 
-  const activeProjectId = selectedProjectId || projects[0]?.id;
+  const activeProjectIdResolved = activeProjectId || projects[0]?.id || null;
 
-  const { data: serverTasks = [], isLoading: isTasksLoading } = useQuery({
-    queryKey: ['tasks', activeProjectId],
-    queryFn: () => fetchTasks(activeProjectId!),
-    enabled: !!activeProjectId,
+  React.useEffect(() => {
+    if (!activeProjectId && projects.length > 0) {
+      setActiveProjectId(projects[0].id);
+    }
+  }, [activeProjectId, projects, setActiveProjectId]);
+
+  const activeProject = projects.find((p) => p.id === activeProjectIdResolved);
+
+  // Fetch project members list
+  const { data: projectMembers = [], refetch: refetchMembers } = useQuery({
+    queryKey: ['project-members', activeProjectIdResolved],
+    queryFn: () => fetchProjectMembers(activeProjectIdResolved!),
+    enabled: !!activeProjectIdResolved,
   });
 
-  const isLoading = isProjectsLoading || (!!activeProjectId && isTasksLoading);
+  // Autocomplete team members search
+  const { data: autocompleteUsers = [] } = useQuery({
+    queryKey: ['autocomplete-users', activeProjectIdResolved, memberSearch],
+    queryFn: () => fetchTeamMembersAutocomplete(activeProjectIdResolved!, memberSearch),
+    enabled: !!activeProjectIdResolved && memberSearch.trim().length > 0,
+  });
+
+  const currentUserMembership = projectMembers.find((m: any) => m.userId === user?.id);
+  const isProjectManager =
+    user?.role === 'ADMIN' ||
+    activeProject?.ownerId === user?.id ||
+    currentUserMembership?.role === 'PROJECT_MANAGER';
+
+  const { data: serverTasks = [], isLoading: isTasksLoading } = useQuery({
+    queryKey: [
+      'tasks',
+      activeProjectIdResolved,
+      debouncedSearchQuery,
+      statusFilter,
+      priorityFilter,
+    ],
+    queryFn: () =>
+      fetchTasks(activeProjectIdResolved!, {
+        search: debouncedSearchQuery || undefined,
+        status: statusFilter || undefined,
+        priority: priorityFilter || undefined,
+      }),
+    enabled: !!activeProjectIdResolved,
+  });
+
+  const isLoading = isProjectsLoading || (!!activeProjectIdResolved && isTasksLoading);
 
   const tasks = serverTasks.map((t) => ({
     ...t,
@@ -209,6 +283,7 @@ export function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       setIsCreateModalOpen(false);
       setNewTaskForm({ title: '', description: '', priority: 'Medium' });
+      useToastStore.getState().showSuccess('Task created successfully!');
     },
   });
 
@@ -225,6 +300,55 @@ export function Dashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       setSelectedTask(null);
+      useToastStore.getState().showSuccess('Task deleted successfully.');
+    },
+  });
+
+  // Project Members mutations
+  const addMemberMutation = useMutation({
+    mutationFn: (body: { userId: string; role: 'PROJECT_MANAGER' | 'COLLABORATOR' }) =>
+      addProjectMember(activeProjectIdResolved!, body),
+    onSuccess: () => {
+      refetchMembers();
+      setSelectedAutocompleteUser(null);
+      setMemberSearch('');
+      useToastStore.getState().showSuccess('Member added to project workspace!');
+    },
+  });
+
+  const updateMemberRoleMutation = useMutation({
+    mutationFn: ({ userId, role }: { userId: string; role: 'PROJECT_MANAGER' | 'COLLABORATOR' }) =>
+      updateProjectMemberRole(activeProjectIdResolved!, userId, { role }),
+    onSuccess: () => {
+      refetchMembers();
+      useToastStore.getState().showSuccess('Member role updated.');
+    },
+  });
+
+  const removeMemberMutation = useMutation({
+    mutationFn: (userId: string) => removeProjectMember(activeProjectIdResolved!, userId),
+    onSuccess: () => {
+      refetchMembers();
+      useToastStore.getState().showSuccess('Member removed from project.');
+    },
+  });
+
+  // Task Assignee mutations
+  const assignUserMutation = useMutation({
+    mutationFn: (userId: string) => assignTaskUser(selectedTask!.id, userId),
+    onSuccess: () => {
+      refetchTaskDetails();
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      useToastStore.getState().showSuccess('Task assignee added.');
+    },
+  });
+
+  const unassignUserMutation = useMutation({
+    mutationFn: (userId: string) => unassignTaskUser(selectedTask!.id, userId),
+    onSuccess: () => {
+      refetchTaskDetails();
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      useToastStore.getState().showSuccess('Task assignee removed.');
     },
   });
 
@@ -301,13 +425,13 @@ export function Dashboard() {
   };
 
   const handleCreateTask = () => {
-    if (!newTaskForm.title.trim() || !activeProjectId) return;
+    if (!newTaskForm.title.trim() || !activeProjectIdResolved) return;
     createTaskMutation.mutate({
       title: newTaskForm.title.trim(),
       description: newTaskForm.description.trim() || undefined,
       priority: mapPriorityToBackend(newTaskForm.priority),
       status: 'TODO',
-      projectId: activeProjectId,
+      projectId: activeProjectIdResolved,
     });
   };
 
@@ -380,11 +504,7 @@ export function Dashboard() {
 
   // ─── Filter Tasks ────────────────────────────────────────────────────────────
 
-  const filteredTasks = tasks.filter((task) => {
-    const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter ? task.status === statusFilter : true;
-    return matchesSearch && matchesStatus;
-  });
+  const filteredTasks = tasks;
 
   if (isLoading) {
     return (
@@ -401,77 +521,55 @@ export function Dashboard() {
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-extrabold tracking-tight">Project Board</h1>
             {projects.length > 0 && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+              <div className="flex items-center gap-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="flex items-center gap-2 border-border bg-background hover:bg-muted text-foreground text-sm font-semibold h-9 px-3"
+                    >
+                      <Folder className="h-4 w-4 text-primary" />
+                      <span>
+                        {projects.find((p) => p.id === activeProjectIdResolved)?.name ||
+                          'Select Project'}
+                      </span>
+                      <ChevronDown className="h-4 w-4 opacity-50" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-popover border-border text-popover-foreground w-56">
+                    {projects.map((project) => (
+                      <DropdownMenuItem
+                        key={project.id}
+                        onClick={() => setActiveProjectId(project.id)}
+                        className={
+                          project.id === activeProjectIdResolved
+                            ? 'bg-primary/10 text-primary font-medium'
+                            : ''
+                        }
+                      >
+                        {project.name}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {activeProjectIdResolved && (
                   <Button
                     variant="outline"
                     className="flex items-center gap-2 border-border bg-background hover:bg-muted text-foreground text-sm font-semibold h-9 px-3"
+                    onClick={() => setIsMembersModalOpen(true)}
                   >
-                    <Folder className="h-4 w-4 text-primary" />
-                    <span>
-                      {projects.find((p) => p.id === activeProjectId)?.name || 'Select Project'}
-                    </span>
-                    <ChevronDown className="h-4 w-4 opacity-50" />
+                    <Users className="h-4 w-4 text-primary" />
+                    <span>Members ({projectMembers.length})</span>
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="bg-popover border-border text-popover-foreground w-56">
-                  {projects.map((project) => (
-                    <DropdownMenuItem
-                      key={project.id}
-                      onClick={() => setSelectedProjectId(project.id)}
-                      className={
-                        project.id === activeProjectId
-                          ? 'bg-primary/10 text-primary font-medium'
-                          : ''
-                      }
-                    >
-                      {project.name}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                )}
+              </div>
             )}
           </div>
           <p className="text-muted-foreground">Manage and track your project tasks in real time.</p>
         </div>
 
         <div className="flex items-center gap-4">
-          {viewMode === 'table' && (
-            <div className="flex items-center gap-2 mr-4">
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search tasks..."
-                  className="w-64 pl-9 bg-background border-border text-foreground"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="bg-background border-border text-foreground hover:bg-accent hover:text-accent-foreground"
-                  >
-                    <Filter className="mr-2 h-4 w-4" /> {statusFilter || 'All Statuses'}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="bg-popover border-border text-popover-foreground">
-                  <DropdownMenuItem onClick={() => setStatusFilter(null)}>
-                    All Statuses
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setStatusFilter('To Do')}>
-                    To Do
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setStatusFilter('In Progress')}>
-                    In Progress
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setStatusFilter('Done')}>Done</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          )}
-
           <div className="flex bg-muted/50 p-1 rounded-lg border border-border mr-2">
             <Button
               variant="ghost"
@@ -512,6 +610,79 @@ export function Dashboard() {
             <Plus className="h-4 w-4 mr-2" /> New Task
           </Button>
         </div>
+      </div>
+
+      {/* Unified Filters Bar */}
+      <div className="mb-6 flex flex-wrap items-center gap-3 bg-muted/20 p-3 rounded-xl border border-border">
+        <div className="relative flex-1 min-w-[200px] max-w-sm">
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search tasks..."
+            className="pl-9 bg-background border-border text-foreground"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+
+        {/* Status Filter */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="bg-background border-border text-foreground hover:bg-muted"
+            >
+              <Filter className="mr-2 h-4 w-4 text-primary" />
+              <span>Status: {statusFilter || 'All'}</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="bg-popover border-border text-popover-foreground">
+            <DropdownMenuItem onClick={() => setStatusFilter(null)}>All Statuses</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setStatusFilter('To Do')}>To Do</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setStatusFilter('In Progress')}>
+              In Progress
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setStatusFilter('Done')}>Done</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* Priority Filter */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="bg-background border-border text-foreground hover:bg-muted"
+            >
+              <Filter className="mr-2 h-4 w-4 text-primary" />
+              <span>Priority: {priorityFilter || 'All'}</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="bg-popover border-border text-popover-foreground">
+            <DropdownMenuItem onClick={() => setPriorityFilter(null)}>
+              All Priorities
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setPriorityFilter('Low')}>Low</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setPriorityFilter('Medium')}>Medium</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setPriorityFilter('High')}>High</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* Clear Filters */}
+        {(searchQuery || statusFilter || priorityFilter) && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setSearchQuery('');
+              setStatusFilter(null);
+              setPriorityFilter(null);
+            }}
+            className="text-muted-foreground hover:text-foreground text-xs font-semibold"
+          >
+            Clear Filters
+          </Button>
+        )}
       </div>
 
       {viewMode === 'board' ? (
@@ -668,6 +839,86 @@ export function Dashboard() {
                   {mappedSelectedTask?.description || 'No description provided.'}
                 </DialogDescription>
               </DialogHeader>
+
+              {/* Task Assignees Box */}
+              <div className="space-y-3 pt-4 border-t border-border/50">
+                <div className="flex justify-between items-center">
+                  <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                    Assignees
+                  </h4>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 border-border bg-background hover:bg-muted text-foreground flex items-center gap-1.5"
+                      >
+                        <UserPlus size={14} />
+                        <span>Manage Assignees</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="bg-popover border-border text-popover-foreground w-64 max-h-60 overflow-y-auto">
+                      {projectMembers.map((member) => {
+                        const isAssigned = mappedSelectedTask?.assignees?.some(
+                          (a) => a.userId === member.userId,
+                        );
+                        return (
+                          <DropdownMenuItem
+                            key={member.userId}
+                            className="flex items-center justify-between cursor-pointer"
+                            onClick={() => {
+                              if (isAssigned) {
+                                unassignUserMutation.mutate(member.userId);
+                              } else {
+                                assignUserMutation.mutate(member.userId);
+                              }
+                            }}
+                          >
+                            <span className="truncate">
+                              {member.user?.name || member.user?.email || 'Unknown User'}
+                            </span>
+                            {isAssigned && (
+                              <Check size={14} className="text-primary shrink-0 ml-2" />
+                            )}
+                          </DropdownMenuItem>
+                        );
+                      })}
+                      {projectMembers.length === 0 && (
+                        <div className="p-2 text-xs text-muted-foreground text-center">
+                          No project members to assign.
+                        </div>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {mappedSelectedTask?.assignees && mappedSelectedTask.assignees.length > 0 ? (
+                    mappedSelectedTask.assignees.map((assignee) => (
+                      <div
+                        key={assignee.userId}
+                        className="flex items-center gap-2 bg-muted border border-border px-2.5 py-1.5 rounded-full text-xs text-foreground max-w-[180px] truncate"
+                      >
+                        <span className="truncate font-medium">
+                          {assignee.name || assignee.email}
+                        </span>
+                        <button
+                          type="button"
+                          className="hover:text-destructive text-muted-foreground transition-colors shrink-0"
+                          onClick={() => unassignUserMutation.mutate(assignee.userId)}
+                          title="Remove Assignee"
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-xs text-muted-foreground italic">
+                      No assignees assigned to this task.
+                    </p>
+                  )}
+                </div>
+              </div>
 
               {/* Task S3 Attachments Box */}
               <div className="space-y-4 pt-4 mt-8 border-t border-border/50">
@@ -879,6 +1130,166 @@ export function Dashboard() {
               Save Task
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ─── MODAL 3: PROJECT MEMBERS MANAGEMENT CONSOLE ────────────────────────── */}
+      <Dialog open={isMembersModalOpen} onOpenChange={setIsMembersModalOpen}>
+        <DialogContent className="bg-background border-border text-foreground sm:max-w-[550px] max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Project Members</DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              Manage the members and roles for this project workspace.
+            </DialogDescription>
+          </DialogHeader>
+
+          {/* Autocomplete Input to Add Member */}
+          {isProjectManager && (
+            <div className="space-y-3 border-b border-border/50 pb-4 mb-4">
+              <label className="text-sm font-semibold text-foreground">Add New Member</label>
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search users by name or email..."
+                    value={memberSearch}
+                    onChange={(e) => {
+                      setMemberSearch(e.target.value);
+                      if (selectedAutocompleteUser) setSelectedAutocompleteUser(null);
+                    }}
+                    className="pl-9 bg-background border-border"
+                  />
+                  {/* Autocomplete Dropdown list */}
+                  {autocompleteUsers.length > 0 &&
+                    memberSearch.trim().length > 0 &&
+                    !selectedAutocompleteUser && (
+                      <div className="absolute z-50 left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                        {autocompleteUsers.map((u: any) => (
+                          <div
+                            key={u.id}
+                            onClick={() => {
+                              setSelectedAutocompleteUser(u);
+                              setMemberSearch(u.email);
+                            }}
+                            className="p-2.5 hover:bg-muted text-sm text-foreground cursor-pointer flex justify-between items-center"
+                          >
+                            <span className="font-medium">{u.name || u.email}</span>
+                            {u.name && (
+                              <span className="text-xs text-muted-foreground">{u.email}</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                </div>
+
+                <select
+                  value={newMemberRole}
+                  onChange={(e) => setNewMemberRole(e.target.value as any)}
+                  className="flex h-10 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                >
+                  <option value="COLLABORATOR">Collaborator</option>
+                  <option value="PROJECT_MANAGER">Project Manager</option>
+                </select>
+
+                <Button
+                  onClick={() => {
+                    if (selectedAutocompleteUser) {
+                      addMemberMutation.mutate({
+                        userId: selectedAutocompleteUser.id,
+                        role: newMemberRole,
+                      });
+                    }
+                  }}
+                  disabled={!selectedAutocompleteUser || addMemberMutation.isPending}
+                >
+                  Add
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Members List */}
+          <div className="space-y-4">
+            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+              Current Members ({projectMembers.length})
+            </h4>
+            <div className="space-y-2">
+              {projectMembers.map((member: any) => {
+                const isOwner = member.userId === activeProject?.ownerId;
+                const isSelf = member.userId === user?.id;
+                return (
+                  <div
+                    key={member.userId}
+                    className="flex justify-between items-center border border-border rounded-xl p-3 bg-muted/20"
+                  >
+                    <div className="min-w-0 pr-4">
+                      <p className="text-sm font-semibold text-foreground truncate">
+                        {member.user?.name || member.user?.email || 'Teammate'}
+                        {isSelf && (
+                          <span className="ml-1.5 text-[10px] bg-primary/20 text-primary px-1.5 py-0.5 rounded-full font-bold">
+                            You
+                          </span>
+                        )}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">{member.user?.email}</p>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      {isOwner ? (
+                        <span className="text-[10px] bg-amber-500/10 text-amber-500 border border-amber-500/25 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                          Project Owner
+                        </span>
+                      ) : isProjectManager && !isSelf ? (
+                        <>
+                          <select
+                            value={member.role}
+                            onChange={(e) =>
+                              updateMemberRoleMutation.mutate({
+                                userId: member.userId,
+                                role: e.target.value as any,
+                              })
+                            }
+                            className="flex h-8 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground focus-visible:outline-none"
+                            disabled={updateMemberRoleMutation.isPending}
+                          >
+                            <option value="COLLABORATOR">Collaborator</option>
+                            <option value="PROJECT_MANAGER">Project Manager</option>
+                          </select>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => {
+                              if (
+                                window.confirm(
+                                  `Remove ${member.user?.name || member.user?.email} from project?`,
+                                )
+                              ) {
+                                removeMemberMutation.mutate(member.userId);
+                              }
+                            }}
+                            disabled={removeMemberMutation.isPending}
+                          >
+                            <X size={14} />
+                          </Button>
+                        </>
+                      ) : (
+                        <span className="text-[10px] bg-muted text-muted-foreground border border-border px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                          {member.role === 'PROJECT_MANAGER' ? 'Project Manager' : 'Collaborator'}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+              {projectMembers.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-6">
+                  No members in this project workspace.
+                </p>
+              )}
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

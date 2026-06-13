@@ -634,9 +634,9 @@ export function RegisterRoutes(app: Router) {
     
         const argsUserController_getUserAutocomplete: Record<string, TsoaRoute.ParameterSchema> = {
                 projectId: {"in":"query","name":"projectId","required":true,"dataType":"string"},
-                search: {"in":"query","name":"search","required":true,"dataType":"string"},
+                q: {"in":"query","name":"q","required":true,"dataType":"string"},
         };
-        app.get('/users/search/autocomplete',
+        app.get('/users/search',
             authenticateMiddleware([{"jwt":["project:member"]}]),
             ...(fetchMiddlewares<RequestHandler>(UserController)),
             ...(fetchMiddlewares<RequestHandler>(UserController.prototype.getUserAutocomplete)),
@@ -952,11 +952,11 @@ export function RegisterRoutes(app: Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsTaskAssignmentController_assignUser: Record<string, TsoaRoute.ParameterSchema> = {
-                taskId: {"in":"path","name":"taskId","required":true,"dataType":"string"},
+                id: {"in":"path","name":"id","required":true,"dataType":"string"},
                 body: {"in":"body","name":"body","required":true,"ref":"AssignUserInput"},
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
-        app.post('/tasks/:taskId/assignees',
+        app.post('/tasks/:id/assignments',
             authenticateMiddleware([{"jwt":["project:manager"]}]),
             ...(fetchMiddlewares<RequestHandler>(TaskAssignmentController)),
             ...(fetchMiddlewares<RequestHandler>(TaskAssignmentController.prototype.assignUser)),
@@ -985,11 +985,11 @@ export function RegisterRoutes(app: Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsTaskAssignmentController_unassignUser: Record<string, TsoaRoute.ParameterSchema> = {
-                taskId: {"in":"path","name":"taskId","required":true,"dataType":"string"},
+                id: {"in":"path","name":"id","required":true,"dataType":"string"},
                 userId: {"in":"path","name":"userId","required":true,"dataType":"string"},
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
-        app.delete('/tasks/:taskId/assignees/:userId',
+        app.delete('/tasks/:id/assignments/:userId',
             authenticateMiddleware([{"jwt":["project:manager"]}]),
             ...(fetchMiddlewares<RequestHandler>(TaskAssignmentController)),
             ...(fetchMiddlewares<RequestHandler>(TaskAssignmentController.prototype.unassignUser)),
@@ -1018,11 +1018,11 @@ export function RegisterRoutes(app: Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsTaskAssignmentController_bulkAssign: Record<string, TsoaRoute.ParameterSchema> = {
-                taskId: {"in":"path","name":"taskId","required":true,"dataType":"string"},
+                id: {"in":"path","name":"id","required":true,"dataType":"string"},
                 body: {"in":"body","name":"body","required":true,"ref":"BulkAssignInput"},
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
-        app.put('/tasks/:taskId/assignees',
+        app.put('/tasks/:id/assignments',
             authenticateMiddleware([{"jwt":["project:manager"]}]),
             ...(fetchMiddlewares<RequestHandler>(TaskAssignmentController)),
             ...(fetchMiddlewares<RequestHandler>(TaskAssignmentController.prototype.bulkAssign)),
@@ -1051,10 +1051,10 @@ export function RegisterRoutes(app: Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsTaskAssignmentController_getAssignees: Record<string, TsoaRoute.ParameterSchema> = {
-                taskId: {"in":"path","name":"taskId","required":true,"dataType":"string"},
+                id: {"in":"path","name":"id","required":true,"dataType":"string"},
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
-        app.get('/tasks/:taskId/assignees',
+        app.get('/tasks/:id/assignments',
             authenticateMiddleware([{"jwt":["project:member"]}]),
             ...(fetchMiddlewares<RequestHandler>(TaskAssignmentController)),
             ...(fetchMiddlewares<RequestHandler>(TaskAssignmentController.prototype.getAssignees)),

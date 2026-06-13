@@ -40,7 +40,7 @@ export interface BulkAssignInput {
   userIds: string[];
 }
 
-@Route('tasks/{taskId}/assignees')
+@Route('tasks/{id}/assignments')
 @Tags('Task Assignments')
 @Security('jwt')
 export class TaskAssignmentController extends Controller {
@@ -52,12 +52,12 @@ export class TaskAssignmentController extends Controller {
   @SuccessResponse('201', 'Created')
   @Security('jwt', ['project:manager'])
   public async assignUser(
-    @Path() taskId: string,
+    @Path() id: string,
     @Body() body: AssignUserInput,
     @Request() request: ExRequest,
   ): Promise<ApiResponse<TaskAssignment>> {
     const { userId: requestorId, role: requestorRole } = (request as any).user;
-    const assignment = await assignUserToTask(taskId, body.userId, requestorId, requestorRole);
+    const assignment = await assignUserToTask(id, body.userId, requestorId, requestorRole);
     this.setStatus(201);
     return successResponse('User assigned to task successfully.', assignment);
   }
@@ -69,12 +69,12 @@ export class TaskAssignmentController extends Controller {
   @Middlewares(validateRequest(unassignUserSchema))
   @Security('jwt', ['project:manager'])
   public async unassignUser(
-    @Path() taskId: string,
+    @Path() id: string,
     @Path() userId: string,
     @Request() request: ExRequest,
   ): Promise<ApiResponse<null>> {
     const { userId: requestorId, role: requestorRole } = (request as any).user;
-    await unassignUserFromTask(taskId, userId, requestorId, requestorRole);
+    await unassignUserFromTask(id, userId, requestorId, requestorRole);
     return successResponse('User unassigned from task successfully.', null);
   }
 
@@ -85,17 +85,12 @@ export class TaskAssignmentController extends Controller {
   @Middlewares(validateRequest(bulkAssignSchema))
   @Security('jwt', ['project:manager'])
   public async bulkAssign(
-    @Path() taskId: string,
+    @Path() id: string,
     @Body() body: BulkAssignInput,
     @Request() request: ExRequest,
   ): Promise<ApiResponse<TaskAssignment[]>> {
     const { userId: requestorId, role: requestorRole } = (request as any).user;
-    const assignments = await bulkAssignUsersToTask(
-      taskId,
-      body.userIds,
-      requestorId,
-      requestorRole,
-    );
+    const assignments = await bulkAssignUsersToTask(id, body.userIds, requestorId, requestorRole);
     return successResponse('Task assignments updated successfully.', assignments);
   }
 
@@ -106,11 +101,11 @@ export class TaskAssignmentController extends Controller {
   @Middlewares(validateRequest(getAssigneesSchema))
   @Security('jwt', ['project:member'])
   public async getAssignees(
-    @Path() taskId: string,
+    @Path() id: string,
     @Request() request: ExRequest,
   ): Promise<ApiResponse<TaskAssignee[]>> {
     const { userId: requestorId, role: requestorRole } = (request as any).user;
-    const assignees = await getTaskAssignees(taskId, requestorId, requestorRole);
+    const assignees = await getTaskAssignees(id, requestorId, requestorRole);
     return successResponse('Task assignees retrieved successfully.', assignees);
   }
 }

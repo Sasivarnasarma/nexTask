@@ -1646,7 +1646,7 @@
 		"contact": {}
 	},
 	"paths": {
-		"/users/search/autocomplete": {
+		"/users/search": {
 			"get": {
 				"operationId": "GetUserAutocomplete",
 				"responses": {
@@ -1683,7 +1683,7 @@
 					},
 					{
 						"in": "query",
-						"name": "search",
+						"name": "q",
 						"required": true,
 						"schema": {
 							"type": "string"
@@ -2053,7 +2053,7 @@
 				]
 			}
 		},
-		"/tasks/{taskId}/assignees": {
+		"/tasks/{id}/assignments": {
 			"post": {
 				"operationId": "AssignUser",
 				"responses": {
@@ -2082,7 +2082,7 @@
 				"parameters": [
 					{
 						"in": "path",
-						"name": "taskId",
+						"name": "id",
 						"required": true,
 						"schema": {
 							"type": "string"
@@ -2128,7 +2128,7 @@
 				"parameters": [
 					{
 						"in": "path",
-						"name": "taskId",
+						"name": "id",
 						"required": true,
 						"schema": {
 							"type": "string"
@@ -2174,7 +2174,7 @@
 				"parameters": [
 					{
 						"in": "path",
-						"name": "taskId",
+						"name": "id",
 						"required": true,
 						"schema": {
 							"type": "string"
@@ -2183,7 +2183,7 @@
 				]
 			}
 		},
-		"/tasks/{taskId}/assignees/{userId}": {
+		"/tasks/{id}/assignments/{userId}": {
 			"delete": {
 				"operationId": "UnassignUser",
 				"responses": {
@@ -2212,7 +2212,7 @@
 				"parameters": [
 					{
 						"in": "path",
-						"name": "taskId",
+						"name": "id",
 						"required": true,
 						"schema": {
 							"type": "string"

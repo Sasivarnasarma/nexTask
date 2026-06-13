@@ -39,18 +39,18 @@ export class UserController extends Controller {
    * Returns a list of team members for autocomplete search dropdowns (Task 3.4)
    */
   @SuccessResponse('200', 'OK')
-  @Get('search/autocomplete')
+  @Get('search')
   @Middlewares(validateRequest(userAutocompleteQuerySchema))
   @Security('jwt', ['project:member'])
   public async getUserAutocomplete(
     @Query() projectId: string,
-    @Query() search: string,
+    @Query('q') q: string,
   ): Promise<ApiResponse<any[]>> {
-    if (!search || search.trim() === '') {
+    if (!q || q.trim() === '') {
       return successResponse('Search term empty.', []);
     }
 
-    const users = await this.userService.searchUsersAutocomplete(projectId, search);
+    const users = await this.userService.searchUsersAutocomplete(projectId, q);
     return successResponse('Autocomplete users retrieved successfully.', users);
   }
 
