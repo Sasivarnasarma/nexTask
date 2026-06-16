@@ -107,6 +107,15 @@ export class UserService {
    * Returns a list of projects a user belongs to
    */
   public async getUserProjects(userId: string): Promise<any[]> {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+
+    if (user?.role === 'ADMIN') {
+      return prisma.project.findMany();
+    }
+
     const memberships = await prisma.projectMember.findMany({
       where: { userId },
       include: {
@@ -125,7 +134,7 @@ export class UserService {
         AND: [
           {
             projectMemberships: {
-              some: {
+              none: {
                 projectId,
               },
             },

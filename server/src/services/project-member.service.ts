@@ -139,6 +139,11 @@ export class ProjectMemberService {
       userId: m.userId,
       name: m.user.name,
       email: m.user.email,
+      user: {
+        id: m.userId,
+        name: m.user.name,
+        email: m.user.email,
+      },
       role: m.role,
       joinedAt: m.joinedAt,
     }));
@@ -182,6 +187,11 @@ export class ProjectMemberService {
       userId: member.userId,
       name: member.user.name,
       email: member.user.email,
+      user: {
+        id: member.userId,
+        name: member.user.name,
+        email: member.user.email,
+      },
       role: member.role,
       joinedAt: member.joinedAt,
     };

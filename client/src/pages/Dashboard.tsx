@@ -290,8 +290,45 @@ export function Dashboard() {
   const updateTaskMutation = useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: UpdateTaskRequest }) =>
       updateTask(id, payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    onMutate: async ({ id, payload }) => {
+      const queryKey = [
+        'tasks',
+        activeProjectIdResolved,
+        debouncedSearchQuery,
+        statusFilter,
+        priorityFilter,
+      ];
+
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey });
+
+      // Snapshot current tasks
+      const previousTasks = queryClient.getQueryData<any[]>(queryKey);
+
+      // Optimistically update query cache
+      if (previousTasks && payload.status) {
+        queryClient.setQueryData<any[]>(
+          queryKey,
+          previousTasks.map((t) =>
+            t.id === id ? { ...t, status: payload.status } : t
+          )
+        );
+      }
+
+      return { previousTasks, queryKey };
+    },
+    onError: (_err, _variables, context) => {
+      // Revert to snapshot on failure
+      if (context?.previousTasks) {
+        queryClient.setQueryData(context.queryKey, context.previousTasks);
+      }
+      useToastStore.getState().showError('Failed to move task.');
+    },
+    onSettled: (_data, _error, _variables, context) => {
+      // Trigger background sync
+      if (context?.queryKey) {
+        queryClient.invalidateQueries({ queryKey: context.queryKey });
+      }
     },
   });
 
@@ -510,6 +547,23 @@ export function Dashboard() {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
         <p className="text-muted-foreground animate-pulse">Loading board...</p>
+      </div>
+    );
+  }
+
+  if (projects.length === 0) {
+    const canCreateProject = user?.role === 'ADMIN' || user?.role === 'PROJECT_MANAGER';
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-8">
+        <div className="text-center space-y-4 max-w-md">
+          <Folder className="h-16 w-16 text-muted-foreground mx-auto animate-pulse" />
+          <h2 className="text-2xl font-bold tracking-tight">You are not in any project</h2>
+          <p className="text-muted-foreground text-sm">
+            {canCreateProject
+              ? 'Get started by creating a new project workspace using the sidebar selector.'
+              : 'Please ask your administrator or project manager to invite you to a project workspace.'}
+          </p>
+        </div>
       </div>
     );
   }
@@ -822,15 +876,17 @@ export function Dashboard() {
                   >
                     {mappedSelectedTask?.priority} Priority
                   </Badge>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-muted-foreground hover:text-destructive text-xs hover:bg-destructive/10"
-                    onClick={handleDeleteTask}
-                    disabled={deleteTaskMutation.isPending}
-                  >
-                    <Trash2 size={14} className="mr-1" /> Delete Task
-                  </Button>
+                  {isProjectManager && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-muted-foreground hover:text-destructive text-xs hover:bg-destructive/10"
+                      onClick={handleDeleteTask}
+                      disabled={deleteTaskMutation.isPending}
+                    >
+                      <Trash2 size={14} className="mr-1" /> Delete Task
+                    </Button>
+                  )}
                 </div>
                 <DialogTitle className="text-2xl font-bold">
                   {mappedSelectedTask?.title}
@@ -846,50 +902,52 @@ export function Dashboard() {
                   <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
                     Assignees
                   </h4>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 border-border bg-background hover:bg-muted text-foreground flex items-center gap-1.5"
-                      >
-                        <UserPlus size={14} />
-                        <span>Manage Assignees</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="bg-popover border-border text-popover-foreground w-64 max-h-60 overflow-y-auto">
-                      {projectMembers.map((member) => {
-                        const isAssigned = mappedSelectedTask?.assignees?.some(
-                          (a) => a.userId === member.userId,
-                        );
-                        return (
-                          <DropdownMenuItem
-                            key={member.userId}
-                            className="flex items-center justify-between cursor-pointer"
-                            onClick={() => {
-                              if (isAssigned) {
-                                unassignUserMutation.mutate(member.userId);
-                              } else {
-                                assignUserMutation.mutate(member.userId);
-                              }
-                            }}
-                          >
-                            <span className="truncate">
-                              {member.user?.name || member.user?.email || 'Unknown User'}
-                            </span>
-                            {isAssigned && (
-                              <Check size={14} className="text-primary shrink-0 ml-2" />
-                            )}
-                          </DropdownMenuItem>
-                        );
-                      })}
-                      {projectMembers.length === 0 && (
-                        <div className="p-2 text-xs text-muted-foreground text-center">
-                          No project members to assign.
-                        </div>
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  {isProjectManager && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 border-border bg-background hover:bg-muted text-foreground flex items-center gap-1.5"
+                        >
+                          <UserPlus size={14} />
+                          <span>Manage Assignees</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="bg-popover border-border text-popover-foreground w-64 max-h-60 overflow-y-auto">
+                        {projectMembers.map((member) => {
+                          const isAssigned = mappedSelectedTask?.assignees?.some(
+                            (a) => a.userId === member.userId,
+                          );
+                          return (
+                            <DropdownMenuItem
+                              key={member.userId}
+                              className="flex items-center justify-between cursor-pointer"
+                              onClick={() => {
+                                if (isAssigned) {
+                                  unassignUserMutation.mutate(member.userId);
+                                } else {
+                                  assignUserMutation.mutate(member.userId);
+                                }
+                              }}
+                            >
+                              <span className="truncate">
+                                {member.user?.name || member.user?.email || 'Unknown User'}
+                              </span>
+                              {isAssigned && (
+                                <Check size={14} className="text-primary shrink-0 ml-2" />
+                              )}
+                            </DropdownMenuItem>
+                          );
+                        })}
+                        {projectMembers.length === 0 && (
+                          <div className="p-2 text-xs text-muted-foreground text-center">
+                            No project members to assign.
+                          </div>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
                 </div>
 
                 <div className="flex flex-wrap gap-2">
@@ -902,14 +960,16 @@ export function Dashboard() {
                         <span className="truncate font-medium">
                           {assignee.name || assignee.email}
                         </span>
-                        <button
-                          type="button"
-                          className="hover:text-destructive text-muted-foreground transition-colors shrink-0"
-                          onClick={() => unassignUserMutation.mutate(assignee.userId)}
-                          title="Remove Assignee"
-                        >
-                          <X size={12} />
-                        </button>
+                        {isProjectManager && (
+                          <button
+                            type="button"
+                            className="hover:text-destructive text-muted-foreground transition-colors shrink-0"
+                            onClick={() => unassignUserMutation.mutate(assignee.userId)}
+                            title="Remove Assignee"
+                          >
+                            <X size={12} />
+                          </button>
+                        )}
                       </div>
                     ))
                   ) : (
