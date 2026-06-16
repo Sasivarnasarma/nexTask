@@ -222,13 +222,19 @@ export function Dashboard() {
     queryFn: fetchUserProjects,
   });
 
-  const activeProjectIdResolved = activeProjectId || projects[0]?.id || null;
+  const activeProjectIdResolved =
+    (activeProjectId && projects.some((p) => p.id === activeProjectId)
+      ? activeProjectId
+      : projects[0]?.id) || null;
 
   React.useEffect(() => {
-    if (!activeProjectId && projects.length > 0) {
-      setActiveProjectId(projects[0].id);
+    if (projects.length === 0) return;
+
+    // Normalize persisted selection (e.g. user removed from a project)
+    if (activeProjectIdResolved && activeProjectIdResolved !== activeProjectId) {
+      setActiveProjectId(activeProjectIdResolved);
     }
-  }, [activeProjectId, projects, setActiveProjectId]);
+  }, [activeProjectId, activeProjectIdResolved, projects, setActiveProjectId]);
 
   const activeProject = projects.find((p) => p.id === activeProjectIdResolved);
 

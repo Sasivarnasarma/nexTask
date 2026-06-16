@@ -65,8 +65,19 @@ export async function deleteProject(id: string): Promise<void> {
 
 // ─── Project Member APIs ──────────────────────────────────────────────────────
 
-export async function fetchProjectMembers(id: string): Promise<any[]> {
-  const { data } = await apiClient.get<ApiResponse<any[]>>(`/projects/${id}/members`);
+export interface ProjectMemberView {
+  userId: string;
+  role: 'PROJECT_MANAGER' | 'COLLABORATOR';
+  joinedAt: Date | string;
+  user: {
+    id: string;
+    name: string | null;
+    email: string;
+  };
+}
+
+export async function fetchProjectMembers(id: string): Promise<ProjectMemberView[]> {
+  const { data } = await apiClient.get<ApiResponse<ProjectMemberView[]>>(`/projects/${id}/members`);
   return data.data ?? [];
 }
 
@@ -92,8 +103,10 @@ export async function removeProjectMember(id: string, userId: string): Promise<v
 export async function fetchTeamMembersAutocomplete(
   projectId: string,
   search: string,
-): Promise<any[]> {
-  const { data } = await apiClient.get<ApiResponse<any[]>>('/users/search', {
+): Promise<Array<{ id: string; name: string | null; email: string }>> {
+  const { data } = await apiClient.get<
+    ApiResponse<Array<{ id: string; name: string | null; email: string }>>
+  >('/users/search', {
     params: { projectId, q: search },
   });
   return data.data ?? [];

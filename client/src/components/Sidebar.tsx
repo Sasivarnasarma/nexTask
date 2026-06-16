@@ -49,7 +49,10 @@ export function Sidebar({ isOpen }: { isOpen: boolean }) {
     queryFn: fetchUserProjects,
   });
 
-  const activeProjectIdResolved = activeProjectId || projects[0]?.id || null;
+  const activeProjectIdResolved =
+    (activeProjectId && projects.some((p) => p.id === activeProjectId)
+      ? activeProjectId
+      : projects[0]?.id) || null;
   const activeProject = projects.find((p) => p.id === activeProjectIdResolved);
   const activeProjectName = activeProject ? activeProject.name : 'Select Project';
 
