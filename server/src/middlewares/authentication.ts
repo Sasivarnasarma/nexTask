@@ -109,6 +109,24 @@ export async function expressAuthentication(
     try {
       const payload = verifyToken(token);
 
+      // ── isActive check ──────────────────────────────────────────────────
+      // Query the database to ensure the user exists and is active.
+      const user = await prisma.user.findUnique({
+        where: { id: payload.userId },
+        select: { isActive: true },
+      });
+
+      if (!user) {
+        throw { status: 401, message: 'User not found.' };
+      }
+
+      if (!user.isActive) {
+        throw {
+          status: 403,
+          message: 'Your account has been deactivated. Please contact an administrator.',
+        };
+      }
+
       // ── mustResetPassword gate ──────────────────────────────────────────
       // If the user's account requires a password reset (e.g. first login),
       // block all endpoints EXCEPT the reset-password route itself.

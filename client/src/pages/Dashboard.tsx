@@ -315,9 +315,7 @@ export function Dashboard() {
       if (previousTasks && payload.status) {
         queryClient.setQueryData<any[]>(
           queryKey,
-          previousTasks.map((t) =>
-            t.id === id ? { ...t, status: payload.status } : t
-          )
+          previousTasks.map((t) => (t.id === id ? { ...t, status: payload.status } : t)),
         );
       }
 

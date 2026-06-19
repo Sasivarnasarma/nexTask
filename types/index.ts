@@ -6,6 +6,7 @@ export interface User {
   name: string | null;
   role: UserRole;
   mustResetPassword: boolean;
+  isActive: boolean;
   createdAt: Date | string;
   updatedAt: Date | string;
 }
@@ -252,4 +253,37 @@ export interface GetPresignedUrlRequest {
 export interface GetPresignedUrlResponse {
   uploadUrl: string;
   fileKey: string;
+}
+
+// ─── Admin Management Payloads ────────────────────────────────────────────────
+
+export interface AdminCreateUserRequest {
+  email: string;
+  name: string | null;
+  role: UserRole;
+}
+
+export interface AdminUpdateUserRequest {
+  name: string | null;
+  email: string;
+  role: UserRole;
+}
+
+export interface UserActivityResponse {
+  id: string;
+  action:
+    | 'CREATED'
+    | 'UPDATED'
+    | 'ASSIGNED'
+    | 'COMMENTED'
+    | 'COMPLETED'
+    | 'DELETED'
+    | 'USER_CREATED'
+    | 'USER_DEACTIVATED'
+    | 'USER_ACTIVATED'
+    | 'ROLE_CHANGED';
+  description: string | null;
+  createdAt: string;
+  taskId: string | null;
+  userId: string;
 }
