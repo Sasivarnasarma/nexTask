@@ -1,21 +1,17 @@
 import {
+  AddMemberInput,
   ApiResponse,
   CreateProjectRequest,
   Project,
+  ProjectMember,
+  ProjectMemberView,
   TaskAssignee,
+  TaskAssignment,
+  UpdateMemberRoleInput,
   UpdateProjectRequest,
 } from '@nextask/types';
 
 import apiClient from './client';
-
-export interface AddMemberInput {
-  userId: string;
-  role: 'PROJECT_MANAGER' | 'COLLABORATOR';
-}
-
-export interface UpdateMemberRoleInput {
-  role: 'PROJECT_MANAGER' | 'COLLABORATOR';
-}
 
 // ─── Project APIs ────────────────────────────────────────────────────────────
 
@@ -65,25 +61,17 @@ export async function deleteProject(id: string): Promise<void> {
 
 // ─── Project Member APIs ──────────────────────────────────────────────────────
 
-export interface ProjectMemberView {
-  userId: string;
-  role: 'PROJECT_MANAGER' | 'COLLABORATOR';
-  joinedAt: Date | string;
-  user: {
-    id: string;
-    name: string | null;
-    email: string;
-  };
-}
-
 export async function fetchProjectMembers(id: string): Promise<ProjectMemberView[]> {
   const { data } = await apiClient.get<ApiResponse<ProjectMemberView[]>>(`/projects/${id}/members`);
   return data.data ?? [];
 }
 
-export async function addProjectMember(id: string, body: AddMemberInput): Promise<any> {
-  const { data } = await apiClient.post<ApiResponse<any>>(`/projects/${id}/members`, body);
-  return data.data;
+export async function addProjectMember(id: string, body: AddMemberInput): Promise<ProjectMember> {
+  const { data } = await apiClient.post<ApiResponse<ProjectMember>>(
+    `/projects/${id}/members`,
+    body,
+  );
+  return data.data!;
 }
 
 export async function updateProjectMemberRole(
@@ -119,11 +107,14 @@ export async function fetchTaskAssignees(taskId: string): Promise<TaskAssignee[]
   return data.data ?? [];
 }
 
-export async function assignTaskUser(taskId: string, userId: string): Promise<any> {
-  const { data } = await apiClient.post<ApiResponse<any>>(`/tasks/${taskId}/assignments`, {
-    userId,
-  });
-  return data.data;
+export async function assignTaskUser(taskId: string, userId: string): Promise<TaskAssignment> {
+  const { data } = await apiClient.post<ApiResponse<TaskAssignment>>(
+    `/tasks/${taskId}/assignments`,
+    {
+      userId,
+    },
+  );
+  return data.data!;
 }
 
 export async function unassignTaskUser(taskId: string, userId: string): Promise<void> {

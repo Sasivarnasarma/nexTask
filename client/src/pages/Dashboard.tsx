@@ -11,7 +11,7 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
-import { Task, UpdateTaskRequest } from '@nextask/types';
+import { ProjectMemberView, Task, UpdateTaskRequest } from '@nextask/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   BarChart2,
@@ -211,7 +211,11 @@ export function Dashboard() {
   // Project Members management console states
   const [isMembersModalOpen, setIsMembersModalOpen] = useState(false);
   const [memberSearch, setMemberSearch] = useState('');
-  const [selectedAutocompleteUser, setSelectedAutocompleteUser] = useState<any | null>(null);
+  const [selectedAutocompleteUser, setSelectedAutocompleteUser] = useState<{
+    id: string;
+    name: string | null;
+    email: string;
+  } | null>(null);
   const [newMemberRole, setNewMemberRole] = useState<'PROJECT_MANAGER' | 'COLLABORATOR'>(
     'COLLABORATOR',
   );
@@ -250,7 +254,7 @@ export function Dashboard() {
     enabled: !!activeProjectIdResolved && memberSearch.trim().length > 0,
   });
 
-  const currentUserMembership = projectMembers.find((m: any) => m.userId === user?.id);
+  const currentUserMembership = projectMembers.find((m) => m.userId === user?.id);
 
   const isProjectManager =
     user?.role === 'ADMIN' ||
@@ -304,12 +308,12 @@ export function Dashboard() {
         priorityFilter,
       ];
       await queryClient.cancelQueries({ queryKey });
-      const previousTasks = queryClient.getQueryData<any[]>(queryKey);
+      const previousTasks = queryClient.getQueryData<Task[]>(queryKey);
 
       if (previousTasks && payload.status) {
-        queryClient.setQueryData<any[]>(
+        queryClient.setQueryData<Task[]>(
           queryKey,
-          previousTasks.map((t) => (t.id === id ? { ...t, status: payload.status } : t)),
+          previousTasks.map((t) => (t.id === id ? { ...t, status: payload.status! } : t)),
         );
       }
       return { previousTasks, queryKey };
@@ -1204,7 +1208,7 @@ export function Dashboard() {
                     memberSearch.trim().length > 0 &&
                     !selectedAutocompleteUser && (
                       <div className="absolute z-50 left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                        {autocompleteUsers.map((u: any) => (
+                        {autocompleteUsers.map((u) => (
                           <div
                             key={u.id}
                             onClick={() => {
@@ -1224,7 +1228,9 @@ export function Dashboard() {
                 </div>
                 <select
                   value={newMemberRole}
-                  onChange={(e) => setNewMemberRole(e.target.value as any)}
+                  onChange={(e) =>
+                    setNewMemberRole(e.target.value as 'PROJECT_MANAGER' | 'COLLABORATOR')
+                  }
                   className="flex h-10 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-none"
                 >
                   <option value="COLLABORATOR">Collaborator</option>
@@ -1253,7 +1259,7 @@ export function Dashboard() {
               Current Members ({projectMembers.length})
             </h4>
             <div className="space-y-2">
-              {projectMembers.map((member: any) => {
+              {projectMembers.map((member: ProjectMemberView) => {
                 const isOwner = member.userId === activeProject?.ownerId;
                 const isSelf = member.userId === user?.id;
                 return (
@@ -1284,7 +1290,7 @@ export function Dashboard() {
                             onChange={(e) =>
                               updateMemberRoleMutation.mutate({
                                 userId: member.userId,
-                                role: e.target.value as any,
+                                role: e.target.value as 'PROJECT_MANAGER' | 'COLLABORATOR',
                               })
                             }
                             className="flex h-8 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground focus-visible:outline-none"

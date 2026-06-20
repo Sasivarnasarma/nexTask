@@ -73,7 +73,7 @@ export async function fetchTasks(
     tags?: string[];
   },
 ): Promise<Task[]> {
-  const params: Record<string, any> = { projectId };
+  const params: Record<string, string | string[]> = { projectId };
   if (filters?.search) params.search = filters.search;
   if (filters?.status) params.status = mapStatusToBackend(filters.status);
   if (filters?.priority) params.priority = mapPriorityToBackend(filters.priority);

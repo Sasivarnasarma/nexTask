@@ -1,28 +1,17 @@
-import { validatePasswordComplexity } from '@nextask/types';
+import {
+  LoginRequest,
+  LoginResponse,
+  PasswordResetRequest as ResetPasswordRequest,
+  validatePasswordComplexity,
+} from '@nextask/types';
 
 import { prisma } from '../lib/prisma';
 import { ApiError } from '../utils/apiError.util';
 import { hashPassword, verifyPassword } from '../utils/hash.util';
 import { generateToken } from '../utils/jwt.util';
 
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-export interface AuthData {
-  token: string;
-  mustResetPassword: boolean;
-}
-
-export interface ResetPasswordRequest {
-  currentPassword: string;
-  newPassword: string;
-  confirmNewPassword: string;
-}
-
 export class AuthService {
-  public async login(data: LoginRequest): Promise<AuthData> {
+  public async login(data: LoginRequest): Promise<LoginResponse> {
     const user = await prisma.user.findUnique({
       where: { email: data.email },
     });
@@ -60,7 +49,7 @@ export class AuthService {
    * - Clears the mustResetPassword flag on success.
    * - Returns a fresh JWT so the client can continue without re-logging in.
    */
-  public async resetPassword(userId: string, data: ResetPasswordRequest): Promise<AuthData> {
+  public async resetPassword(userId: string, data: ResetPasswordRequest): Promise<LoginResponse> {
     // --- Confirm passwords match ---
     if (data.newPassword !== data.confirmNewPassword) {
       throw new ApiError(400, 'New password and confirmation do not match.');

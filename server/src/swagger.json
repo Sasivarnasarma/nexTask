@@ -1291,17 +1291,86 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"ProjectRole": {
+				"type": "string",
+				"enum": [
+					"PROJECT_MANAGER",
+					"COLLABORATOR"
+				]
+			},
+			"ProjectMember": {
+				"properties": {
+					"projectId": {
+						"type": "string"
+					},
+					"userId": {
+						"type": "string"
+					},
+					"role": {
+						"$ref": "#/components/schemas/ProjectRole"
+					},
+					"joinedAt": {
+						"anyOf": [
+							{
+								"type": "string",
+								"format": "date-time"
+							},
+							{
+								"type": "string"
+							}
+						]
+					}
+				},
+				"required": [
+					"projectId",
+					"userId",
+					"role",
+					"joinedAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiResponse_ProjectMember_": {
+				"properties": {
+					"success": {
+						"type": "boolean"
+					},
+					"message": {
+						"type": "string"
+					},
+					"data": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ProjectMember"
+							}
+						],
+						"nullable": true
+					},
+					"errors": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Record_string.string_"
+							}
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"success",
+					"message",
+					"data",
+					"errors"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"AddMemberInput": {
 				"properties": {
 					"userId": {
 						"type": "string"
 					},
 					"role": {
-						"type": "string",
-						"enum": [
-							"PROJECT_MANAGER",
-							"COLLABORATOR"
-						]
+						"$ref": "#/components/schemas/ProjectRole"
 					}
 				},
 				"required": [
@@ -1311,14 +1380,126 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"ProjectMemberView": {
+				"properties": {
+					"userId": {
+						"type": "string"
+					},
+					"role": {
+						"$ref": "#/components/schemas/ProjectRole"
+					},
+					"joinedAt": {
+						"anyOf": [
+							{
+								"type": "string",
+								"format": "date-time"
+							},
+							{
+								"type": "string"
+							}
+						]
+					},
+					"user": {
+						"properties": {
+							"email": {
+								"type": "string"
+							},
+							"name": {
+								"type": "string",
+								"nullable": true
+							},
+							"id": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"email",
+							"name",
+							"id"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"userId",
+					"role",
+					"joinedAt",
+					"user"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiResponse_ProjectMemberView-Array_": {
+				"properties": {
+					"success": {
+						"type": "boolean"
+					},
+					"message": {
+						"type": "string"
+					},
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/ProjectMemberView"
+						},
+						"type": "array",
+						"nullable": true
+					},
+					"errors": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Record_string.string_"
+							}
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"success",
+					"message",
+					"data",
+					"errors"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiResponse_ProjectMemberView_": {
+				"properties": {
+					"success": {
+						"type": "boolean"
+					},
+					"message": {
+						"type": "string"
+					},
+					"data": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ProjectMemberView"
+							}
+						],
+						"nullable": true
+					},
+					"errors": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Record_string.string_"
+							}
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"success",
+					"message",
+					"data",
+					"errors"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"UpdateMemberRoleInput": {
 				"properties": {
 					"role": {
-						"type": "string",
-						"enum": [
-							"PROJECT_MANAGER",
-							"COLLABORATOR"
-						]
+						"$ref": "#/components/schemas/ProjectRole"
 					}
 				},
 				"required": [
@@ -1437,7 +1618,7 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"AuthData": {
+			"LoginResponse": {
 				"properties": {
 					"token": {
 						"type": "string"
@@ -1453,7 +1634,7 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ApiResponse_AuthData_": {
+			"ApiResponse_LoginResponse_": {
 				"properties": {
 					"success": {
 						"type": "boolean"
@@ -1464,7 +1645,7 @@
 					"data": {
 						"allOf": [
 							{
-								"$ref": "#/components/schemas/AuthData"
+								"$ref": "#/components/schemas/LoginResponse"
 							}
 						],
 						"nullable": true
@@ -3025,7 +3206,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_any_"
+									"$ref": "#/components/schemas/ApiResponse_ProjectMember_"
 								}
 							}
 						}
@@ -3071,7 +3252,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_any-Array_"
+									"$ref": "#/components/schemas/ApiResponse_ProjectMemberView-Array_"
 								}
 							}
 						}
@@ -3109,7 +3290,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_any_"
+									"$ref": "#/components/schemas/ApiResponse_ProjectMemberView_"
 								}
 							}
 						}
@@ -3467,7 +3648,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_AuthData_"
+									"$ref": "#/components/schemas/ApiResponse_LoginResponse_"
 								}
 							}
 						}
@@ -3499,7 +3680,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_AuthData_"
+									"$ref": "#/components/schemas/ApiResponse_LoginResponse_"
 								}
 							}
 						}

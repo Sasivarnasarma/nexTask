@@ -287,3 +287,23 @@ export interface UserActivityResponse {
   taskId: string | null;
   userId: string;
 }
+
+export interface AddMemberInput {
+  userId: string;
+  role: ProjectRole;
+}
+
+export interface UpdateMemberRoleInput {
+  role: ProjectRole;
+}
+
+export interface ProjectMemberView {
+  userId: string;
+  role: ProjectRole;
+  joinedAt: Date | string;
+  user: {
+    id: string;
+    name: string | null;
+    email: string;
+  };
+}

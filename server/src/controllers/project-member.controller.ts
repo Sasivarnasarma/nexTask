@@ -1,3 +1,9 @@
+import {
+  AddMemberInput,
+  ProjectMember,
+  ProjectMemberView,
+  UpdateMemberRoleInput,
+} from '@nextask/types';
 import type { Request as ExRequest } from 'express';
 import { Middlewares } from 'tsoa';
 import {
@@ -28,15 +34,6 @@ import {
 import { ProjectMemberService } from '../services/project-member.service';
 import { ApiResponse, successResponse } from '../utils/response.util';
 
-export interface AddMemberInput {
-  userId: string;
-  role: 'PROJECT_MANAGER' | 'COLLABORATOR';
-}
-
-export interface UpdateMemberRoleInput {
-  role: 'PROJECT_MANAGER' | 'COLLABORATOR';
-}
-
 @Route('projects/{id}/members')
 @Tags('Project Members')
 @Security('jwt')
@@ -59,7 +56,7 @@ export class ProjectMemberController extends Controller {
     @Path() id: string,
     @Body() body: AddMemberInput,
     @Request() request: ExRequest,
-  ): Promise<ApiResponse<any>> {
+  ): Promise<ApiResponse<ProjectMember>> {
     const { userId: requestorId, role: requestorRole } = (request as any).user;
     const member = await this.memberService.addMemberToProject(
       id,
@@ -81,7 +78,7 @@ export class ProjectMemberController extends Controller {
   public async getMembers(
     @Path() id: string,
     @Request() request: ExRequest,
-  ): Promise<ApiResponse<any[]>> {
+  ): Promise<ApiResponse<ProjectMemberView[]>> {
     const { userId: requestorId, role: requestorRole } = (request as any).user;
     const members = await this.memberService.getProjectMembers(id, requestorId, requestorRole);
     return successResponse('Operation completed successfully.', members);
@@ -97,7 +94,7 @@ export class ProjectMemberController extends Controller {
     @Path() id: string,
     @Path() userId: string,
     @Request() request: ExRequest,
-  ): Promise<ApiResponse<any>> {
+  ): Promise<ApiResponse<ProjectMemberView>> {
     const { userId: requestorId, role: requestorRole } = (request as any).user;
     const member = await this.memberService.getMemberDetails(
       id,
