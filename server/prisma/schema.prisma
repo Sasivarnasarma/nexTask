@@ -150,8 +150,8 @@ model TaskActivity {
   createdAt   DateTime     @default(now())
 
   // Relations
-  taskId      String
-  task        Task         @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  taskId      String?
+  task        Task?        @relation(fields: [taskId], references: [id], onDelete: Cascade)
   userId      String
   user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -200,4 +200,8 @@ enum ActivityType {
   COMMENTED
   COMPLETED
   DELETED
+  USER_CREATED
+  USER_DEACTIVATED
+  USER_ACTIVATED
+  ROLE_CHANGED
 }

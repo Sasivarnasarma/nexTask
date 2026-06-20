@@ -1,4 +1,6 @@
 import {
+  AdminCreateUserRequest,
+  AdminUpdateUserRequest,
   ChangePasswordRequest,
   ProfileUpdateRequest as UpdateProfileRequest,
   UserProfile,
@@ -9,7 +11,13 @@ import { prisma } from '../lib/prisma';
 import { ApiError } from '../utils/apiError.util';
 import { hashPassword, verifyPassword } from '../utils/hash.util';
 
-export type { ChangePasswordRequest, UpdateProfileRequest, UserProfile };
+export type {
+  AdminCreateUserRequest,
+  AdminUpdateUserRequest,
+  ChangePasswordRequest,
+  UpdateProfileRequest,
+  UserProfile,
+};
 
 export class UserService {
   /**
@@ -25,6 +33,7 @@ export class UserService {
       name: user.name,
       role: user.role,
       mustResetPassword: user.mustResetPassword,
+      isActive: user.isActive,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
@@ -69,6 +78,7 @@ export class UserService {
       name: updated.name,
       role: updated.role,
       mustResetPassword: updated.mustResetPassword,
+      isActive: updated.isActive,
       createdAt: updated.createdAt,
       updatedAt: updated.updatedAt,
     };
@@ -153,6 +163,299 @@ export class UserService {
         email: true,
       },
       take: 10,
+    });
+  }
+
+  /**
+   * List all users with pagination and search (Admin Only)
+   */
+  public async listUsers(page: number, limit: number, search?: string) {
+    const skip = (page - 1) * limit;
+    const whereClause = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: 'insensitive' as const } },
+            { email: { contains: search, mode: 'insensitive' as const } },
+          ],
+        }
+      : {};
+
+    const [users, total] = await Promise.all([
+      prisma.user.findMany({
+        where: whereClause,
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          isActive: true,
+          mustResetPassword: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      }),
+      prisma.user.count({ where: whereClause }),
+    ]);
+
+    return {
+      users,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  /**
+   * Create user (Admin Only)
+   */
+  public async createUser(data: AdminCreateUserRequest, actorId: string) {
+    const email = data.email.trim().toLowerCase();
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing) {
+      throw new ApiError(409, 'A user with this email address already exists.');
+    }
+
+    // Generate a temporary password that satisfies password complexity rules
+    const randomPart = Math.random().toString(36).substring(2, 8);
+    const randomDigit = Math.floor(Math.random() * 10);
+    const tempPassword = `Temp!${randomPart}${randomDigit}`;
+
+    const hashedPassword = await hashPassword(tempPassword);
+
+    const newUser = await prisma.user.create({
+      data: {
+        email,
+        name: data.name ? data.name.trim() : null,
+        role: data.role,
+        password: hashedPassword,
+        mustResetPassword: true,
+        isActive: true,
+      },
+    });
+
+    // Log the action to console for local testing / temporary password retrieval
+    console.log(`[USER_CREATED] New user created: ${email} | Temp Password: ${tempPassword}`);
+
+    // Record audit activity
+    await prisma.taskActivity.create({
+      data: {
+        action: 'USER_CREATED',
+        userId: actorId,
+        description: `Created user ${email} (${data.role})`,
+      },
+    });
+
+    return {
+      user: {
+        id: newUser.id,
+        email: newUser.email,
+        name: newUser.name,
+        role: newUser.role,
+        isActive: newUser.isActive,
+        mustResetPassword: newUser.mustResetPassword,
+        createdAt: newUser.createdAt,
+        updatedAt: newUser.updatedAt,
+      },
+      tempPassword,
+    };
+  }
+
+  /**
+   * Update user details (Admin Only)
+   */
+  public async updateUser(id: string, data: AdminUpdateUserRequest, actorId: string) {
+    const userToUpdate = await prisma.user.findUnique({ where: { id } });
+    if (!userToUpdate) {
+      throw new ApiError(404, 'User not found.');
+    }
+
+    const email = data.email.trim().toLowerCase();
+    const conflict = await prisma.user.findFirst({
+      where: { email, NOT: { id } },
+    });
+    if (conflict) {
+      throw new ApiError(409, 'This email address is already in use by another user.');
+    }
+
+    const roleChanged = userToUpdate.role !== data.role;
+
+    const updated = await prisma.user.update({
+      where: { id },
+      data: {
+        email,
+        name: data.name ? data.name.trim() : null,
+        role: data.role,
+      },
+    });
+
+    // Record audit activity
+    await prisma.taskActivity.create({
+      data: {
+        action: roleChanged ? 'ROLE_CHANGED' : 'UPDATED',
+        userId: actorId,
+        description: roleChanged
+          ? `Changed role of user ${email} from ${userToUpdate.role} to ${data.role}`
+          : `Updated details of user ${email}`,
+      },
+    });
+
+    return {
+      id: updated.id,
+      email: updated.email,
+      name: updated.name,
+      role: updated.role,
+      isActive: updated.isActive,
+      mustResetPassword: updated.mustResetPassword,
+      createdAt: updated.createdAt,
+      updatedAt: updated.updatedAt,
+    };
+  }
+
+  /**
+   * Deactivate user (Admin Only)
+   */
+  public async deactivateUser(id: string, actorId: string) {
+    if (id === actorId) {
+      throw new ApiError(400, 'Administrators cannot deactivate their own account.');
+    }
+
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) {
+      throw new ApiError(404, 'User not found.');
+    }
+
+    const updated = await prisma.user.update({
+      where: { id },
+      data: { isActive: false },
+    });
+
+    // Record audit activity
+    await prisma.taskActivity.create({
+      data: {
+        action: 'USER_DEACTIVATED',
+        userId: actorId,
+        description: `Deactivated user ${user.email}`,
+      },
+    });
+
+    return {
+      id: updated.id,
+      email: updated.email,
+      name: updated.name,
+      role: updated.role,
+      isActive: updated.isActive,
+      mustResetPassword: updated.mustResetPassword,
+      createdAt: updated.createdAt,
+      updatedAt: updated.updatedAt,
+    };
+  }
+
+  /**
+   * Activate user (Admin Only)
+   */
+  public async activateUser(id: string, actorId: string) {
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) {
+      throw new ApiError(404, 'User not found.');
+    }
+
+    const updated = await prisma.user.update({
+      where: { id },
+      data: { isActive: true },
+    });
+
+    // Record audit activity
+    await prisma.taskActivity.create({
+      data: {
+        action: 'USER_ACTIVATED',
+        userId: actorId,
+        description: `Activated user ${user.email}`,
+      },
+    });
+
+    return {
+      id: updated.id,
+      email: updated.email,
+      name: updated.name,
+      role: updated.role,
+      isActive: updated.isActive,
+      mustResetPassword: updated.mustResetPassword,
+      createdAt: updated.createdAt,
+      updatedAt: updated.updatedAt,
+    };
+  }
+
+  /**
+   * Delete user (Admin Only)
+   */
+  public async deleteUser(id: string, actorId: string) {
+    if (id === actorId) {
+      throw new ApiError(400, 'Administrators cannot delete their own account.');
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id },
+      include: {
+        ownedProjects: true,
+      },
+    });
+
+    if (!user) {
+      throw new ApiError(404, 'User not found.');
+    }
+
+    if (user.ownedProjects.length > 0) {
+      throw new ApiError(
+        400,
+        `Cannot delete user. They own projects: ${user.ownedProjects.map((p) => p.name).join(', ')}. Transfer project ownership first.`,
+      );
+    }
+
+    await prisma.user.delete({ where: { id } });
+
+    // Record audit activity
+    await prisma.taskActivity.create({
+      data: {
+        action: 'DELETED',
+        userId: actorId,
+        description: `Deleted user ${user.email}`,
+      },
+    });
+  }
+
+  /**
+   * Get user activity audit logs
+   */
+  public async getUserActivity(userId: string) {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new ApiError(404, 'User not found.');
+    }
+
+    return prisma.taskActivity.findMany({
+      where: {
+        OR: [{ userId }, { description: { contains: user.email } }],
+      },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        task: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+      },
     });
   }
 }

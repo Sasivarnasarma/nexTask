@@ -37,6 +37,7 @@ export default function LoginPage() {
           name: null,
           role: 'COLLABORATOR',
           mustResetPassword: true,
+          isActive: true,
           createdAt: '',
           updatedAt: '',
         });
