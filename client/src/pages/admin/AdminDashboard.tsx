@@ -19,6 +19,7 @@ import {
   UserMinus,
 } from 'lucide-react';
 import React, { useState } from 'react';
+import { Navigate } from 'react-router-dom';
 
 import {
   activateUser,
@@ -49,6 +50,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { extractApiError } from '@/lib/apiError';
 import { useAuthStore } from '@/store/auth.store';
 import { useToastStore } from '@/store/toast.store';
 
@@ -104,6 +106,7 @@ export function AdminDashboard() {
   const { data: usersData, isLoading: usersLoading } = useQuery({
     queryKey: ['admin-users', page, searchQuery],
     queryFn: () => listUsers(page, limit, searchQuery),
+    enabled: currentUser?.role === 'ADMIN',
   });
 
   // Fetch Activities for selected user
@@ -113,7 +116,7 @@ export function AdminDashboard() {
       selectedUserId
         ? (getUserActivity(selectedUserId) as Promise<UserActivity[]>)
         : Promise.resolve([]),
-    enabled: !!selectedUserId && activeTab === 'audit',
+    enabled: currentUser?.role === 'ADMIN' && !!selectedUserId && activeTab === 'audit',
   });
 
   // Mutations
@@ -131,7 +134,7 @@ export function AdminDashboard() {
       showSuccess('User account created successfully!');
     },
     onError: (err) => {
-      showError((err as any).response?.data?.message || 'Failed to create user.');
+      showError(extractApiError(err, 'Failed to create user.'));
     },
   });
 
@@ -147,7 +150,7 @@ export function AdminDashboard() {
       showSuccess('User details updated successfully!');
     },
     onError: (err) => {
-      showError((err as any).response?.data?.message || 'Failed to update user.');
+      showError(extractApiError(err, 'Failed to update user.'));
     },
   });
 
@@ -158,7 +161,7 @@ export function AdminDashboard() {
       showSuccess('User account deactivated successfully.');
     },
     onError: (err) => {
-      showError((err as any).response?.data?.message || 'Failed to deactivate user.');
+      showError(extractApiError(err, 'Failed to deactivate user.'));
     },
   });
 
@@ -169,7 +172,7 @@ export function AdminDashboard() {
       showSuccess('User account activated successfully.');
     },
     onError: (err) => {
-      showError((err as any).response?.data?.message || 'Failed to activate user.');
+      showError(extractApiError(err, 'Failed to activate user.'));
     },
   });
 
@@ -181,9 +184,13 @@ export function AdminDashboard() {
       showSuccess('User deleted successfully.');
     },
     onError: (err) => {
-      showError((err as any).response?.data?.message || 'Failed to delete user.');
+      showError(extractApiError(err, 'Failed to delete user.'));
     },
   });
+
+  if (currentUser?.role !== 'ADMIN') {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   // Action Handlers
   const handleCreateSubmit = (e: React.FormEvent) => {
@@ -523,7 +530,7 @@ export function AdminDashboard() {
                 {activities.map((act) => (
                   <div key={act.id} className="relative">
                     {/* Timeline Node */}
-                    <span className="absolute -left-[31px] top-1 bg-background border-2 border-primary rounded-full p-1 h-4.5 w-4.5 flex items-center justify-center">
+                    <span className="absolute left-[31px] top-1 bg-background border-2 border-primary rounded-full p-1 h-4.5 w-4.5 flex items-center justify-center">
                       <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                     </span>
 
