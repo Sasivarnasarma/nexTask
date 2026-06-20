@@ -6,8 +6,6 @@ import {
 } from '@nextask/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  Check,
-  Copy,
   Edit,
   History,
   Loader2,
@@ -88,11 +86,6 @@ export function AdminDashboard() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [isTempPasswordOpen, setIsTempPasswordOpen] = useState(false);
-
-  // Temp Password display
-  const [generatedTempPassword, setGeneratedTempPassword] = useState('');
-  const [copied, setCopied] = useState(false);
 
   // User Forms State
   const [formEmail, setFormEmail] = useState('');
@@ -126,12 +119,10 @@ export function AdminDashboard() {
     AdminCreateUserRequest
   >({
     mutationFn: createUser,
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       setIsCreateOpen(false);
-      setGeneratedTempPassword(data.tempPassword || '');
-      setIsTempPasswordOpen(true);
-      showSuccess('User account created successfully!');
+      showSuccess('User account created successfully! Credentials have been sent to their email.');
     },
     onError: (err) => {
       showError(extractApiError(err, 'Failed to create user.'));
@@ -246,12 +237,6 @@ export function AdminDashboard() {
     setSelectedUserId(user.id);
     setSelectedUserEmail(user.email);
     setActiveTab('audit');
-  };
-
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(generatedTempPassword);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -635,42 +620,6 @@ export function AdminDashboard() {
               </Button>
             </DialogFooter>
           </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Temporary Password Display Dialog */}
-      <Dialog open={isTempPasswordOpen} onOpenChange={setIsTempPasswordOpen}>
-        <DialogContent className="bg-background border-border text-foreground sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Account Credentials Generated</DialogTitle>
-            <DialogDescription className="text-muted-foreground">
-              Please copy the temporary login password. It will not be shown again.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="bg-muted/50 border border-border rounded-lg p-4 flex items-center justify-between gap-4 mt-2">
-            <code className="text-primary font-mono text-base font-bold tracking-wider select-all">
-              {generatedTempPassword}
-            </code>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={copyToClipboard}
-              className="hover:bg-muted text-muted-foreground hover:text-foreground"
-            >
-              {copied ? (
-                <Check className="h-4 w-4 text-emerald-500" />
-              ) : (
-                <Copy className="h-4 w-4" />
-              )}
-            </Button>
-          </div>
-
-          <DialogFooter className="mt-4">
-            <Button onClick={() => setIsTempPasswordOpen(false)} className="w-full">
-              Done, I have saved it
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
 
