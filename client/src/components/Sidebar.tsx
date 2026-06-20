@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChevronDown, Folder, LayoutDashboard, LogOut, Plus, Settings } from 'lucide-react';
+import { ChevronDown, Folder, LayoutDashboard, LogOut, Plus, Settings, Shield } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
@@ -171,6 +171,31 @@ export function Sidebar({ isOpen }: { isOpen: boolean }) {
               {isOpen && <span>Dashboard</span>}
             </Link>
           </div>
+
+          {/* Admin Portal (Admin Only) */}
+          {user?.role === 'ADMIN' && (
+            <div className="flex flex-col gap-1.5">
+              {isOpen && (
+                <div className="text-muted-foreground font-bold text-[10px] tracking-widest uppercase mb-1.5 px-3">
+                  Admin
+                </div>
+              )}
+              <Link
+                to="/admin"
+                title="Admin Portal"
+                className={`flex items-center gap-3 ${isOpen ? 'px-4 py-2.5 justify-start' : 'h-10 w-10 justify-center mx-auto'} ${
+                  isActive('/admin')
+                    ? 'bg-primary/10 text-primary font-bold shadow-sm'
+                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                } rounded-lg text-sm transition-all duration-200`}
+              >
+                <Shield
+                  className={`w-5 h-5 shrink-0 ${isActive('/admin') ? 'text-primary' : 'text-muted-foreground'}`}
+                />
+                {isOpen && <span>Admin Portal</span>}
+              </Link>
+            </div>
+          )}
 
           <div className="flex flex-col gap-1.5">
             {isOpen && (

@@ -11,6 +11,7 @@ import { ToastContainer } from './components/ui/Toast';
 import './index.css';
 import { Dashboard } from './pages/Dashboard';
 import { Settings } from './pages/Settings';
+import { AdminDashboard } from './pages/admin/AdminDashboard';
 import ForceResetPage from './pages/auth/ForceResetPage';
 import LoginPage from './pages/auth/LoginPage';
 import ProfilePage from './pages/profile/ProfilePage';
@@ -59,6 +60,7 @@ const DashboardLayout: React.FC = () => {
         <main className="flex-1 flex flex-col min-h-0 bg-background overflow-y-auto">
           <Routes>
             <Route path="dashboard" element={<Dashboard />} />
+            <Route path="admin" element={<AdminDashboard />} />
             <Route path="profile" element={<ProfilePage />} />
             <Route path="settings" element={<Settings />} />
             <Route path="*" element={<Navigate to="dashboard" replace />} />

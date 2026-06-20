@@ -2,10 +2,13 @@ import type { Request as ExRequest } from 'express';
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Middlewares,
   Patch,
+  Path,
   Post,
+  Put,
   Query,
   Request,
   Route,
@@ -15,8 +18,18 @@ import {
 } from 'tsoa';
 
 import { validateRequest } from '../middlewares/validate.middleware';
-import { userAutocompleteQuerySchema } from '../schemas/user.schema';
 import {
+  createUserSchema,
+  deleteUserSchema,
+  getUserActivitySchema,
+  getUserSchema,
+  listUsersQuerySchema,
+  updateUserSchema,
+  userAutocompleteQuerySchema,
+} from '../schemas/user.schema';
+import {
+  AdminCreateUserRequest,
+  AdminUpdateUserRequest,
   ChangePasswordRequest,
   UpdateProfileRequest,
   UserProfile,
@@ -103,5 +116,121 @@ export class UserController extends Controller {
     const { userId } = (request as any).user;
     const projects = await this.userService.getUserProjects(userId);
     return successResponse('Projects retrieved successfully.', projects);
+  }
+
+  /**
+   * View all users with pagination and search (Admin Only)
+   */
+  @Get('/')
+  @Middlewares(validateRequest(listUsersQuerySchema))
+  @Security('jwt', ['global:admin'])
+  public async listUsers(
+    @Request() request: ExRequest,
+    @Query() page: number = 1,
+    @Query() limit: number = 10,
+    @Query() search?: string,
+  ): Promise<ApiResponse<any>> {
+    const result = await this.userService.listUsers(page, limit, search);
+    return successResponse('Users list retrieved successfully.', result);
+  }
+
+  /**
+   * Create a new user with generated temporary password (Admin Only)
+   */
+  @Post('/')
+  @Middlewares(validateRequest(createUserSchema))
+  @SuccessResponse('201', 'Created')
+  @Security('jwt', ['global:admin'])
+  public async createUser(
+    @Body() requestBody: AdminCreateUserRequest,
+    @Request() request: ExRequest,
+  ): Promise<ApiResponse<any>> {
+    const { userId: actorId } = (request as any).user;
+    const result = await this.userService.createUser(requestBody, actorId);
+    this.setStatus(201);
+    return successResponse('User created successfully.', result);
+  }
+
+  /**
+   * View single user details (Admin Only)
+   */
+  @Get('{id}')
+  @Middlewares(validateRequest(getUserSchema))
+  @Security('jwt', ['global:admin'])
+  public async getUserById(@Path() id: string): Promise<ApiResponse<any>> {
+    const profile = await this.userService.getProfile(id);
+    return successResponse('User details retrieved successfully.', profile);
+  }
+
+  /**
+   * Update user details like email, name, and role (Admin Only)
+   */
+  @Put('{id}')
+  @Middlewares(validateRequest(updateUserSchema))
+  @Security('jwt', ['global:admin'])
+  public async updateUser(
+    @Path() id: string,
+    @Body() requestBody: AdminUpdateUserRequest,
+    @Request() request: ExRequest,
+  ): Promise<ApiResponse<any>> {
+    const { userId: actorId } = (request as any).user;
+    const result = await this.userService.updateUser(id, requestBody, actorId);
+    return successResponse('User updated successfully.', result);
+  }
+
+  /**
+   * Deactivate a user (Admin Only)
+   */
+  @Patch('{id}/deactivate')
+  @Middlewares(validateRequest(getUserSchema))
+  @Security('jwt', ['global:admin'])
+  public async deactivateUser(
+    @Path() id: string,
+    @Request() request: ExRequest,
+  ): Promise<ApiResponse<any>> {
+    const { userId: actorId } = (request as any).user;
+    const result = await this.userService.deactivateUser(id, actorId);
+    return successResponse('User deactivated successfully.', result);
+  }
+
+  /**
+   * Activate a user (Admin Only)
+   */
+  @Patch('{id}/activate')
+  @Middlewares(validateRequest(getUserSchema))
+  @Security('jwt', ['global:admin'])
+  public async activateUser(
+    @Path() id: string,
+    @Request() request: ExRequest,
+  ): Promise<ApiResponse<any>> {
+    const { userId: actorId } = (request as any).user;
+    const result = await this.userService.activateUser(id, actorId);
+    return successResponse('User activated successfully.', result);
+  }
+
+  /**
+   * Delete a user cleanly (Admin Only)
+   */
+  @Delete('{id}')
+  @Middlewares(validateRequest(deleteUserSchema))
+  @Security('jwt', ['global:admin'])
+  public async deleteUser(
+    @Path() id: string,
+    @Request() request: ExRequest,
+  ): Promise<ApiResponse<null>> {
+    const { userId: actorId } = (request as any).user;
+    await this.userService.deleteUser(id, actorId);
+    return successResponse('User deleted successfully.', null);
+  }
+
+  /**
+   * View user action audit logs (Admin Only)
+   */
+  @Get('{id}/activity')
+  @Middlewares(validateRequest(getUserActivitySchema))
+  @Security('jwt', ['global:admin'])
+  public async getUserActivity(@Path() id: string): Promise<ApiResponse<any[]>> {
+    const logs = await this.userService.getUserActivity(id);
+    return successResponse('User activity audit logs retrieved successfully.', logs);
   }
 }
