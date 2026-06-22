@@ -36,6 +36,7 @@ import {
 } from '../services/task.service';
 import { ApiError } from '../utils/apiError.util';
 import { ApiResponse, successResponse } from '../utils/response.util';
+import { broadcastToProject } from '../lib/socket';
 
 @Route('tasks')
 @Tags('Tasks')
@@ -74,6 +75,7 @@ export class TaskController extends Controller {
   public async createNewTask(@Body() body: CreateTaskRequest): Promise<ApiResponse<Task>> {
     const task = await createTask(body);
     this.setStatus(201);
+    broadcastToProject(task.projectId, 'task:created', task);
     return successResponse('Task created successfully.', task);
   }
 
@@ -115,6 +117,7 @@ export class TaskController extends Controller {
     }
 
     const task = await updateTask(id, body);
+    broadcastToProject(task.projectId, 'task:updated', task);
     return successResponse('Task updated successfully.', task);
   }
 
@@ -123,7 +126,14 @@ export class TaskController extends Controller {
   @Middlewares(validateRequest(deleteTaskSchema))
   @Security('jwt', ['project:manager'])
   public async deleteExistingTask(@Path() id: string): Promise<ApiResponse<null>> {
-    await deleteTask(id);
+    const existingTask = await getTaskById(id);
+    if (existingTask) {
+      const projectId = existingTask.projectId;
+      await deleteTask(id);
+      broadcastToProject(projectId, 'task:deleted', { taskId: id });
+    } else {
+      await deleteTask(id);
+    }
     return successResponse('Task deleted successfully.', null);
   }
 }

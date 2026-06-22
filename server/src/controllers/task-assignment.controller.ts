@@ -31,6 +31,8 @@ import {
   unassignUserFromTask,
 } from '../services/task-assignment.service';
 import { ApiResponse, successResponse } from '../utils/response.util';
+import { getTaskById } from '../services/task.service';
+import { broadcastToProject } from '../lib/socket';
 
 export interface AssignUserInput {
   userId: string;
@@ -59,6 +61,11 @@ export class TaskAssignmentController extends Controller {
     const { userId: requestorId, role: requestorRole } = (request as any).user;
     const assignment = await assignUserToTask(id, body.userId, requestorId, requestorRole);
     this.setStatus(201);
+    const task = await getTaskById(id);
+    if (task) {
+      broadcastToProject(task.projectId, 'task:assigned', { taskId: id, assignment, assignees: task.assignees });
+      broadcastToProject(task.projectId, 'task:updated', task);
+    }
     return successResponse('User assigned to task successfully.', assignment);
   }
 
@@ -74,7 +81,15 @@ export class TaskAssignmentController extends Controller {
     @Request() request: ExRequest,
   ): Promise<ApiResponse<null>> {
     const { userId: requestorId, role: requestorRole } = (request as any).user;
+    const taskBefore = await getTaskById(id);
     await unassignUserFromTask(id, userId, requestorId, requestorRole);
+    const task = await getTaskById(id);
+    if (task) {
+      broadcastToProject(task.projectId, 'task:unassigned', { taskId: id, userId });
+      broadcastToProject(task.projectId, 'task:updated', task);
+    } else if (taskBefore) {
+      broadcastToProject(taskBefore.projectId, 'task:unassigned', { taskId: id, userId });
+    }
     return successResponse('User unassigned from task successfully.', null);
   }
 
@@ -91,6 +106,11 @@ export class TaskAssignmentController extends Controller {
   ): Promise<ApiResponse<TaskAssignment[]>> {
     const { userId: requestorId, role: requestorRole } = (request as any).user;
     const assignments = await bulkAssignUsersToTask(id, body.userIds, requestorId, requestorRole);
+    const task = await getTaskById(id);
+    if (task) {
+      broadcastToProject(task.projectId, 'task:assignments-updated', { taskId: id, assignments, assignees: task.assignees });
+      broadcastToProject(task.projectId, 'task:updated', task);
+    }
     return successResponse('Task assignments updated successfully.', assignments);
   }
 

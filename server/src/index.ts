@@ -1,9 +1,11 @@
+import http from 'http';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express, { NextFunction, Request, Response } from 'express';
 import swaggerUi from 'swagger-ui-express';
 
 import { RegisterRoutes } from './routes';
+import { initSocket } from './lib/socket';
 import swaggerDocument from './swagger.json';
 import { ApiError } from './utils/apiError.util';
 import { errorResponse } from './utils/response.util';
@@ -60,8 +62,11 @@ app.use((err: unknown, req: Request, res: Response, _next: NextFunction) => {
   return res.status(500).json(errorResponse(message));
 });
 
+const server = http.createServer(app);
+initSocket(server);
+
 if (require.main === module) {
-  app.listen(port, () => {
+  server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
   });
 }

@@ -21,6 +21,8 @@ import {
   getCommentsSchema,
 } from '../schemas/comment.schema';
 import { deleteComment, getCommentsByTaskId, postComment } from '../services/comment.service';
+import { getTaskById } from '../services/task.service';
+import { broadcastToProject } from '../lib/socket';
 import { ApiResponse, successResponse } from '../utils/response.util';
 
 @Route('tasks')
@@ -51,6 +53,10 @@ export class CommentController extends Controller {
   ): Promise<ApiResponse<Comment>> {
     const { userId } = (request as any).user;
     const comment = await postComment(userId, taskId, body.content, body.attachments);
+    const task = await getTaskById(taskId);
+    if (task) {
+      broadcastToProject(task.projectId, 'comment:created', comment);
+    }
     return successResponse('Comment posted successfully.', comment);
   }
 }
