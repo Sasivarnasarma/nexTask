@@ -1,15 +1,15 @@
 import fs from 'fs';
 import path from 'path';
 
-export interface OnboardingTemplateData {
+export interface WelcomeTemplateData {
   email: string;
   name: string;
   tempPassword: string;
   clientUrl: string;
 }
 
-export function getOnboardingTemplate(data: OnboardingTemplateData): string {
-  const filePath = path.join(__dirname, 'onboarding.html');
+export function getWelcomeTemplate(data: WelcomeTemplateData): string {
+  const filePath = path.join(__dirname, 'welcome.html');
   let html = fs.readFileSync(filePath, 'utf-8');
 
   html = html

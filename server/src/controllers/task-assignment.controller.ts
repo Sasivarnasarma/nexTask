@@ -44,7 +44,7 @@ export interface BulkAssignInput {
 @Tags('Task Assignments')
 @Security('jwt')
 export class TaskAssignmentController extends Controller {
-/**
+  /**
    * Assigns a user to a task.
    */
   @Post('/')
@@ -78,7 +78,7 @@ export class TaskAssignmentController extends Controller {
     return successResponse('User unassigned from task successfully.', null);
   }
 
-/**
+  /**
    * Bulk assigns users to a task, overwriting existing assignments.
    */
   @Put('/')
@@ -94,7 +94,6 @@ export class TaskAssignmentController extends Controller {
     return successResponse('Task assignments updated successfully.', assignments);
   }
 
-  
   /**
    * Retrieves all assignees for a given task.
    */

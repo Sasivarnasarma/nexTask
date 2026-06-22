@@ -252,9 +252,9 @@ export class UserService {
       },
     });
 
-    // Trigger onboarding email notification
+    // Trigger welcome email notification
     try {
-      await this.mailService.sendOnboardingEmail(email, newUser.name, tempPassword);
+      await this.mailService.sendWelcomeEmail(email, newUser.name, tempPassword);
     } catch (mailError) {
       console.error(`[MAIL_ERROR] Failed to dispatch welcome email to ${email}:`, mailError);
     }

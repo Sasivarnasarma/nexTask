@@ -3,10 +3,9 @@ import { TaskAssignment } from '@prisma/client';
 
 import { prisma } from '../lib/prisma';
 import { ApiError } from '../utils/apiError.util';
+import { MailService } from './mail.service';
 import { verifyProjectManagerAccess, verifyProjectMemberAccess } from './project-member.service';
 import { PushService } from './push.service';
-
-import { MailService } from './mail.service';
 
 const mailService = new MailService();
 
@@ -75,7 +74,7 @@ export async function assignUserToTask(
     },
   });
 
-// Optional: Send push notification AND Email Alert
+  // Optional: Send push notification AND Email Alert
   if (userId !== requestorId) {
     // 1. Send the push notification
     PushService.sendNotificationToUser(userId, {
@@ -87,15 +86,17 @@ export async function assignUserToTask(
     });
 
     // 2. Send the email notification
-    mailService.sendTaskAssignmentEmail(
-      user.email,
-      user.name || 'Team Member',
-      task.title,
-      task.project.name
-    ).catch(err => console.error('❌ Failed to send assignment mail:', err));
-    }
-    return assignment;
+    mailService
+      .sendTaskAssignmentEmail(
+        user.email,
+        user.name || 'Team Member',
+        task.title,
+        task.project.name,
+      )
+      .catch((err) => console.error('❌ Failed to send assignment mail:', err));
   }
+  return assignment;
+}
 
 /**
  * Unassigns a user from a task.
@@ -174,7 +175,7 @@ export async function bulkAssignUsersToTask(
   // Check if all users exist and are active
   const users = await prisma.user.findMany({
     where: { id: { in: uniqueUserIds } },
-    select: { id: true, isActive: true },
+    select: { id: true, name: true, email: true, isActive: true },
   });
   if (users.length !== uniqueUserIds.length) {
     throw new ApiError(404, 'One or more users not found.');
@@ -231,8 +232,7 @@ export async function bulkAssignUsersToTask(
     });
   });
 
-  // Notify newly assigned users
-// Notify newly assigned users via Push and Email
+  // Notify newly assigned users via Push and Email
   for (const uid of uniqueUserIds) {
     if (!oldUserIds.has(uid) && uid !== requestorId) {
       // 1. Send push notification
@@ -244,18 +244,18 @@ export async function bulkAssignUsersToTask(
         console.error('Failed to send push notification for task assignment:', err);
       });
 
-      // 2. Fetch user data and send email
-      // (Using a standard then/catch block to avoid awaiting inside a non-critical loop)
-      prisma.user.findUnique({ where: { id: uid } }).then((notifiedUser) => {
-        if (notifiedUser) {
-          mailService.sendTaskAssignmentEmail(
+      // 2. Send email notification using pre-fetched user details
+      const notifiedUser = users.find((u) => u.id === uid);
+      if (notifiedUser) {
+        mailService
+          .sendTaskAssignmentEmail(
             notifiedUser.email,
             notifiedUser.name || 'Team Member',
             task.title,
-            task.project.name
-          ).catch(err => console.error('❌ Failed to send bulk assignment mail:', err));
-        }
-      });
+            task.project.name,
+          )
+          .catch((err) => console.error('❌ Failed to send bulk assignment mail:', err));
+      }
     }
   }
 
@@ -300,4 +300,4 @@ export async function getTaskAssignees(
     email: a.user.email,
     assignedAt: a.assignedAt,
   }));
-} 
+}

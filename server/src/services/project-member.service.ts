@@ -2,6 +2,9 @@ import { Project } from '@prisma/client';
 
 import { prisma } from '../lib/prisma';
 import { ApiError } from '../utils/apiError.util';
+import { MailService } from './mail.service';
+
+const mailService = new MailService();
 
 /**
  * Authorization helper to ensure the user is either:
@@ -107,6 +110,17 @@ export class ProjectMemberService {
         role,
       },
     });
+
+    // Send email notification (non-blocking)
+    const project = await prisma.project.findUnique({
+      where: { id: projectId },
+      select: { name: true },
+    });
+    if (user && project) {
+      mailService
+        .sendProjectAddedEmail(user.email, user.name || 'Team Member', project.name)
+        .catch((err) => console.error('❌ Failed to send project added email:', err));
+    }
 
     return newMember;
   }
@@ -232,6 +246,9 @@ export class ProjectMemberService {
           userId,
         },
       },
+      include: {
+        user: true,
+      },
     });
     if (!member) throw new ApiError(404, 'Project member not found.');
 
@@ -244,6 +261,18 @@ export class ProjectMemberService {
       },
       data: { role: newRole },
     });
+
+    // Send email notification (non-blocking)
+    if (member.user && project) {
+      mailService
+        .sendProjectRoleUpdatedEmail(
+          member.user.email,
+          member.user.name || 'Team Member',
+          project.name,
+          newRole,
+        )
+        .catch((err) => console.error('❌ Failed to send project role updated email:', err));
+    }
   }
 
   /**
@@ -274,6 +303,9 @@ export class ProjectMemberService {
           userId,
         },
       },
+      include: {
+        user: true,
+      },
     });
     if (!member) throw new ApiError(404, 'Project member not found.');
 
@@ -298,5 +330,12 @@ export class ProjectMemberService {
         },
       });
     });
+
+    // Send email notification (non-blocking)
+    if (member.user && project) {
+      mailService
+        .sendProjectRemovedEmail(member.user.email, member.user.name || 'Team Member', project.name)
+        .catch((err) => console.error('❌ Failed to send project removed email:', err));
+    }
   }
 }
