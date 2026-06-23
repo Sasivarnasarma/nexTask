@@ -34,6 +34,7 @@ import {
   X,
 } from 'lucide-react';
 import React, { useState } from 'react';
+import { io } from 'socket.io-client';
 
 import {
   createTaskAttachment,
@@ -427,6 +428,87 @@ export function Dashboard() {
       refetchTaskDetails();
     },
   });
+
+  const selectedTaskRef = React.useRef(selectedTask);
+  React.useEffect(() => {
+    selectedTaskRef.current = selectedTask;
+  }, [selectedTask]);
+
+  React.useEffect(() => {
+    if (!activeProjectIdResolved) return;
+
+    const socketUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
+    const token = useAuthStore.getState().token;
+
+    const newSocket = io(socketUrl, {
+      auth: { token },
+      transports: ['websocket'],
+    });
+
+    newSocket.on('connect', () => {
+      console.log('Socket connected, joining project:', activeProjectIdResolved);
+      newSocket.emit('join-project', activeProjectIdResolved);
+    });
+
+    newSocket.on('task:created', () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks', activeProjectIdResolved] });
+    });
+
+    newSocket.on('task:updated', (data) => {
+      queryClient.invalidateQueries({ queryKey: ['tasks', activeProjectIdResolved] });
+      if (selectedTaskRef.current && selectedTaskRef.current.id === data.id) {
+        refetchTaskDetails();
+      }
+    });
+
+    newSocket.on('task:deleted', (data) => {
+      queryClient.invalidateQueries({ queryKey: ['tasks', activeProjectIdResolved] });
+      if (selectedTaskRef.current && selectedTaskRef.current.id === data.taskId) {
+        setSelectedTask(null);
+      }
+    });
+
+    newSocket.on('comment:created', (data) => {
+      if (selectedTaskRef.current && selectedTaskRef.current.id === data.taskId) {
+        refetchComments();
+        refetchTaskDetails();
+      }
+    });
+
+    newSocket.on('comment:deleted', (data) => {
+      if (selectedTaskRef.current && selectedTaskRef.current.id === data.taskId) {
+        refetchComments();
+        refetchTaskDetails();
+      }
+    });
+
+    newSocket.on('task:assigned', (data) => {
+      queryClient.invalidateQueries({ queryKey: ['tasks', activeProjectIdResolved] });
+      if (selectedTaskRef.current && selectedTaskRef.current.id === data.taskId) {
+        refetchTaskDetails();
+      }
+    });
+
+    newSocket.on('task:unassigned', (data) => {
+      queryClient.invalidateQueries({ queryKey: ['tasks', activeProjectIdResolved] });
+      if (selectedTaskRef.current && selectedTaskRef.current.id === data.taskId) {
+        refetchTaskDetails();
+      }
+    });
+
+    newSocket.on('task:assignments-updated', (data) => {
+      queryClient.invalidateQueries({ queryKey: ['tasks', activeProjectIdResolved] });
+      if (selectedTaskRef.current && selectedTaskRef.current.id === data.taskId) {
+        refetchTaskDetails();
+      }
+    });
+
+    return () => {
+      console.log('Cleaning up socket for project:', activeProjectIdResolved);
+      newSocket.emit('leave-project', activeProjectIdResolved);
+      newSocket.disconnect();
+    };
+  }, [activeProjectIdResolved, queryClient, refetchComments, refetchTaskDetails]);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
