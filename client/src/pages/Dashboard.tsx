@@ -563,7 +563,7 @@ export function Dashboard() {
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !selectedTask?.id) return;
+    if (!file || !selectedTask?.id || !activeProjectIdResolved) return;
     setIsUploading(true);
 
     try {
@@ -571,6 +571,7 @@ export function Dashboard() {
         filename: file.name,
         mimeType: file.type || 'application/octet-stream',
         fileSize: file.size,
+        projectId: activeProjectIdResolved,
       });
 
       await uploadFileToS3(uploadUrl, file);

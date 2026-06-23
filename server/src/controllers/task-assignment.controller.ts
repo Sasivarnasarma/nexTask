@@ -46,7 +46,7 @@ export interface BulkAssignInput {
   userIds: string[];
 }
 
-@Route('tasks/{id}/assignments')
+@Route('tasks/{id}/assignees')
 @Tags('Task Assignments')
 @Security('jwt')
 export class TaskAssignmentController extends Controller {

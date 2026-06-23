@@ -23,3 +23,15 @@ export async function resetPassword(payload: PasswordResetRequest): Promise<Logi
   }
   return data.data;
 }
+
+export async function refreshSession(): Promise<LoginResponse> {
+  const { data } = await apiClient.post<ApiResponse<LoginResponse>>(
+    '/auth/refresh',
+    {},
+    { skipGlobalToast: true },
+  );
+  if (data.data === null) {
+    throw new Error('Refresh session response payload is missing.');
+  }
+  return data.data;
+}

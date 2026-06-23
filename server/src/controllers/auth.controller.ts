@@ -44,4 +44,19 @@ export class AuthController extends Controller {
     const data = await this.authService.resetPassword(userId, requestBody);
     return successResponse('Password reset successfully.', data);
   }
+
+  /**
+   * Refreshes the session of an already-logged-in user, extending their token expiration.
+   */
+  @SuccessResponse('200', 'OK')
+  @Security('jwt')
+  @Post('refresh')
+  public async refreshSession(
+    @Request() request: ExRequest,
+  ): Promise<LoginResponseWrapper> {
+    this.setStatus(200);
+    const { userId } = (request as any).user;
+    const data = await this.authService.refreshSession(userId);
+    return successResponse('Session refreshed successfully.', data);
+  }
 }

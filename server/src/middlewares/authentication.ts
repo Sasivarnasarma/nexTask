@@ -109,11 +109,11 @@ export async function expressAuthentication(
     try {
       const payload = verifyToken(token);
 
-      // ── isActive check ──────────────────────────────────────────────────
-      // Query the database to ensure the user exists and is active.
+      // ── Database Verification of User Status & Roles ─────────────────────
+      // Query the database to ensure the user exists, is active, and matches JWT role/reset claims.
       const user = await prisma.user.findUnique({
         where: { id: payload.userId },
-        select: { isActive: true },
+        select: { isActive: true, role: true, mustResetPassword: true },
       });
 
       if (!user) {
@@ -127,10 +127,26 @@ export async function expressAuthentication(
         };
       }
 
+      // Detect if user's role has been updated or demoted in the database, invalidating the stale JWT claims
+      if (user.role !== payload.role) {
+        throw {
+          status: 401,
+          message: 'User role has changed. Please log in again to refresh your session.',
+        };
+      }
+
+      // Detect if user's password reset status has changed, invalidating the stale JWT claims
+      if (user.mustResetPassword !== payload.mustResetPassword) {
+        throw {
+          status: 401,
+          message: 'Security credentials updated. Please log in again to refresh your session.',
+        };
+      }
+
       // ── mustResetPassword gate ──────────────────────────────────────────
       // If the user's account requires a password reset (e.g. first login),
       // block all endpoints EXCEPT the reset-password route itself.
-      if (payload.mustResetPassword) {
+      if (user.mustResetPassword) {
         const isAllowed = RESET_ALLOWED_PATHS.some(
           (entry) => entry.method === request.method && request.path === entry.path,
         );

@@ -671,6 +671,7 @@ const models: TsoaRoute.Models = {
             "filename": {"dataType":"string","required":true},
             "mimeType": {"dataType":"string","required":true},
             "fileSize": {"dataType":"double","required":true},
+            "projectId": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
     },
@@ -1273,7 +1274,7 @@ export function RegisterRoutes(app: Router) {
                 body: {"in":"body","name":"body","required":true,"ref":"AssignUserInput"},
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
-        app.post('/tasks/:id/assignments',
+        app.post('/tasks/:id/assignees',
             authenticateMiddleware([{"jwt":["project:manager"]}]),
             ...(fetchMiddlewares<RequestHandler>(TaskAssignmentController)),
             ...(fetchMiddlewares<RequestHandler>(TaskAssignmentController.prototype.assignUser)),
@@ -1306,7 +1307,7 @@ export function RegisterRoutes(app: Router) {
                 userId: {"in":"path","name":"userId","required":true,"dataType":"string"},
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
-        app.delete('/tasks/:id/assignments/:userId',
+        app.delete('/tasks/:id/assignees/:userId',
             authenticateMiddleware([{"jwt":["project:manager"]}]),
             ...(fetchMiddlewares<RequestHandler>(TaskAssignmentController)),
             ...(fetchMiddlewares<RequestHandler>(TaskAssignmentController.prototype.unassignUser)),
@@ -1339,7 +1340,7 @@ export function RegisterRoutes(app: Router) {
                 body: {"in":"body","name":"body","required":true,"ref":"BulkAssignInput"},
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
-        app.put('/tasks/:id/assignments',
+        app.put('/tasks/:id/assignees',
             authenticateMiddleware([{"jwt":["project:manager"]}]),
             ...(fetchMiddlewares<RequestHandler>(TaskAssignmentController)),
             ...(fetchMiddlewares<RequestHandler>(TaskAssignmentController.prototype.bulkAssign)),
@@ -1371,7 +1372,7 @@ export function RegisterRoutes(app: Router) {
                 id: {"in":"path","name":"id","required":true,"dataType":"string"},
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
-        app.get('/tasks/:id/assignments',
+        app.get('/tasks/:id/assignees',
             authenticateMiddleware([{"jwt":["project:member"]}]),
             ...(fetchMiddlewares<RequestHandler>(TaskAssignmentController)),
             ...(fetchMiddlewares<RequestHandler>(TaskAssignmentController.prototype.getAssignees)),
@@ -2188,6 +2189,37 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAuthController_refreshSession: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.post('/auth/refresh',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(AuthController)),
+            ...(fetchMiddlewares<RequestHandler>(AuthController.prototype.refreshSession)),
+
+            async function AuthController_refreshSession(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAuthController_refreshSession, request, response });
+
+                const controller = new AuthController();
+
+              await templateService.apiHandler({
+                methodName: 'refreshSession',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsAttachmentController_getAttachments: Record<string, TsoaRoute.ParameterSchema> = {
                 taskId: {"in":"path","name":"taskId","required":true,"dataType":"string"},
         };
@@ -2286,6 +2318,7 @@ export function RegisterRoutes(app: Router) {
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsAttachmentUploadController_getPresignedUrl: Record<string, TsoaRoute.ParameterSchema> = {
                 body: {"in":"body","name":"body","required":true,"ref":"GetPresignedUrlRequest"},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
         app.post('/attachments/presigned-url',
             authenticateMiddleware([{"jwt":[]}]),

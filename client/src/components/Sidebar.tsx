@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChevronDown, Folder, LayoutDashboard, LogOut, Plus, Settings, Shield } from 'lucide-react';
+import { Calendar, ChevronDown, Folder, LayoutDashboard, LogOut, Plus, Settings, Shield } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
@@ -169,6 +169,20 @@ export function Sidebar({ isOpen }: { isOpen: boolean }) {
                 className={`w-5 h-5 shrink-0 ${isActive('/dashboard') ? 'text-primary' : 'text-muted-foreground'}`}
               />
               {isOpen && <span>Dashboard</span>}
+            </Link>
+            <Link
+              to="/calendar"
+              title="Schedule Visualizer"
+              className={`flex items-center gap-3 ${isOpen ? 'px-4 py-2.5 justify-start' : 'h-10 w-10 justify-center mx-auto'} ${
+                isActive('/calendar')
+                  ? 'bg-primary/10 text-primary font-bold shadow-sm'
+                  : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+              } rounded-lg text-sm transition-all duration-200`}
+            >
+              <Calendar
+                className={`w-5 h-5 shrink-0 ${isActive('/calendar') ? 'text-primary' : 'text-muted-foreground'}`}
+              />
+              {isOpen && <span>Calendar</span>}
             </Link>
           </div>
 

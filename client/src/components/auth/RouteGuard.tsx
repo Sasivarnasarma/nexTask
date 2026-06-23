@@ -1,6 +1,7 @@
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 
+import { getProfile } from '@/api/profile.api';
 import { useAuthStore } from '@/store/auth.store';
 
 interface Props {
@@ -13,11 +14,24 @@ interface Props {
  * Redirect logic:
  *  - Not authenticated      → /login
  *  - mustResetPassword=true → /force-reset  (cannot access any other page)
- *  - Authenticated + ok     → render children
+ *  - Authenticated + ok     → render children and sync profile background
  */
 export function RequireAuth({ children }: Props) {
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, logout, updateUser } = useAuthStore();
   const location = useLocation();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      getProfile()
+        .then((profile) => {
+          updateUser(profile);
+        })
+        .catch((err) => {
+          console.error('Failed to sync profile, logging out:', err);
+          logout();
+        });
+    }
+  }, [isAuthenticated, logout, updateUser]);
 
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;

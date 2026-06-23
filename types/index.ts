@@ -248,6 +248,7 @@ export interface GetPresignedUrlRequest {
   filename: string;
   mimeType: string;
   fileSize: number;
+  projectId: string;
 }
 
 export interface GetPresignedUrlResponse {

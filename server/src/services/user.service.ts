@@ -11,6 +11,7 @@ import { prisma } from '../lib/prisma';
 import { ApiError } from '../utils/apiError.util';
 import { hashPassword, verifyPassword } from '../utils/hash.util';
 import { MailService } from './mail.service';
+import { deleteFile } from './s3.service';
 
 export type {
   AdminCreateUserRequest,
@@ -422,6 +423,23 @@ export class UserService {
       throw new ApiError(
         400,
         `Cannot delete user. They own projects: ${user.ownedProjects.map((p) => p.name).join(', ')}. Transfer project ownership first.`,
+      );
+    }
+
+    // Fetch all attachments uploaded by this user to clean up S3
+    const attachments = await prisma.attachment.findMany({
+      where: { uploadedById: id },
+      select: { fileKey: true },
+    });
+
+    // Clean up S3 files
+    if (attachments.length > 0) {
+      await Promise.all(
+        attachments.map((att) =>
+          deleteFile(att.fileKey).catch((err) => {
+            console.error(`Failed to delete S3 file ${att.fileKey} during user deletion:`, err);
+          }),
+        ),
       );
     }
 

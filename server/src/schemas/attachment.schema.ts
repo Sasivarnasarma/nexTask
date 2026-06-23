@@ -16,7 +16,12 @@ export const getPresignedUrlSchema = z.object({
   body: z.object({
     filename: z.string().min(1, 'Filename is required'),
     mimeType: z.string().min(1, 'Mime type is required'),
-    fileSize: z.number().int().positive('File size must be greater than 0'),
+    fileSize: z
+      .number()
+      .int()
+      .positive('File size must be greater than 0')
+      .max(26214400, 'File size cannot exceed 25MB'),
+    projectId: z.string().uuid('Invalid Project ID format'),
   }),
 });
 

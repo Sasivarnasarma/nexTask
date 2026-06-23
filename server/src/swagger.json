@@ -1822,12 +1822,16 @@
 					"fileSize": {
 						"type": "number",
 						"format": "double"
+					},
+					"projectId": {
+						"type": "string"
 					}
 				},
 				"required": [
 					"filename",
 					"mimeType",
-					"fileSize"
+					"fileSize",
+					"projectId"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -2583,7 +2587,7 @@
 				]
 			}
 		},
-		"/tasks/{id}/assignments": {
+		"/tasks/{id}/assignees": {
 			"post": {
 				"operationId": "AssignUser",
 				"responses": {
@@ -2713,7 +2717,7 @@
 				]
 			}
 		},
-		"/tasks/{id}/assignments/{userId}": {
+		"/tasks/{id}/assignees/{userId}": {
 			"delete": {
 				"operationId": "UnassignUser",
 				"responses": {
@@ -3698,6 +3702,33 @@
 				}
 			}
 		},
+		"/auth/refresh": {
+			"post": {
+				"operationId": "RefreshSession",
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/LoginResponseWrapper"
+								}
+							}
+						}
+					}
+				},
+				"description": "Refreshes the session of an already-logged-in user, extending their token expiration.",
+				"tags": [
+					"Auth"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": []
+			}
+		},
 		"/tasks/{taskId}/attachments": {
 			"get": {
 				"operationId": "GetAttachments",
@@ -3835,6 +3866,7 @@
 						}
 					}
 				},
+				"description": "Generates a cryptographically signed S3 PUT URL.\nRequires project membership validation and enforces a 25MB file size boundary.",
 				"tags": [
 					"Attachments"
 				],

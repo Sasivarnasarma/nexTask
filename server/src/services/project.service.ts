@@ -2,6 +2,7 @@ import { Project } from '@prisma/client';
 
 import { prisma } from '../lib/prisma';
 import { ApiError } from '../utils/apiError.util';
+import { deleteFile } from './s3.service';
 
 export class ProjectService {
   // 1. CREATE a brand new project
@@ -117,6 +118,29 @@ export class ProjectService {
   public async deleteProject(id: string): Promise<Project> {
     const existing = await prisma.project.findUnique({ where: { id } });
     if (!existing) throw new ApiError(404, 'Project not found.');
+
+    // Fetch all attachments for all tasks in this project
+    const attachments = await prisma.attachment.findMany({
+      where: {
+        task: {
+          projectId: id,
+        },
+      },
+      select: {
+        fileKey: true,
+      },
+    });
+
+    // Delete all attachment files from S3/R2
+    if (attachments.length > 0) {
+      await Promise.all(
+        attachments.map((att) =>
+          deleteFile(att.fileKey).catch((err) => {
+            console.error(`Failed to delete S3 file ${att.fileKey} during project deletion:`, err);
+          }),
+        ),
+      );
+    }
 
     return prisma.project.delete({
       where: { id },

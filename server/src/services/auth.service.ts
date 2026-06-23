@@ -97,4 +97,34 @@ export class AuthService {
 
     return { token, mustResetPassword: updatedUser.mustResetPassword };
   }
+
+  /**
+   * Generates a fresh JWT for an active session.
+   * Since this is called under an authenticated route, the user identity
+   * has already been verified, but we re-validate their active status in the DB.
+   */
+  public async refreshSession(userId: string): Promise<LoginResponse> {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new ApiError(404, 'User not found.');
+    }
+
+    if (!user.isActive) {
+      throw new ApiError(
+        403,
+        'Your account has been deactivated. Please contact an administrator.',
+      );
+    }
+
+    const token = generateToken({
+      userId: user.id,
+      role: user.role,
+      mustResetPassword: user.mustResetPassword,
+    });
+
+    return { token, mustResetPassword: user.mustResetPassword };
+  }
 }
