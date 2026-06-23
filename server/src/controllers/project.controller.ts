@@ -1,4 +1,10 @@
-import { CreateProjectRequest, Project, UpdateProjectRequest } from '@nextask/types';
+import {
+  CreateProjectRequest,
+  ProjectListResponse,
+  ProjectResponse,
+  UpdateProjectRequest,
+  VoidResponse,
+} from '@nextask/types';
 import type { Request as ExRequest } from 'express';
 import { Middlewares } from 'tsoa';
 import {
@@ -28,7 +34,7 @@ import {
 } from '../schemas/project.schema';
 import { ProjectService } from '../services/project.service';
 import { ApiError } from '../utils/apiError.util';
-import { ApiResponse, successResponse } from '../utils/response.util';
+import { successResponse } from '../utils/response.util';
 
 @Route('projects')
 @Tags('Projects')
@@ -49,7 +55,7 @@ export class ProjectController extends Controller {
   public async create(
     @Body() requestBody: CreateProjectRequest,
     @Request() request: ExRequest,
-  ): Promise<ApiResponse<Project>> {
+  ): Promise<ProjectResponse> {
     const { userId: requestorId } = (request as any).user;
 
     const newProject = await this.projectService.createProject(
@@ -63,7 +69,7 @@ export class ProjectController extends Controller {
 
   // 2. GET /projects (View all projects visible to requestor)
   @Get('/')
-  public async getAll(@Request() request: ExRequest): Promise<ApiResponse<Project[]>> {
+  public async getAll(@Request() request: ExRequest): Promise<ProjectListResponse> {
     const { userId: requestorId, role: requestorRole } = (request as any).user;
     const projects = await this.projectService.getAllProjects(requestorId, requestorRole);
     return successResponse('Projects retrieved successfully.', projects);
@@ -73,7 +79,7 @@ export class ProjectController extends Controller {
   @Get('{id}')
   @Middlewares(validateRequest(getProjectSchema))
   @Security('jwt', ['project:member'])
-  public async getById(@Path() id: string): Promise<ApiResponse<Project>> {
+  public async getById(@Path() id: string): Promise<ProjectResponse> {
     const project = await this.projectService.getProjectById(id);
     if (!project) throw new ApiError(404, 'Project not found.');
     return successResponse('Project retrieved successfully.', project);
@@ -86,7 +92,7 @@ export class ProjectController extends Controller {
   public async update(
     @Path() id: string,
     @Body() requestBody: UpdateProjectRequest,
-  ): Promise<ApiResponse<Project>> {
+  ): Promise<ProjectResponse> {
     const updatedProject = await this.projectService.updateProject(
       id,
       requestBody.name,
@@ -99,7 +105,7 @@ export class ProjectController extends Controller {
   @Patch('{id}/complete')
   @Middlewares(validateRequest(completeProjectSchema))
   @Security('jwt', ['project:manager'])
-  public async complete(@Path() id: string): Promise<ApiResponse<Project>> {
+  public async complete(@Path() id: string): Promise<ProjectResponse> {
     const completedProject = await this.projectService.completeProject(id);
     return successResponse('Project marked as completed.', completedProject);
   }
@@ -108,7 +114,7 @@ export class ProjectController extends Controller {
   @Patch('{id}/archive')
   @Middlewares(validateRequest(archiveProjectSchema))
   @Security('jwt', ['project:manager'])
-  public async archive(@Path() id: string): Promise<ApiResponse<Project>> {
+  public async archive(@Path() id: string): Promise<ProjectResponse> {
     const archivedProject = await this.projectService.archiveProject(id);
     return successResponse('Project archived successfully.', archivedProject);
   }
@@ -117,7 +123,7 @@ export class ProjectController extends Controller {
   @Delete('{id}')
   @Middlewares(validateRequest(deleteProjectSchema))
   @Security('jwt', ['global:admin'])
-  public async delete(@Path() id: string): Promise<ApiResponse<null>> {
+  public async delete(@Path() id: string): Promise<VoidResponse> {
     const project = await this.projectService.getProjectById(id);
     if (!project) throw new ApiError(404, 'Project not found.');
 

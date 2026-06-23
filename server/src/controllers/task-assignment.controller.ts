@@ -1,5 +1,9 @@
-import { TaskAssignee } from '@nextask/types';
-import { TaskAssignment } from '@prisma/client';
+import {
+  TaskAssigneeListResponse,
+  TaskAssignmentListResponse,
+  TaskAssignmentResponse,
+  VoidResponse,
+} from '@nextask/types';
 import type { Request as ExRequest } from 'express';
 import {
   Body,
@@ -32,7 +36,7 @@ import {
   unassignUserFromTask,
 } from '../services/task-assignment.service';
 import { getTaskById } from '../services/task.service';
-import { ApiResponse, successResponse } from '../utils/response.util';
+import { successResponse } from '../utils/response.util';
 
 export interface AssignUserInput {
   userId: string;
@@ -57,7 +61,7 @@ export class TaskAssignmentController extends Controller {
     @Path() id: string,
     @Body() body: AssignUserInput,
     @Request() request: ExRequest,
-  ): Promise<ApiResponse<TaskAssignment>> {
+  ): Promise<TaskAssignmentResponse> {
     const { userId: requestorId, role: requestorRole } = (request as any).user;
     const assignment = await assignUserToTask(id, body.userId, requestorId, requestorRole);
     this.setStatus(201);
@@ -83,7 +87,7 @@ export class TaskAssignmentController extends Controller {
     @Path() id: string,
     @Path() userId: string,
     @Request() request: ExRequest,
-  ): Promise<ApiResponse<null>> {
+  ): Promise<VoidResponse> {
     const { userId: requestorId, role: requestorRole } = (request as any).user;
     const taskBefore = await getTaskById(id);
     await unassignUserFromTask(id, userId, requestorId, requestorRole);
@@ -107,7 +111,7 @@ export class TaskAssignmentController extends Controller {
     @Path() id: string,
     @Body() body: BulkAssignInput,
     @Request() request: ExRequest,
-  ): Promise<ApiResponse<TaskAssignment[]>> {
+  ): Promise<TaskAssignmentListResponse> {
     const { userId: requestorId, role: requestorRole } = (request as any).user;
     const assignments = await bulkAssignUsersToTask(id, body.userIds, requestorId, requestorRole);
     const task = await getTaskById(id);
@@ -131,7 +135,7 @@ export class TaskAssignmentController extends Controller {
   public async getAssignees(
     @Path() id: string,
     @Request() request: ExRequest,
-  ): Promise<ApiResponse<TaskAssignee[]>> {
+  ): Promise<TaskAssigneeListResponse> {
     const { userId: requestorId, role: requestorRole } = (request as any).user;
     const assignees = await getTaskAssignees(id, requestorId, requestorRole);
     return successResponse('Task assignees retrieved successfully.', assignees);

@@ -7,15 +7,7 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
-			"Record_string.string_": {
-				"properties": {},
-				"additionalProperties": {
-					"type": "string"
-				},
-				"type": "object",
-				"description": "Construct a type with a set of properties K of type T"
-			},
-			"ApiResponse_any-Array_": {
+			"UserListResponse": {
 				"properties": {
 					"success": {
 						"type": "boolean"
@@ -24,16 +16,14 @@
 						"type": "string"
 					},
 					"data": {
-						"items": {},
-						"type": "array",
 						"nullable": true
 					},
 					"errors": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Record_string.string_"
-							}
-						],
+						"properties": {},
+						"additionalProperties": {
+							"type": "string"
+						},
+						"type": "object",
 						"nullable": true
 					}
 				},
@@ -114,7 +104,7 @@
 			"UserProfile": {
 				"$ref": "#/components/schemas/User"
 			},
-			"ApiResponse_UserProfile_": {
+			"UserProfileResponse": {
 				"properties": {
 					"success": {
 						"type": "boolean"
@@ -131,11 +121,11 @@
 						"nullable": true
 					},
 					"errors": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Record_string.string_"
-							}
-						],
+						"properties": {},
+						"additionalProperties": {
+							"type": "string"
+						},
+						"type": "object",
 						"nullable": true
 					}
 				},
@@ -160,7 +150,7 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ApiResponse_null_": {
+			"VoidResponse": {
 				"properties": {
 					"success": {
 						"type": "boolean"
@@ -173,11 +163,11 @@
 						"nullable": true
 					},
 					"errors": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Record_string.string_"
-							}
-						],
+						"properties": {},
+						"additionalProperties": {
+							"type": "string"
+						},
+						"type": "object",
 						"nullable": true
 					}
 				},
@@ -210,7 +200,81 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ApiResponse_any_": {
+			"ProjectStatus": {
+				"type": "string",
+				"enum": [
+					"ACTIVE",
+					"ARCHIVED",
+					"COMPLETED"
+				]
+			},
+			"Project": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string",
+						"nullable": true
+					},
+					"status": {
+						"$ref": "#/components/schemas/ProjectStatus"
+					},
+					"endDate": {
+						"anyOf": [
+							{
+								"type": "string",
+								"format": "date-time"
+							},
+							{
+								"type": "string"
+							}
+						],
+						"nullable": true
+					},
+					"ownerId": {
+						"type": "string"
+					},
+					"createdAt": {
+						"anyOf": [
+							{
+								"type": "string",
+								"format": "date-time"
+							},
+							{
+								"type": "string"
+							}
+						]
+					},
+					"updatedAt": {
+						"anyOf": [
+							{
+								"type": "string",
+								"format": "date-time"
+							},
+							{
+								"type": "string"
+							}
+						]
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"description",
+					"status",
+					"endDate",
+					"ownerId",
+					"createdAt",
+					"updatedAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ProjectListResponse": {
 				"properties": {
 					"success": {
 						"type": "boolean"
@@ -219,14 +283,59 @@
 						"type": "string"
 					},
 					"data": {
+						"items": {
+							"$ref": "#/components/schemas/Project"
+						},
+						"type": "array",
 						"nullable": true
 					},
 					"errors": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Record_string.string_"
+						"properties": {},
+						"additionalProperties": {
+							"type": "string"
+						},
+						"type": "object",
+						"nullable": true
+					}
+				},
+				"required": [
+					"success",
+					"message",
+					"data",
+					"errors"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"UserCreateResponse": {
+				"properties": {
+					"success": {
+						"type": "boolean"
+					},
+					"message": {
+						"type": "string"
+					},
+					"data": {
+						"properties": {
+							"tempPassword": {
+								"type": "string"
+							},
+							"user": {
+								"$ref": "#/components/schemas/User"
 							}
+						},
+						"required": [
+							"user"
 						],
+						"type": "object",
+						"nullable": true
+					},
+					"errors": {
+						"properties": {},
+						"additionalProperties": {
+							"type": "string"
+						},
+						"type": "object",
 						"nullable": true
 					}
 				},
@@ -277,6 +386,93 @@
 					"name",
 					"email",
 					"role"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"UserActivityResponse": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"action": {
+						"type": "string",
+						"enum": [
+							"CREATED",
+							"UPDATED",
+							"ASSIGNED",
+							"COMMENTED",
+							"COMPLETED",
+							"DELETED",
+							"USER_CREATED",
+							"USER_DEACTIVATED",
+							"USER_ACTIVATED",
+							"ROLE_CHANGED"
+						]
+					},
+					"description": {
+						"type": "string",
+						"nullable": true
+					},
+					"createdAt": {
+						"anyOf": [
+							{
+								"type": "string",
+								"format": "date-time"
+							},
+							{
+								"type": "string"
+							}
+						]
+					},
+					"taskId": {
+						"type": "string",
+						"nullable": true
+					},
+					"userId": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"action",
+					"description",
+					"createdAt",
+					"taskId",
+					"userId"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"UserActivityListResponse": {
+				"properties": {
+					"success": {
+						"type": "boolean"
+					},
+					"message": {
+						"type": "string"
+					},
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/UserActivityResponse"
+						},
+						"type": "array",
+						"nullable": true
+					},
+					"errors": {
+						"properties": {},
+						"additionalProperties": {
+							"type": "string"
+						},
+						"type": "object",
+						"nullable": true
+					}
+				},
+				"required": [
+					"success",
+					"message",
+					"data",
+					"errors"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -453,7 +649,7 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"SharedTask": {
+			"Task": {
 				"properties": {
 					"id": {
 						"type": "string"
@@ -462,7 +658,8 @@
 						"type": "string"
 					},
 					"description": {
-						"type": "string"
+						"type": "string",
+						"nullable": true
 					},
 					"dueDate": {
 						"anyOf": [
@@ -473,7 +670,8 @@
 							{
 								"type": "string"
 							}
-						]
+						],
+						"nullable": true
 					},
 					"priority": {
 						"type": "string",
@@ -559,7 +757,7 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ApiResponse_SharedTask-Array_": {
+			"TaskListResponse": {
 				"properties": {
 					"success": {
 						"type": "boolean"
@@ -569,142 +767,30 @@
 					},
 					"data": {
 						"items": {
-							"$ref": "#/components/schemas/SharedTask"
+							"$ref": "#/components/schemas/Task"
 						},
 						"type": "array",
 						"nullable": true
 					},
 					"errors": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Record_string.string_"
-							}
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"success",
-					"message",
-					"data",
-					"errors"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ApiResponse_SharedTask_": {
-				"properties": {
-					"success": {
-						"type": "boolean"
-					},
-					"message": {
-						"type": "string"
-					},
-					"data": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/SharedTask"
-							}
-						],
-						"nullable": true
-					},
-					"errors": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Record_string.string_"
-							}
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"success",
-					"message",
-					"data",
-					"errors"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"_36_Enums.Priority": {
-				"type": "string",
-				"enum": [
-					"LOW",
-					"MEDIUM",
-					"HIGH"
-				]
-			},
-			"_36_Enums.Status": {
-				"type": "string",
-				"enum": [
-					"TODO",
-					"IN_PROGRESS",
-					"COMPLETED"
-				]
-			},
-			"DefaultSelection_Prisma._36_TaskPayload_": {
-				"properties": {
-					"projectId": {
-						"type": "string"
-					},
-					"updatedAt": {
-						"type": "string",
-						"format": "date-time"
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time"
-					},
-					"position": {
-						"type": "number",
-						"format": "double"
-					},
-					"tags": {
-						"items": {
+						"properties": {},
+						"additionalProperties": {
 							"type": "string"
 						},
-						"type": "array"
-					},
-					"status": {
-						"$ref": "#/components/schemas/_36_Enums.Status"
-					},
-					"priority": {
-						"$ref": "#/components/schemas/_36_Enums.Priority"
-					},
-					"dueDate": {
-						"type": "string",
-						"format": "date-time"
-					},
-					"description": {
-						"type": "string"
-					},
-					"title": {
-						"type": "string"
-					},
-					"id": {
-						"type": "string"
+						"type": "object",
+						"nullable": true
 					}
 				},
 				"required": [
-					"projectId",
-					"updatedAt",
-					"createdAt",
-					"position",
-					"tags",
-					"status",
-					"priority",
-					"dueDate",
-					"description",
-					"title",
-					"id"
+					"success",
+					"message",
+					"data",
+					"errors"
 				],
-				"type": "object"
+				"type": "object",
+				"additionalProperties": false
 			},
-			"Task": {
-				"$ref": "#/components/schemas/DefaultSelection_Prisma._36_TaskPayload_",
-				"description": "Model Task"
-			},
-			"ApiResponse_Task_": {
+			"TaskResponse": {
 				"properties": {
 					"success": {
 						"type": "boolean"
@@ -721,11 +807,11 @@
 						"nullable": true
 					},
 					"errors": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Record_string.string_"
-							}
-						],
+						"properties": {},
+						"additionalProperties": {
+							"type": "string"
+						},
+						"type": "object",
 						"nullable": true
 					}
 				},
@@ -843,31 +929,35 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"DefaultSelection_Prisma._36_TaskAssignmentPayload_": {
+			"TaskAssignment": {
 				"properties": {
-					"assignedAt": {
-						"type": "string",
-						"format": "date-time"
+					"taskId": {
+						"type": "string"
 					},
 					"userId": {
 						"type": "string"
 					},
-					"taskId": {
-						"type": "string"
+					"assignedAt": {
+						"anyOf": [
+							{
+								"type": "string",
+								"format": "date-time"
+							},
+							{
+								"type": "string"
+							}
+						]
 					}
 				},
 				"required": [
-					"assignedAt",
+					"taskId",
 					"userId",
-					"taskId"
+					"assignedAt"
 				],
-				"type": "object"
+				"type": "object",
+				"additionalProperties": false
 			},
-			"TaskAssignment": {
-				"$ref": "#/components/schemas/DefaultSelection_Prisma._36_TaskAssignmentPayload_",
-				"description": "Model TaskAssignment"
-			},
-			"ApiResponse_TaskAssignment_": {
+			"TaskAssignmentResponse": {
 				"properties": {
 					"success": {
 						"type": "boolean"
@@ -884,11 +974,11 @@
 						"nullable": true
 					},
 					"errors": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Record_string.string_"
-							}
-						],
+						"properties": {},
+						"additionalProperties": {
+							"type": "string"
+						},
+						"type": "object",
 						"nullable": true
 					}
 				},
@@ -913,7 +1003,7 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ApiResponse_TaskAssignment-Array_": {
+			"TaskAssignmentListResponse": {
 				"properties": {
 					"success": {
 						"type": "boolean"
@@ -929,11 +1019,11 @@
 						"nullable": true
 					},
 					"errors": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Record_string.string_"
-							}
-						],
+						"properties": {},
+						"additionalProperties": {
+							"type": "string"
+						},
+						"type": "object",
 						"nullable": true
 					}
 				},
@@ -961,7 +1051,7 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ApiResponse_TaskAssignee-Array_": {
+			"TaskAssigneeListResponse": {
 				"properties": {
 					"success": {
 						"type": "boolean"
@@ -977,11 +1067,11 @@
 						"nullable": true
 					},
 					"errors": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Record_string.string_"
-							}
-						],
+						"properties": {},
+						"additionalProperties": {
+							"type": "string"
+						},
+						"type": "object",
 						"nullable": true
 					}
 				},
@@ -1011,7 +1101,7 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ApiResponse__time-Date__": {
+			"SystemHealthResponse": {
 				"properties": {
 					"success": {
 						"type": "boolean"
@@ -1022,8 +1112,15 @@
 					"data": {
 						"properties": {
 							"time": {
-								"type": "string",
-								"format": "date-time"
+								"anyOf": [
+									{
+										"type": "string",
+										"format": "date-time"
+									},
+									{
+										"type": "string"
+									}
+								]
 							}
 						},
 						"required": [
@@ -1033,11 +1130,11 @@
 						"nullable": true
 					},
 					"errors": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Record_string.string_"
-							}
-						],
+						"properties": {},
+						"additionalProperties": {
+							"type": "string"
+						},
+						"type": "object",
 						"nullable": true
 					}
 				},
@@ -1050,7 +1147,7 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ApiResponse__publicKey-string__": {
+			"SystemPublicKeyResponse": {
 				"properties": {
 					"success": {
 						"type": "boolean"
@@ -1071,11 +1168,11 @@
 						"nullable": true
 					},
 					"errors": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Record_string.string_"
-							}
-						],
+						"properties": {},
+						"additionalProperties": {
+							"type": "string"
+						},
+						"type": "object",
 						"nullable": true
 					}
 				},
@@ -1120,81 +1217,7 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ProjectStatus": {
-				"type": "string",
-				"enum": [
-					"ACTIVE",
-					"ARCHIVED",
-					"COMPLETED"
-				]
-			},
-			"Project": {
-				"properties": {
-					"id": {
-						"type": "string"
-					},
-					"name": {
-						"type": "string"
-					},
-					"description": {
-						"type": "string",
-						"nullable": true
-					},
-					"status": {
-						"$ref": "#/components/schemas/ProjectStatus"
-					},
-					"endDate": {
-						"anyOf": [
-							{
-								"type": "string",
-								"format": "date-time"
-							},
-							{
-								"type": "string"
-							}
-						],
-						"nullable": true
-					},
-					"ownerId": {
-						"type": "string"
-					},
-					"createdAt": {
-						"anyOf": [
-							{
-								"type": "string",
-								"format": "date-time"
-							},
-							{
-								"type": "string"
-							}
-						]
-					},
-					"updatedAt": {
-						"anyOf": [
-							{
-								"type": "string",
-								"format": "date-time"
-							},
-							{
-								"type": "string"
-							}
-						]
-					}
-				},
-				"required": [
-					"id",
-					"name",
-					"description",
-					"status",
-					"endDate",
-					"ownerId",
-					"createdAt",
-					"updatedAt"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ApiResponse_Project_": {
+			"ProjectResponse": {
 				"properties": {
 					"success": {
 						"type": "boolean"
@@ -1211,11 +1234,11 @@
 						"nullable": true
 					},
 					"errors": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Record_string.string_"
-							}
-						],
+						"properties": {},
+						"additionalProperties": {
+							"type": "string"
+						},
+						"type": "object",
 						"nullable": true
 					}
 				},
@@ -1239,39 +1262,6 @@
 				},
 				"required": [
 					"name"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ApiResponse_Project-Array_": {
-				"properties": {
-					"success": {
-						"type": "boolean"
-					},
-					"message": {
-						"type": "string"
-					},
-					"data": {
-						"items": {
-							"$ref": "#/components/schemas/Project"
-						},
-						"type": "array",
-						"nullable": true
-					},
-					"errors": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Record_string.string_"
-							}
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"success",
-					"message",
-					"data",
-					"errors"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -1330,7 +1320,7 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ApiResponse_ProjectMember_": {
+			"ProjectMemberResponse": {
 				"properties": {
 					"success": {
 						"type": "boolean"
@@ -1347,11 +1337,11 @@
 						"nullable": true
 					},
 					"errors": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Record_string.string_"
-							}
-						],
+						"properties": {},
+						"additionalProperties": {
+							"type": "string"
+						},
+						"type": "object",
 						"nullable": true
 					}
 				},
@@ -1429,7 +1419,7 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ApiResponse_ProjectMemberView-Array_": {
+			"ProjectMemberViewListResponse": {
 				"properties": {
 					"success": {
 						"type": "boolean"
@@ -1445,11 +1435,11 @@
 						"nullable": true
 					},
 					"errors": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Record_string.string_"
-							}
-						],
+						"properties": {},
+						"additionalProperties": {
+							"type": "string"
+						},
+						"type": "object",
 						"nullable": true
 					}
 				},
@@ -1462,7 +1452,7 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ApiResponse_ProjectMemberView_": {
+			"ProjectMemberViewResponse": {
 				"properties": {
 					"success": {
 						"type": "boolean"
@@ -1479,11 +1469,11 @@
 						"nullable": true
 					},
 					"errors": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Record_string.string_"
-							}
-						],
+						"properties": {},
+						"additionalProperties": {
+							"type": "string"
+						},
+						"type": "object",
 						"nullable": true
 					}
 				},
@@ -1508,7 +1498,7 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ApiResponse_Comment-Array_": {
+			"CommentListResponse": {
 				"properties": {
 					"success": {
 						"type": "boolean"
@@ -1524,11 +1514,11 @@
 						"nullable": true
 					},
 					"errors": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Record_string.string_"
-							}
-						],
+						"properties": {},
+						"additionalProperties": {
+							"type": "string"
+						},
+						"type": "object",
 						"nullable": true
 					}
 				},
@@ -1541,7 +1531,7 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ApiResponse_Comment_": {
+			"CommentResponse": {
 				"properties": {
 					"success": {
 						"type": "boolean"
@@ -1558,11 +1548,11 @@
 						"nullable": true
 					},
 					"errors": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Record_string.string_"
-							}
-						],
+						"properties": {},
+						"additionalProperties": {
+							"type": "string"
+						},
+						"type": "object",
 						"nullable": true
 					}
 				},
@@ -1634,7 +1624,7 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ApiResponse_LoginResponse_": {
+			"LoginResponseWrapper": {
 				"properties": {
 					"success": {
 						"type": "boolean"
@@ -1651,11 +1641,11 @@
 						"nullable": true
 					},
 					"errors": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Record_string.string_"
-							}
-						],
+						"properties": {},
+						"additionalProperties": {
+							"type": "string"
+						},
+						"type": "object",
 						"nullable": true
 					}
 				},
@@ -1704,7 +1694,7 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ApiResponse_Attachment-Array_": {
+			"AttachmentListResponse": {
 				"properties": {
 					"success": {
 						"type": "boolean"
@@ -1720,11 +1710,11 @@
 						"nullable": true
 					},
 					"errors": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Record_string.string_"
-							}
-						],
+						"properties": {},
+						"additionalProperties": {
+							"type": "string"
+						},
+						"type": "object",
 						"nullable": true
 					}
 				},
@@ -1737,7 +1727,7 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ApiResponse_Attachment_": {
+			"AttachmentResponse": {
 				"properties": {
 					"success": {
 						"type": "boolean"
@@ -1754,11 +1744,11 @@
 						"nullable": true
 					},
 					"errors": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Record_string.string_"
-							}
-						],
+						"properties": {},
+						"additionalProperties": {
+							"type": "string"
+						},
+						"type": "object",
 						"nullable": true
 					}
 				},
@@ -1787,7 +1777,7 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ApiResponse_GetPresignedUrlResponse_": {
+			"GetPresignedUrlResponseWrapper": {
 				"properties": {
 					"success": {
 						"type": "boolean"
@@ -1804,11 +1794,11 @@
 						"nullable": true
 					},
 					"errors": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Record_string.string_"
-							}
-						],
+						"properties": {},
+						"additionalProperties": {
+							"type": "string"
+						},
+						"type": "object",
 						"nullable": true
 					}
 				},
@@ -1866,7 +1856,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_any-Array_"
+									"$ref": "#/components/schemas/UserListResponse"
 								}
 							}
 						}
@@ -1912,7 +1902,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_UserProfile_"
+									"$ref": "#/components/schemas/UserProfileResponse"
 								}
 							}
 						}
@@ -1937,7 +1927,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_UserProfile_"
+									"$ref": "#/components/schemas/UserProfileResponse"
 								}
 							}
 						}
@@ -1974,7 +1964,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_null_"
+									"$ref": "#/components/schemas/VoidResponse"
 								}
 							}
 						}
@@ -2011,7 +2001,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_any-Array_"
+									"$ref": "#/components/schemas/ProjectListResponse"
 								}
 							}
 						}
@@ -2038,7 +2028,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_any_"
+									"$ref": "#/components/schemas/UserListResponse"
 								}
 							}
 						}
@@ -2094,7 +2084,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_any_"
+									"$ref": "#/components/schemas/UserCreateResponse"
 								}
 							}
 						}
@@ -2133,7 +2123,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_any_"
+									"$ref": "#/components/schemas/UserProfileResponse"
 								}
 							}
 						}
@@ -2169,7 +2159,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_any_"
+									"$ref": "#/components/schemas/UserProfileResponse"
 								}
 							}
 						}
@@ -2215,7 +2205,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_null_"
+									"$ref": "#/components/schemas/VoidResponse"
 								}
 							}
 						}
@@ -2253,7 +2243,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_any_"
+									"$ref": "#/components/schemas/UserProfileResponse"
 								}
 							}
 						}
@@ -2291,7 +2281,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_any_"
+									"$ref": "#/components/schemas/UserProfileResponse"
 								}
 							}
 						}
@@ -2329,7 +2319,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_any-Array_"
+									"$ref": "#/components/schemas/UserActivityListResponse"
 								}
 							}
 						}
@@ -2367,7 +2357,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_SharedTask-Array_"
+									"$ref": "#/components/schemas/TaskListResponse"
 								}
 							}
 						}
@@ -2447,7 +2437,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_Task_"
+									"$ref": "#/components/schemas/TaskResponse"
 								}
 							}
 						}
@@ -2485,7 +2475,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_SharedTask_"
+									"$ref": "#/components/schemas/TaskResponse"
 								}
 							}
 						}
@@ -2520,7 +2510,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_Task_"
+									"$ref": "#/components/schemas/TaskResponse"
 								}
 							}
 						}
@@ -2565,7 +2555,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_null_"
+									"$ref": "#/components/schemas/VoidResponse"
 								}
 							}
 						}
@@ -2602,7 +2592,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_TaskAssignment_"
+									"$ref": "#/components/schemas/TaskAssignmentResponse"
 								}
 							}
 						}
@@ -2648,7 +2638,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_TaskAssignment-Array_"
+									"$ref": "#/components/schemas/TaskAssignmentListResponse"
 								}
 							}
 						}
@@ -2694,7 +2684,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_TaskAssignee-Array_"
+									"$ref": "#/components/schemas/TaskAssigneeListResponse"
 								}
 							}
 						}
@@ -2732,7 +2722,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_null_"
+									"$ref": "#/components/schemas/VoidResponse"
 								}
 							}
 						}
@@ -2778,7 +2768,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_null_"
+									"$ref": "#/components/schemas/VoidResponse"
 								}
 							}
 						}
@@ -2822,7 +2812,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse__time-Date__"
+									"$ref": "#/components/schemas/SystemHealthResponse"
 								}
 							}
 						}
@@ -2844,7 +2834,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse__publicKey-string__"
+									"$ref": "#/components/schemas/SystemPublicKeyResponse"
 								}
 							}
 						}
@@ -2871,7 +2861,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_null_"
+									"$ref": "#/components/schemas/VoidResponse"
 								}
 							}
 						}
@@ -2908,7 +2898,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_null_"
+									"$ref": "#/components/schemas/VoidResponse"
 								}
 							}
 						}
@@ -2953,7 +2943,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_Project_"
+									"$ref": "#/components/schemas/ProjectResponse"
 								}
 							}
 						}
@@ -2989,7 +2979,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_Project-Array_"
+									"$ref": "#/components/schemas/ProjectListResponse"
 								}
 							}
 						}
@@ -3015,7 +3005,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_Project_"
+									"$ref": "#/components/schemas/ProjectResponse"
 								}
 							}
 						}
@@ -3050,7 +3040,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_Project_"
+									"$ref": "#/components/schemas/ProjectResponse"
 								}
 							}
 						}
@@ -3095,7 +3085,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_null_"
+									"$ref": "#/components/schemas/VoidResponse"
 								}
 							}
 						}
@@ -3132,7 +3122,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_Project_"
+									"$ref": "#/components/schemas/ProjectResponse"
 								}
 							}
 						}
@@ -3169,7 +3159,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_Project_"
+									"$ref": "#/components/schemas/ProjectResponse"
 								}
 							}
 						}
@@ -3206,7 +3196,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_ProjectMember_"
+									"$ref": "#/components/schemas/ProjectMemberResponse"
 								}
 							}
 						}
@@ -3252,7 +3242,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_ProjectMemberView-Array_"
+									"$ref": "#/components/schemas/ProjectMemberViewListResponse"
 								}
 							}
 						}
@@ -3290,7 +3280,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_ProjectMemberView_"
+									"$ref": "#/components/schemas/ProjectMemberViewResponse"
 								}
 							}
 						}
@@ -3334,7 +3324,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_null_"
+									"$ref": "#/components/schemas/VoidResponse"
 								}
 							}
 						}
@@ -3388,7 +3378,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_null_"
+									"$ref": "#/components/schemas/VoidResponse"
 								}
 							}
 						}
@@ -3434,7 +3424,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_null_"
+									"$ref": "#/components/schemas/VoidResponse"
 								}
 							}
 						}
@@ -3480,7 +3470,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_null_"
+									"$ref": "#/components/schemas/VoidResponse"
 								}
 							}
 						}
@@ -3526,7 +3516,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_Comment-Array_"
+									"$ref": "#/components/schemas/CommentListResponse"
 								}
 							}
 						}
@@ -3562,7 +3552,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_Comment_"
+									"$ref": "#/components/schemas/CommentResponse"
 								}
 							}
 						}
@@ -3610,7 +3600,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_null_"
+									"$ref": "#/components/schemas/VoidResponse"
 								}
 							}
 						}
@@ -3648,7 +3638,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_LoginResponse_"
+									"$ref": "#/components/schemas/LoginResponseWrapper"
 								}
 							}
 						}
@@ -3680,7 +3670,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_LoginResponse_"
+									"$ref": "#/components/schemas/LoginResponseWrapper"
 								}
 							}
 						}
@@ -3717,7 +3707,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_Attachment-Array_"
+									"$ref": "#/components/schemas/AttachmentListResponse"
 								}
 							}
 						}
@@ -3753,7 +3743,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_Attachment_"
+									"$ref": "#/components/schemas/AttachmentResponse"
 								}
 							}
 						}
@@ -3801,7 +3791,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_null_"
+									"$ref": "#/components/schemas/VoidResponse"
 								}
 							}
 						}
@@ -3839,7 +3829,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiResponse_GetPresignedUrlResponse_"
+									"$ref": "#/components/schemas/GetPresignedUrlResponseWrapper"
 								}
 							}
 						}

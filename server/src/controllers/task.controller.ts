@@ -1,5 +1,11 @@
-import { CreateTaskRequest, Task as SharedTask, UpdateTaskRequest } from '@nextask/types';
-import { Task } from '@prisma/client';
+import {
+  CreateTaskRequest,
+  Task,
+  TaskListResponse,
+  TaskResponse,
+  UpdateTaskRequest,
+  VoidResponse,
+} from '@nextask/types';
 import type { Request as ExRequest } from 'express';
 import { Middlewares } from 'tsoa';
 import {
@@ -36,7 +42,7 @@ import {
   updateTask,
 } from '../services/task.service';
 import { ApiError } from '../utils/apiError.util';
-import { ApiResponse, successResponse } from '../utils/response.util';
+import { successResponse } from '../utils/response.util';
 
 @Route('tasks')
 @Tags('Tasks')
@@ -49,10 +55,10 @@ export class TaskController extends Controller {
   public async getTasks(
     @Query() projectId: string,
     @Query() search?: string,
-    @Query() status?: SharedTask['status'],
-    @Query() priority?: SharedTask['priority'],
+    @Query() status?: Task['status'],
+    @Query() priority?: Task['priority'],
     @Query() tags?: string[],
-  ): Promise<ApiResponse<SharedTask[]>> {
+  ): Promise<TaskListResponse> {
     const tasks = await getAllTasks(projectId, search, status, priority, tags);
     return successResponse('Tasks retrieved successfully.', tasks);
   }
@@ -61,7 +67,7 @@ export class TaskController extends Controller {
   @Get('{id}')
   @Middlewares(validateRequest(getTaskSchema))
   @Security('jwt', ['project:member'])
-  public async getTask(@Path() id: string): Promise<ApiResponse<SharedTask>> {
+  public async getTask(@Path() id: string): Promise<TaskResponse> {
     const task = await getTaskById(id);
     if (!task) throw new ApiError(404, 'Task not found.');
     return successResponse('Task retrieved successfully.', task);
@@ -72,7 +78,7 @@ export class TaskController extends Controller {
   @Middlewares(validateRequest(createTaskSchema))
   @SuccessResponse('201', 'Task Created')
   @Security('jwt', ['project:manager'])
-  public async createNewTask(@Body() body: CreateTaskRequest): Promise<ApiResponse<Task>> {
+  public async createNewTask(@Body() body: CreateTaskRequest): Promise<TaskResponse> {
     const task = await createTask(body);
     this.setStatus(201);
     broadcastToProject(task.projectId, 'task:created', task);
@@ -87,7 +93,7 @@ export class TaskController extends Controller {
     @Path() id: string,
     @Body() body: UpdateTaskRequest,
     @Request() request: ExRequest,
-  ): Promise<ApiResponse<Task>> {
+  ): Promise<TaskResponse> {
     const existingTask = await getTaskById(id);
     if (!existingTask) throw new ApiError(404, 'Task not found.');
 
@@ -125,7 +131,7 @@ export class TaskController extends Controller {
   @Delete('{id}')
   @Middlewares(validateRequest(deleteTaskSchema))
   @Security('jwt', ['project:manager'])
-  public async deleteExistingTask(@Path() id: string): Promise<ApiResponse<null>> {
+  public async deleteExistingTask(@Path() id: string): Promise<VoidResponse> {
     const existingTask = await getTaskById(id);
     if (existingTask) {
       const projectId = existingTask.projectId;

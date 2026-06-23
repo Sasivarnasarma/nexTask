@@ -16,8 +16,8 @@ export type UserProfile = User;
 export interface Task {
   id: string;
   title: string;
-  description?: string;
-  dueDate?: Date | string;
+  description?: string | null;
+  dueDate?: Date | string | null;
   priority: 'LOW' | 'MEDIUM' | 'HIGH';
   status: 'TODO' | 'IN_PROGRESS' | 'COMPLETED';
   tags: string[];
@@ -140,7 +140,7 @@ export interface ApiResponse<T = any> {
   success: boolean;
   message: string;
   data: T | null;
-  errors: Record<string, string> | null;
+  errors: { [key: string]: string } | null;
 }
 
 export type ProjectStatus = 'ACTIVE' | 'ARCHIVED' | 'COMPLETED';
@@ -283,7 +283,7 @@ export interface UserActivityResponse {
     | 'USER_ACTIVATED'
     | 'ROLE_CHANGED';
   description: string | null;
-  createdAt: string;
+  createdAt: Date | string;
   taskId: string | null;
   userId: string;
 }
@@ -307,3 +307,29 @@ export interface ProjectMemberView {
     email: string;
   };
 }
+
+// ─── API Response Wrappers (Clean Swagger Schema Names) ───────────────────────
+
+export interface VoidResponse extends ApiResponse<null> {}
+export interface UserProfileResponse extends ApiResponse<UserProfile> {}
+export interface UserCreateResponse extends ApiResponse<{ user: User; tempPassword?: string }> {}
+export interface UserListResponse extends ApiResponse<any> {}
+export interface UserActivityListResponse extends ApiResponse<UserActivityResponse[]> {}
+export interface TaskResponse extends ApiResponse<Task> {}
+export interface TaskListResponse extends ApiResponse<Task[]> {}
+export interface TaskAssignmentResponse extends ApiResponse<TaskAssignment> {}
+export interface TaskAssignmentListResponse extends ApiResponse<TaskAssignment[]> {}
+export interface TaskAssigneeListResponse extends ApiResponse<TaskAssignee[]> {}
+export interface ProjectResponse extends ApiResponse<Project> {}
+export interface ProjectListResponse extends ApiResponse<Project[]> {}
+export interface ProjectMemberResponse extends ApiResponse<ProjectMember> {}
+export interface ProjectMemberViewResponse extends ApiResponse<ProjectMemberView> {}
+export interface ProjectMemberViewListResponse extends ApiResponse<ProjectMemberView[]> {}
+export interface CommentResponse extends ApiResponse<Comment> {}
+export interface CommentListResponse extends ApiResponse<Comment[]> {}
+export interface AttachmentResponse extends ApiResponse<Attachment> {}
+export interface AttachmentListResponse extends ApiResponse<Attachment[]> {}
+export interface LoginResponseWrapper extends ApiResponse<LoginResponse> {}
+export interface GetPresignedUrlResponseWrapper extends ApiResponse<GetPresignedUrlResponse> {}
+export interface SystemHealthResponse extends ApiResponse<{ time: Date | string }> {}
+export interface SystemPublicKeyResponse extends ApiResponse<{ publicKey: string }> {}

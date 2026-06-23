@@ -1,8 +1,10 @@
 import {
   AddMemberInput,
-  ProjectMember,
-  ProjectMemberView,
+  ProjectMemberResponse,
+  ProjectMemberViewListResponse,
+  ProjectMemberViewResponse,
   UpdateMemberRoleInput,
+  VoidResponse,
 } from '@nextask/types';
 import type { Request as ExRequest } from 'express';
 import { Middlewares } from 'tsoa';
@@ -32,7 +34,7 @@ import {
   updateProjectMemberSchema,
 } from '../schemas/membership.schema';
 import { ProjectMemberService } from '../services/project-member.service';
-import { ApiResponse, successResponse } from '../utils/response.util';
+import { successResponse } from '../utils/response.util';
 
 @Route('projects/{id}/members')
 @Tags('Project Members')
@@ -56,7 +58,7 @@ export class ProjectMemberController extends Controller {
     @Path() id: string,
     @Body() body: AddMemberInput,
     @Request() request: ExRequest,
-  ): Promise<ApiResponse<ProjectMember>> {
+  ): Promise<ProjectMemberResponse> {
     const { userId: requestorId, role: requestorRole } = (request as any).user;
     const member = await this.memberService.addMemberToProject(
       id,
@@ -78,7 +80,7 @@ export class ProjectMemberController extends Controller {
   public async getMembers(
     @Path() id: string,
     @Request() request: ExRequest,
-  ): Promise<ApiResponse<ProjectMemberView[]>> {
+  ): Promise<ProjectMemberViewListResponse> {
     const { userId: requestorId, role: requestorRole } = (request as any).user;
     const members = await this.memberService.getProjectMembers(id, requestorId, requestorRole);
     return successResponse('Operation completed successfully.', members);
@@ -94,7 +96,7 @@ export class ProjectMemberController extends Controller {
     @Path() id: string,
     @Path() userId: string,
     @Request() request: ExRequest,
-  ): Promise<ApiResponse<ProjectMemberView>> {
+  ): Promise<ProjectMemberViewResponse> {
     const { userId: requestorId, role: requestorRole } = (request as any).user;
     const member = await this.memberService.getMemberDetails(
       id,
@@ -116,7 +118,7 @@ export class ProjectMemberController extends Controller {
     @Path() userId: string,
     @Body() body: UpdateMemberRoleInput,
     @Request() request: ExRequest,
-  ): Promise<ApiResponse<null>> {
+  ): Promise<VoidResponse> {
     const { userId: requestorId, role: requestorRole } = (request as any).user;
     await this.memberService.updateMemberRole(
       id,
@@ -139,7 +141,7 @@ export class ProjectMemberController extends Controller {
     @Path() id: string,
     @Path() userId: string,
     @Request() request: ExRequest,
-  ): Promise<ApiResponse<null>> {
+  ): Promise<VoidResponse> {
     const { userId: requestorId, role: requestorRole } = (request as any).user;
     await this.memberService.updateMemberRole(
       id,
@@ -162,7 +164,7 @@ export class ProjectMemberController extends Controller {
     @Path() id: string,
     @Path() userId: string,
     @Request() request: ExRequest,
-  ): Promise<ApiResponse<null>> {
+  ): Promise<VoidResponse> {
     const { userId: requestorId, role: requestorRole } = (request as any).user;
     await this.memberService.updateMemberRole(
       id,
@@ -185,7 +187,7 @@ export class ProjectMemberController extends Controller {
     @Path() id: string,
     @Path() userId: string,
     @Request() request: ExRequest,
-  ): Promise<ApiResponse<null>> {
+  ): Promise<VoidResponse> {
     const { userId: requestorId, role: requestorRole } = (request as any).user;
     await this.memberService.removeMemberFromProject(id, userId, requestorId, requestorRole);
     return successResponse('Project member removed successfully.', null);

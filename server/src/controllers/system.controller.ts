@@ -1,6 +1,7 @@
+import { SystemHealthResponse, VoidResponse } from '@nextask/types';
 import { Controller, Get, Route, Tags } from 'tsoa';
 
-import { ApiResponse, successResponse } from '../utils/response.util';
+import { successResponse } from '../utils/response.util';
 
 interface PingResponse {
   message: string;
@@ -11,7 +12,7 @@ interface PingResponse {
 @Tags('System')
 export class SystemController extends Controller {
   @Get('/')
-  public async getWelcome(): Promise<ApiResponse<null>> {
+  public async getWelcome(): Promise<VoidResponse> {
     return successResponse('Welcome to the nexTask API!', null);
   }
 
@@ -24,7 +25,7 @@ export class SystemController extends Controller {
   }
 
   @Get('health')
-  public async getHealth(): Promise<ApiResponse<{ time: Date }>> {
+  public async getHealth(): Promise<SystemHealthResponse> {
     return successResponse('Server is healthy.', { time: new Date() });
   }
 }

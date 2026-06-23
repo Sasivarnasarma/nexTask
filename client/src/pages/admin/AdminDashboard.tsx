@@ -3,6 +3,7 @@ import {
   AdminUpdateUserRequest,
   User,
   UserActivityResponse,
+  UserRole,
 } from '@nextask/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -51,8 +52,6 @@ import {
 import { extractApiError } from '@/lib/apiError';
 import { useAuthStore } from '@/store/auth.store';
 import { useToastStore } from '@/store/toast.store';
-
-type UserRole = 'ADMIN' | 'PROJECT_MANAGER' | 'COLLABORATOR';
 
 interface UserActivity extends UserActivityResponse {
   user: {

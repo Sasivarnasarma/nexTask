@@ -1,3 +1,4 @@
+import { Task } from '@nextask/types';
 import React from 'react';
 import {
   Bar,
@@ -12,18 +13,6 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-
-interface Task {
-  id: string;
-  title: string;
-  priority: 'LOW' | 'MEDIUM' | 'HIGH';
-  status: 'TODO' | 'IN_PROGRESS' | 'COMPLETED';
-  assignees?: {
-    userId: string;
-    name: string | null;
-    email: string;
-  }[];
-}
 
 interface AnalyticsDashboardProps {
   tasks: Task[];

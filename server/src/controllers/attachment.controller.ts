@@ -1,4 +1,9 @@
-import { Attachment, CreateAttachmentRequest } from '@nextask/types';
+import {
+  AttachmentListResponse,
+  AttachmentResponse,
+  CreateAttachmentRequest,
+  VoidResponse,
+} from '@nextask/types';
 import type { Request as ExRequest } from 'express';
 import { Middlewares } from 'tsoa';
 import { Body, Controller, Delete, Get, Path, Post, Request, Route, Security, Tags } from 'tsoa';
@@ -16,7 +21,7 @@ import {
   getAttachmentsByTaskId,
 } from '../services/attachment.service';
 import { getTaskById } from '../services/task.service';
-import { ApiResponse, successResponse } from '../utils/response.util';
+import { successResponse } from '../utils/response.util';
 
 @Route('tasks')
 @Tags('Attachments')
@@ -28,7 +33,7 @@ export class AttachmentController extends Controller {
   @Get('{taskId}/attachments')
   @Middlewares(validateRequest(getAttachmentsSchema))
   @Security('jwt', ['project:member'])
-  public async getAttachments(@Path() taskId: string): Promise<ApiResponse<Attachment[]>> {
+  public async getAttachments(@Path() taskId: string): Promise<AttachmentListResponse> {
     const attachments = await getAttachmentsByTaskId(taskId);
     return successResponse('Attachments retrieved successfully.', attachments);
   }
@@ -43,7 +48,7 @@ export class AttachmentController extends Controller {
     @Path() taskId: string,
     @Body() body: CreateAttachmentRequest,
     @Request() request: ExRequest,
-  ): Promise<ApiResponse<Attachment>> {
+  ): Promise<AttachmentResponse> {
     const { userId } = (request as any).user;
     const attachment = await createTaskAttachment(userId, taskId, body);
     const task = await getTaskById(taskId);
@@ -67,7 +72,7 @@ export class AttachmentDeleteController extends Controller {
   public async removeAttachment(
     @Path() attachmentId: string,
     @Request() request: ExRequest,
-  ): Promise<ApiResponse<null>> {
+  ): Promise<VoidResponse> {
     const { userId, role } = (request as any).user;
     const taskId = await deleteAttachment(attachmentId, userId, role);
     const task = await getTaskById(taskId);

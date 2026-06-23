@@ -1,4 +1,9 @@
-import { Comment, CreateCommentRequest } from '@nextask/types';
+import {
+  CommentListResponse,
+  CommentResponse,
+  CreateCommentRequest,
+  VoidResponse,
+} from '@nextask/types';
 import type { Request as ExRequest } from 'express';
 import {
   Body,
@@ -23,7 +28,7 @@ import {
 } from '../schemas/comment.schema';
 import { deleteComment, getCommentsByTaskId, postComment } from '../services/comment.service';
 import { getTaskById } from '../services/task.service';
-import { ApiResponse, successResponse } from '../utils/response.util';
+import { successResponse } from '../utils/response.util';
 
 @Route('tasks')
 @Tags('Comments')
@@ -35,7 +40,7 @@ export class CommentController extends Controller {
   @Get('{taskId}/comments')
   @Middlewares(validateRequest(getCommentsSchema))
   @Security('jwt', ['project:member'])
-  public async getComments(@Path() taskId: string): Promise<ApiResponse<Comment[]>> {
+  public async getComments(@Path() taskId: string): Promise<CommentListResponse> {
     const comments = await getCommentsByTaskId(taskId);
     return successResponse('Comments retrieved successfully.', comments);
   }
@@ -50,7 +55,7 @@ export class CommentController extends Controller {
     @Path() taskId: string,
     @Body() body: CreateCommentRequest,
     @Request() request: ExRequest,
-  ): Promise<ApiResponse<Comment>> {
+  ): Promise<CommentResponse> {
     const { userId } = (request as any).user;
     const comment = await postComment(userId, taskId, body.content, body.attachments);
     const task = await getTaskById(taskId);
@@ -74,7 +79,7 @@ export class CommentDeleteController extends Controller {
   public async removeComment(
     @Path() commentId: string,
     @Request() request: ExRequest,
-  ): Promise<ApiResponse<null>> {
+  ): Promise<VoidResponse> {
     const { userId, role } = (request as any).user;
     const taskId = await deleteComment(commentId, userId, role);
     const task = await getTaskById(taskId);

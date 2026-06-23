@@ -1,10 +1,10 @@
-import { PushSubscriptionRequest } from '@nextask/types';
+import { PushSubscriptionRequest, SystemPublicKeyResponse, VoidResponse } from '@nextask/types';
 import type { Request as ExRequest } from 'express';
 import { Body, Controller, Get, Post, Request, Route, Security, SuccessResponse, Tags } from 'tsoa';
 
 import { PushService } from '../services/push.service';
 import { ApiError } from '../utils/apiError.util';
-import { ApiResponse, successResponse } from '../utils/response.util';
+import { successResponse } from '../utils/response.util';
 
 @Route('push')
 @Tags('Push Notifications')
@@ -14,7 +14,7 @@ export class PushController extends Controller {
    * Retrieves the VAPID Public Key needed to subscribe to push notifications.
    */
   @Get('key')
-  public async getPublicKey(): Promise<ApiResponse<{ publicKey: string }>> {
+  public async getPublicKey(): Promise<SystemPublicKeyResponse> {
     const key = PushService.getPublicKey();
     if (!key) {
       throw new ApiError(500, 'Web push configuration is incomplete. VAPID public key not found.');
@@ -30,7 +30,7 @@ export class PushController extends Controller {
   public async subscribe(
     @Body() subscription: PushSubscriptionRequest,
     @Request() request: ExRequest,
-  ): Promise<ApiResponse<null>> {
+  ): Promise<VoidResponse> {
     const { userId } = (request as any).user;
     await PushService.subscribe(userId, subscription);
     this.setStatus(201);
@@ -44,7 +44,7 @@ export class PushController extends Controller {
   public async unsubscribe(
     @Body() body: { endpoint: string },
     @Request() request: ExRequest,
-  ): Promise<ApiResponse<null>> {
+  ): Promise<VoidResponse> {
     const { userId } = (request as any).user;
     await PushService.unsubscribe(userId, body.endpoint);
     return successResponse('Unsubscribed from push notifications successfully.', null);
