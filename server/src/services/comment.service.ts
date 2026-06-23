@@ -150,7 +150,7 @@ export const deleteComment = async (
   commentId: string,
   userId: string,
   userRole: string,
-): Promise<void> => {
+): Promise<string> => {
   const comment = await prisma.comment.findUnique({
     where: { id: commentId },
   });
@@ -196,6 +196,8 @@ export const deleteComment = async (
     throw new ApiError(403, 'You do not have permission to delete this comment.');
   }
 
+  const taskId = comment.taskId;
+
   const attachments = await prisma.attachment.findMany({
     where: { commentId },
     select: { fileKey: true },
@@ -206,4 +208,6 @@ export const deleteComment = async (
   await prisma.comment.delete({
     where: { id: commentId },
   });
+
+  return taskId;
 };

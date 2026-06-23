@@ -17,6 +17,7 @@ import {
   Tags,
 } from 'tsoa';
 
+import { broadcastToProject } from '../lib/socket';
 import { validateRequest } from '../middlewares/validate.middleware';
 import {
   assignUserSchema,
@@ -30,9 +31,8 @@ import {
   getTaskAssignees,
   unassignUserFromTask,
 } from '../services/task-assignment.service';
-import { ApiResponse, successResponse } from '../utils/response.util';
 import { getTaskById } from '../services/task.service';
-import { broadcastToProject } from '../lib/socket';
+import { ApiResponse, successResponse } from '../utils/response.util';
 
 export interface AssignUserInput {
   userId: string;
@@ -63,7 +63,11 @@ export class TaskAssignmentController extends Controller {
     this.setStatus(201);
     const task = await getTaskById(id);
     if (task) {
-      broadcastToProject(task.projectId, 'task:assigned', { taskId: id, assignment, assignees: task.assignees });
+      broadcastToProject(task.projectId, 'task:assigned', {
+        taskId: id,
+        assignment,
+        assignees: task.assignees,
+      });
       broadcastToProject(task.projectId, 'task:updated', task);
     }
     return successResponse('User assigned to task successfully.', assignment);
@@ -108,7 +112,11 @@ export class TaskAssignmentController extends Controller {
     const assignments = await bulkAssignUsersToTask(id, body.userIds, requestorId, requestorRole);
     const task = await getTaskById(id);
     if (task) {
-      broadcastToProject(task.projectId, 'task:assignments-updated', { taskId: id, assignments, assignees: task.assignees });
+      broadcastToProject(task.projectId, 'task:assignments-updated', {
+        taskId: id,
+        assignments,
+        assignees: task.assignees,
+      });
       broadcastToProject(task.projectId, 'task:updated', task);
     }
     return successResponse('Task assignments updated successfully.', assignments);

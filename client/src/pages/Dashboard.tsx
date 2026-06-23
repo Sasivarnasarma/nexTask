@@ -13,7 +13,6 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { ProjectMemberView, Task, UpdateTaskRequest } from '@nextask/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { io } from 'socket.io-client';
 import {
   BarChart2,
   Check,
@@ -35,6 +34,7 @@ import {
   X,
 } from 'lucide-react';
 import React, { useState } from 'react';
+import { io } from 'socket.io-client';
 
 import {
   createTaskAttachment,
@@ -469,6 +469,13 @@ export function Dashboard() {
     });
 
     newSocket.on('comment:created', (data) => {
+      if (selectedTaskRef.current && selectedTaskRef.current.id === data.taskId) {
+        refetchComments();
+        refetchTaskDetails();
+      }
+    });
+
+    newSocket.on('comment:deleted', (data) => {
       if (selectedTaskRef.current && selectedTaskRef.current.id === data.taskId) {
         refetchComments();
         refetchTaskDetails();

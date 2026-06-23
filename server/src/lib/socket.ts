@@ -19,9 +19,7 @@ export const initSocket = (server: http.Server) => {
 
   // JWT Authentication Middleware for Sockets
   io.use((socket, next) => {
-    const token =
-      socket.handshake.auth?.token ||
-      socket.handshake.headers?.authorization;
+    const token = socket.handshake.auth?.token || socket.handshake.headers?.authorization;
 
     if (!token) {
       return next(new Error('Authentication error: Token required'));
@@ -32,7 +30,7 @@ export const initSocket = (server: http.Server) => {
       const payload = verifyToken(jwtToken);
       socket.data = { user: payload };
       next();
-    } catch (err) {
+    } catch {
       next(new Error('Authentication error: Invalid or expired token'));
     }
   });

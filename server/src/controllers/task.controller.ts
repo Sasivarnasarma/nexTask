@@ -18,6 +18,7 @@ import {
   Tags,
 } from 'tsoa';
 
+import { broadcastToProject } from '../lib/socket';
 import { validateRequest } from '../middlewares/validate.middleware';
 import {
   createTaskSchema,
@@ -36,7 +37,6 @@ import {
 } from '../services/task.service';
 import { ApiError } from '../utils/apiError.util';
 import { ApiResponse, successResponse } from '../utils/response.util';
-import { broadcastToProject } from '../lib/socket';
 
 @Route('tasks')
 @Tags('Tasks')

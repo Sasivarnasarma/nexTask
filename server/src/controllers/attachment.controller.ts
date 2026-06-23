@@ -3,6 +3,7 @@ import type { Request as ExRequest } from 'express';
 import { Middlewares } from 'tsoa';
 import { Body, Controller, Delete, Get, Path, Post, Request, Route, Security, Tags } from 'tsoa';
 
+import { broadcastToProject } from '../lib/socket';
 import { validateRequest } from '../middlewares/validate.middleware';
 import {
   deleteAttachmentSchema,
@@ -14,6 +15,7 @@ import {
   deleteAttachment,
   getAttachmentsByTaskId,
 } from '../services/attachment.service';
+import { getTaskById } from '../services/task.service';
 import { ApiResponse, successResponse } from '../utils/response.util';
 
 @Route('tasks')
@@ -44,6 +46,10 @@ export class AttachmentController extends Controller {
   ): Promise<ApiResponse<Attachment>> {
     const { userId } = (request as any).user;
     const attachment = await createTaskAttachment(userId, taskId, body);
+    const task = await getTaskById(taskId);
+    if (task) {
+      broadcastToProject(task.projectId, 'task:updated', task);
+    }
     return successResponse('Attachment metadata registered successfully.', attachment);
   }
 }
@@ -63,7 +69,11 @@ export class AttachmentDeleteController extends Controller {
     @Request() request: ExRequest,
   ): Promise<ApiResponse<null>> {
     const { userId, role } = (request as any).user;
-    await deleteAttachment(attachmentId, userId, role);
+    const taskId = await deleteAttachment(attachmentId, userId, role);
+    const task = await getTaskById(taskId);
+    if (task) {
+      broadcastToProject(task.projectId, 'task:updated', task);
+    }
     return successResponse('Attachment deleted successfully.', null);
   }
 }

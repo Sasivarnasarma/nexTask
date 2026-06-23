@@ -70,7 +70,7 @@ export const deleteAttachment = async (
   attachmentId: string,
   userId: string,
   userRole: string,
-): Promise<void> => {
+): Promise<string> => {
   const attachment = await prisma.attachment.findUnique({
     where: { id: attachmentId },
   });
@@ -116,9 +116,13 @@ export const deleteAttachment = async (
     throw new ApiError(403, 'You do not have permission to delete this attachment.');
   }
 
+  const taskId = attachment.taskId;
+
   await deleteFile(attachment.fileKey);
 
   await prisma.attachment.delete({
     where: { id: attachmentId },
   });
+
+  return taskId;
 };

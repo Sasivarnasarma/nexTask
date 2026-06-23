@@ -14,6 +14,7 @@ import {
   Tags,
 } from 'tsoa';
 
+import { broadcastToProject } from '../lib/socket';
 import { validateRequest } from '../middlewares/validate.middleware';
 import {
   createCommentSchema,
@@ -22,7 +23,6 @@ import {
 } from '../schemas/comment.schema';
 import { deleteComment, getCommentsByTaskId, postComment } from '../services/comment.service';
 import { getTaskById } from '../services/task.service';
-import { broadcastToProject } from '../lib/socket';
 import { ApiResponse, successResponse } from '../utils/response.util';
 
 @Route('tasks')
@@ -76,7 +76,11 @@ export class CommentDeleteController extends Controller {
     @Request() request: ExRequest,
   ): Promise<ApiResponse<null>> {
     const { userId, role } = (request as any).user;
-    await deleteComment(commentId, userId, role);
+    const taskId = await deleteComment(commentId, userId, role);
+    const task = await getTaskById(taskId);
+    if (task) {
+      broadcastToProject(task.projectId, 'comment:deleted', { commentId, taskId });
+    }
     return successResponse('Comment deleted successfully.', null);
   }
 }

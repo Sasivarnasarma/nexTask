@@ -1,16 +1,14 @@
-import http from 'http';
 import cors from 'cors';
-import dotenv from 'dotenv';
+import 'dotenv/config';
 import express, { NextFunction, Request, Response } from 'express';
+import http from 'http';
 import swaggerUi from 'swagger-ui-express';
 
-import { RegisterRoutes } from './routes';
 import { initSocket } from './lib/socket';
+import { RegisterRoutes } from './routes';
 import swaggerDocument from './swagger.json';
 import { ApiError } from './utils/apiError.util';
 import { errorResponse } from './utils/response.util';
-
-dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
