@@ -15,24 +15,14 @@ const RESET_ALLOWED_PATHS: Array<{ method: string; path: string }> = [
  * Helper to resolve the projectId context from the Express Request object.
  */
 async function getProjectIdFromRequest(request: Request): Promise<string | null> {
-  const { params, query, body, path } = request;
+  const { params, query, body, path, method } = request;
 
-  // 1. Query parameter check (e.g. GET /tasks?projectId=...)
-  if (query.projectId && typeof query.projectId === 'string') {
-    return query.projectId;
-  }
-
-  // 2. Body property check (e.g. POST /tasks)
-  if (body && body.projectId && typeof body.projectId === 'string') {
-    return body.projectId;
-  }
-
-  // 3. Project ID direct path parameter (e.g. /projects/:id)
+  // 1. Project ID direct path parameter (e.g. /projects/:id)
   if (path.startsWith('/projects/') && params.id && typeof params.id === 'string') {
     return params.id;
   }
 
-  // 4. Task ID path parameter (e.g. /tasks/:id or /tasks/:taskId/comments)
+  // 2. Task ID path parameter (e.g. /tasks/:id or /tasks/:taskId/comments)
   const taskId =
     typeof params.taskId === 'string'
       ? params.taskId
@@ -47,7 +37,7 @@ async function getProjectIdFromRequest(request: Request): Promise<string | null>
     return task?.projectId || null;
   }
 
-  // 5. Comment ID path parameter (e.g. /comments/:commentId or /comments/:id)
+  // 3. Comment ID path parameter (e.g. /comments/:commentId or /comments/:id)
   const commentId =
     typeof params.commentId === 'string'
       ? params.commentId
@@ -68,7 +58,7 @@ async function getProjectIdFromRequest(request: Request): Promise<string | null>
     }
   }
 
-  // 6. Attachment ID path parameter (e.g. /attachments/:attachmentId or /attachments/:id)
+  // 4. Attachment ID path parameter (e.g. /attachments/:attachmentId or /attachments/:id)
   const attachmentId =
     typeof params.attachmentId === 'string'
       ? params.attachmentId
@@ -87,6 +77,16 @@ async function getProjectIdFromRequest(request: Request): Promise<string | null>
       });
       return task?.projectId || null;
     }
+  }
+
+  // 5. Body property check (ONLY for resource creation, e.g. POST /tasks)
+  if (method === 'POST' && body && body.projectId && typeof body.projectId === 'string') {
+    return body.projectId;
+  }
+
+  // 6. Query parameter check (ONLY for resource listing, e.g. GET /tasks)
+  if (method === 'GET' && query.projectId && typeof query.projectId === 'string') {
+    return query.projectId;
   }
 
   return null;

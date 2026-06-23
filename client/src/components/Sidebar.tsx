@@ -1,5 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Calendar, ChevronDown, Folder, LayoutDashboard, LogOut, Plus, Settings, Shield } from 'lucide-react';
+import {
+  Calendar,
+  ChevronDown,
+  Folder,
+  LayoutDashboard,
+  LogOut,
+  Plus,
+  Settings,
+  Shield,
+} from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 

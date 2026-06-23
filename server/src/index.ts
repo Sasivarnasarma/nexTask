@@ -1,6 +1,7 @@
 import cors from 'cors';
 import 'dotenv/config';
 import express, { NextFunction, Request, Response } from 'express';
+import helmet from 'helmet';
 import http from 'http';
 import swaggerUi from 'swagger-ui-express';
 
@@ -13,6 +14,7 @@ import { errorResponse } from './utils/response.util';
 const app = express();
 const port = process.env.PORT || 3000;
 
+app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json());
 
 app.use(cors());

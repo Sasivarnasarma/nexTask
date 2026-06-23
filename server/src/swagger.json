@@ -430,7 +430,8 @@
 						"nullable": true
 					},
 					"userId": {
-						"type": "string"
+						"type": "string",
+						"nullable": true
 					}
 				},
 				"required": [

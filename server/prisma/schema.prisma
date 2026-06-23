@@ -168,8 +168,8 @@ model TaskActivity {
   // Relations
   taskId      String?
   task        Task?        @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  userId      String
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String?
+  user        User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([taskId])
   @@index([userId])

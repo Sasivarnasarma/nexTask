@@ -3,8 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import { refreshSession } from './api/auth.api';
-import { useAuthStore } from './store/auth.store';
-
 import { Navbar } from './components/Navbar';
 import { PushNotificationPrompt } from './components/PushNotificationPrompt';
 import { Sidebar } from './components/Sidebar';
@@ -12,13 +10,14 @@ import { ThemeProvider } from './components/ThemeProvider';
 import { RedirectIfAuthenticated, RequireAuth } from './components/auth/RouteGuard';
 import { ToastContainer } from './components/ui/Toast';
 import './index.css';
+import { Calendar } from './pages/Calendar';
 import { Dashboard } from './pages/Dashboard';
 import { Settings } from './pages/Settings';
-import { Calendar } from './pages/Calendar';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import ForceResetPage from './pages/auth/ForceResetPage';
 import LoginPage from './pages/auth/LoginPage';
 import ProfilePage from './pages/profile/ProfilePage';
+import { useAuthStore } from './store/auth.store';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -83,13 +82,14 @@ function decodeJwt(token: string): { exp: number } | null {
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     const jsonPayload = decodeURIComponent(
-      window.atob(base64)
+      window
+        .atob(base64)
         .split('')
         .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-        .join('')
+        .join(''),
     );
     return JSON.parse(jsonPayload);
-  } catch (e) {
+  } catch {
     return null;
   }
 }

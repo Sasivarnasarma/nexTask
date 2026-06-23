@@ -146,7 +146,8 @@ export function Calendar() {
           <CalendarIcon className="h-12 w-12 text-muted-foreground mx-auto animate-pulse" />
           <h2 className="text-xl font-bold">No Workspace Selected</h2>
           <p className="text-muted-foreground text-sm">
-            Please select a project from the sidebar to visualize and schedule tasks on the interactive calendar scheduler.
+            Please select a project from the sidebar to visualize and schedule tasks on the
+            interactive calendar scheduler.
           </p>
         </div>
       </div>
@@ -380,7 +381,8 @@ export function Calendar() {
             <Info className="h-8 w-8 text-muted-foreground/60" />
             <CardTitle className="text-sm font-bold text-muted-foreground">Task Preview</CardTitle>
             <CardDescription className="text-xs max-w-[200px] mx-auto">
-              Select any task card from the calendar grid to view description, assignees, and label details.
+              Select any task card from the calendar grid to view description, assignees, and label
+              details.
             </CardDescription>
           </Card>
         )}

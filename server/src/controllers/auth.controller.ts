@@ -51,9 +51,7 @@ export class AuthController extends Controller {
   @SuccessResponse('200', 'OK')
   @Security('jwt')
   @Post('refresh')
-  public async refreshSession(
-    @Request() request: ExRequest,
-  ): Promise<LoginResponseWrapper> {
+  public async refreshSession(@Request() request: ExRequest): Promise<LoginResponseWrapper> {
     this.setStatus(200);
     const { userId } = (request as any).user;
     const data = await this.authService.refreshSession(userId);

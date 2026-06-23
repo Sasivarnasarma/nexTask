@@ -101,6 +101,7 @@ The monorepo structure is organized into packages using `pnpm` workspaces:
 
 - **Credential Hashing:** Implements high-security **Argon2** hashing. Plaintext credentials are never persisted.
 - **JWT Session Tokens:** Stateless tokens containing `userId`, `role`, and `mustResetPassword`. Communicated securely in the client request header: `Authorization: Bearer <jwt_token>`.
+- **HTTP Security Headers (Helmet):** The Express API is secured using **Helmet** to enforce production-grade HTTP security headers, protecting against clickjacking (X-Frame-Options), MIME type sniffing, and stripping the technology stack fingerprint (`X-Powered-By`).
 - **Session Refresh:** Endpoint `/api/auth/refresh` to refresh credentials before expiry.
 - **Mandatory Password Reset Workflow:**
   1. System administrators create accounts and send temporary passwords.
@@ -356,8 +357,8 @@ model TaskActivity {
   // Relations
   taskId      String
   task        Task         @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  userId      String
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String?
+  user        User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
 }
 
 enum Role {

@@ -286,7 +286,7 @@ export interface UserActivityResponse {
   description: string | null;
   createdAt: Date | string;
   taskId: string | null;
-  userId: string;
+  userId: string | null;
 }
 
 export interface AddMemberInput {
