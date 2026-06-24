@@ -2,7 +2,6 @@ import { ApiResponse, Notification } from '@nextask/types';
 
 import apiClient from './client';
 
-
 export async function fetchNotifications(): Promise<Notification[]> {
   const { data } = await apiClient.get<ApiResponse<Notification[]>>('/notifications');
   return data.data ?? [];

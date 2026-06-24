@@ -2,7 +2,7 @@ import { Message } from '@nextask/types';
 import { useQuery } from '@tanstack/react-query';
 import { MessageSquare, Send } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
-import { io, Socket } from 'socket.io-client';
+import { Socket, io } from 'socket.io-client';
 
 import { fetchProjectMessages } from '../api/messages.api';
 import { fetchUserProjects } from '../api/profile.api';

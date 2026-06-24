@@ -103,20 +103,30 @@ export async function fetchTeamMembersAutocomplete(
 // ─── Task Assignment APIs ─────────────────────────────────────────────────────
 
 export async function fetchTaskAssignees(taskId: string): Promise<TaskAssignee[]> {
-  const { data } = await apiClient.get<ApiResponse<TaskAssignee[]>>(`/tasks/${taskId}/assignments`);
+  const { data } = await apiClient.get<ApiResponse<TaskAssignee[]>>(`/tasks/${taskId}/assignees`);
   return data.data ?? [];
 }
 
 export async function assignTaskUser(taskId: string, userId: string): Promise<TaskAssignment> {
-  const { data } = await apiClient.post<ApiResponse<TaskAssignment>>(
-    `/tasks/${taskId}/assignments`,
-    {
-      userId,
-    },
-  );
+  const { data } = await apiClient.post<ApiResponse<TaskAssignment>>(`/tasks/${taskId}/assignees`, {
+    userId,
+  });
   return data.data!;
 }
 
 export async function unassignTaskUser(taskId: string, userId: string): Promise<void> {
-  await apiClient.delete<ApiResponse<null>>(`/tasks/${taskId}/assignments/${userId}`);
+  await apiClient.delete<ApiResponse<null>>(`/tasks/${taskId}/assignees/${userId}`);
+}
+
+export async function bulkAssignTaskUsers(
+  taskId: string,
+  userIds: string[],
+): Promise<TaskAssignment[]> {
+  const { data } = await apiClient.put<ApiResponse<TaskAssignment[]>>(
+    `/tasks/${taskId}/assignees`,
+    {
+      userIds,
+    },
+  );
+  return data.data!;
 }

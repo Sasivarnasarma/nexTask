@@ -15,8 +15,10 @@ import { ProjectMemberView, Task, UpdateTaskRequest } from '@nextask/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   BarChart2,
+  Calendar,
   Check,
   ChevronDown,
+  Edit,
   Filter,
   Folder,
   LayoutGrid,
@@ -47,6 +49,7 @@ import { fetchUserProjects } from '../api/profile.api';
 import {
   addProjectMember,
   assignTaskUser,
+  bulkAssignTaskUsers,
   fetchProjectMembers,
   fetchTeamMembersAutocomplete,
   removeProjectMember,
@@ -190,6 +193,15 @@ export function Dashboard() {
     title: '',
     description: '',
     priority: 'Medium',
+    dueDate: '',
+    assigneeIds: [] as string[],
+  });
+  const [isEditingTask, setIsEditingTask] = useState(false);
+  const [editTaskForm, setEditTaskForm] = useState({
+    title: '',
+    description: '',
+    priority: 'Medium',
+    dueDate: '',
   });
   const [viewMode, setViewMode] = useState<'board' | 'table' | 'analytics'>('board');
   const [searchQuery, setSearchQuery] = useState('');
@@ -289,11 +301,38 @@ export function Dashboard() {
 
   const createTaskMutation = useMutation({
     mutationFn: createTask,
-    onSuccess: () => {
+    onSuccess: async (createdTask) => {
+      if (newTaskForm.assigneeIds.length > 0 && createdTask?.id) {
+        try {
+          await bulkAssignTaskUsers(createdTask.id, newTaskForm.assigneeIds);
+        } catch (err) {
+          console.error('Failed to assign members during task creation:', err);
+        }
+      }
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       setIsCreateModalOpen(false);
-      setNewTaskForm({ title: '', description: '', priority: 'Medium' });
+      setNewTaskForm({
+        title: '',
+        description: '',
+        priority: 'Medium',
+        dueDate: '',
+        assigneeIds: [],
+      });
       useToastStore.getState().showSuccess('Task created successfully!');
+    },
+  });
+
+  const editTaskMutation = useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: UpdateTaskRequest }) =>
+      updateTask(id, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['task', selectedTask?.id] });
+      useToastStore.getState().showSuccess('Task updated successfully!');
+      setIsEditingTask(false);
+    },
+    onError: () => {
+      useToastStore.getState().showError('Failed to update task.');
     },
   });
 
@@ -540,6 +579,42 @@ export function Dashboard() {
       priority: mapPriorityToBackend(newTaskForm.priority),
       status: 'TODO',
       projectId: activeProjectIdResolved,
+      dueDate: newTaskForm.dueDate
+        ? new Date(newTaskForm.dueDate + 'T12:00:00Z').toISOString()
+        : undefined,
+    });
+  };
+
+  const handleStartEdit = () => {
+    if (!selectedTask) return;
+    setEditTaskForm({
+      title: selectedTask.title,
+      description: selectedTask.description || '',
+      priority:
+        selectedTask.priority === 'HIGH'
+          ? 'High'
+          : selectedTask.priority === 'MEDIUM'
+            ? 'Medium'
+            : 'Low',
+      dueDate: selectedTask.dueDate
+        ? new Date(selectedTask.dueDate).toISOString().split('T')[0]
+        : '',
+    });
+    setIsEditingTask(true);
+  };
+
+  const handleSaveEdit = () => {
+    if (!selectedTask || !editTaskForm.title.trim()) return;
+    editTaskMutation.mutate({
+      id: selectedTask.id,
+      payload: {
+        title: editTaskForm.title.trim(),
+        description: editTaskForm.description.trim() || null,
+        priority: mapPriorityToBackend(editTaskForm.priority),
+        dueDate: editTaskForm.dueDate
+          ? new Date(editTaskForm.dueDate + 'T12:00:00Z').toISOString()
+          : null,
+      } as unknown as UpdateTaskRequest,
     });
   };
 
@@ -944,36 +1019,151 @@ export function Dashboard() {
       )}
 
       {/* ─── MODAL 1: VIEW TASK DETAILS ────────────────────────────────────────── */}
-      <Dialog open={!!selectedTask} onOpenChange={() => setSelectedTask(null)}>
+      <Dialog
+        open={!!selectedTask}
+        onOpenChange={() => {
+          setSelectedTask(null);
+          setIsEditingTask(false);
+        }}
+      >
         <DialogContent className="max-w-4xl bg-background border-border text-foreground p-0 overflow-hidden">
           <div className="flex h-[80vh]">
             <div className="flex-1 p-8 border-r border-border space-y-6 overflow-y-auto">
               <DialogHeader>
-                <div className="flex justify-between items-start">
-                  <Badge
-                    className="w-fit mb-2"
-                    variant={mappedSelectedTask?.priority === 'High' ? 'destructive' : 'default'}
-                  >
-                    {mappedSelectedTask?.priority} Priority
-                  </Badge>
-                  {isProjectManager && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-muted-foreground hover:text-destructive text-xs hover:bg-destructive/10"
-                      onClick={handleDeleteTask}
-                      disabled={deleteTaskMutation.isPending}
-                    >
-                      <Trash2 size={14} className="mr-1" /> Delete Task
-                    </Button>
-                  )}
-                </div>
-                <DialogTitle className="text-2xl font-bold">
-                  {mappedSelectedTask?.title}
-                </DialogTitle>
-                <DialogDescription className="text-muted-foreground mt-4 text-base leading-relaxed">
-                  {mappedSelectedTask?.description || 'No description provided.'}
-                </DialogDescription>
+                {isEditingTask ? (
+                  <div className="space-y-4 pt-2">
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                        Task Title
+                      </label>
+                      <Input
+                        value={editTaskForm.title}
+                        onChange={(e) =>
+                          setEditTaskForm({ ...editTaskForm, title: e.target.value })
+                        }
+                        className="bg-background border-border focus-visible:ring-primary font-bold text-lg"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                          Priority
+                        </label>
+                        <select
+                          className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                          value={editTaskForm.priority}
+                          onChange={(e) =>
+                            setEditTaskForm({ ...editTaskForm, priority: e.target.value })
+                          }
+                        >
+                          <option value="Low">Low Priority</option>
+                          <option value="Medium">Medium Priority</option>
+                          <option value="High">High Priority</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                          Due Date (Deadline)
+                        </label>
+                        <Input
+                          type="date"
+                          min={new Date().toISOString().split('T')[0]}
+                          value={editTaskForm.dueDate}
+                          onChange={(e) =>
+                            setEditTaskForm({ ...editTaskForm, dueDate: e.target.value })
+                          }
+                          className="bg-background border-border focus-visible:ring-primary"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                        Description
+                      </label>
+                      <Textarea
+                        value={editTaskForm.description}
+                        onChange={(e) =>
+                          setEditTaskForm({ ...editTaskForm, description: e.target.value })
+                        }
+                        className="bg-background border-border focus-visible:ring-primary resize-none h-24 text-sm"
+                        placeholder="Briefly describe the task requirements..."
+                      />
+                    </div>
+
+                    <div className="flex justify-end gap-2 pt-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setIsEditingTask(false)}
+                        className="hover:bg-muted text-muted-foreground hover:text-foreground h-9"
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={handleSaveEdit}
+                        disabled={editTaskMutation.isPending || !editTaskForm.title.trim()}
+                        className="h-9"
+                      >
+                        {editTaskMutation.isPending ? 'Saving...' : 'Save Changes'}
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex justify-between items-start">
+                      <Badge
+                        className="w-fit mb-2"
+                        variant={
+                          mappedSelectedTask?.priority === 'High' ? 'destructive' : 'default'
+                        }
+                      >
+                        {mappedSelectedTask?.priority} Priority
+                      </Badge>
+                      {isProjectManager && (
+                        <div className="flex gap-1.5">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-muted-foreground hover:text-primary text-xs hover:bg-primary/10"
+                            onClick={handleStartEdit}
+                          >
+                            <Edit size={14} className="mr-1" /> Edit Task
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-muted-foreground hover:text-destructive text-xs hover:bg-destructive/10"
+                            onClick={handleDeleteTask}
+                            disabled={deleteTaskMutation.isPending}
+                          >
+                            <Trash2 size={14} className="mr-1" /> Delete Task
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                    <DialogTitle className="text-2xl font-bold">
+                      {mappedSelectedTask?.title}
+                    </DialogTitle>
+                    <DialogDescription className="text-muted-foreground mt-4 text-base leading-relaxed">
+                      {mappedSelectedTask?.description || 'No description provided.'}
+                    </DialogDescription>
+                    {mappedSelectedTask?.dueDate && (
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-4 bg-muted/40 border border-border/40 px-3 py-1.5 rounded-lg w-fit">
+                        <Calendar className="w-3.5 h-3.5 text-primary" />
+                        <span className="font-semibold text-foreground">Deadline:</span>
+                        <span>
+                          {new Date(mappedSelectedTask.dueDate).toLocaleDateString(undefined, {
+                            dateStyle: 'medium',
+                          })}
+                        </span>
+                      </div>
+                    )}
+                  </>
+                )}
               </DialogHeader>
 
               {/* Task Assignees Box */}
@@ -1231,6 +1421,48 @@ export function Dashboard() {
                 <option value="Medium">Medium Priority</option>
                 <option value="High">High Priority</option>
               </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Due Date (Deadline)</label>
+              <Input
+                type="date"
+                min={new Date().toISOString().split('T')[0]}
+                className="bg-background border-border focus-visible:ring-primary w-full"
+                value={newTaskForm.dueDate}
+                onChange={(e) => setNewTaskForm({ ...newTaskForm, dueDate: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Assignees</label>
+              <div className="border border-border rounded-md p-3 bg-background/50 max-h-32 overflow-y-auto space-y-1.5 focus-within:ring-2 focus-within:ring-primary">
+                {projectMembers.map((member) => {
+                  const isSelected = newTaskForm.assigneeIds.includes(member.userId);
+                  return (
+                    <label
+                      key={member.userId}
+                      className="flex items-center gap-2 text-sm text-foreground cursor-pointer hover:bg-muted/40 p-1 rounded transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => {
+                          const updated = isSelected
+                            ? newTaskForm.assigneeIds.filter((id) => id !== member.userId)
+                            : [...newTaskForm.assigneeIds, member.userId];
+                          setNewTaskForm({ ...newTaskForm, assigneeIds: updated });
+                        }}
+                        className="rounded border-border text-primary focus:ring-primary h-4 w-4 bg-background cursor-pointer"
+                      />
+                      <span className="truncate">
+                        {member.user?.name || member.user?.email || 'Unknown User'}
+                      </span>
+                    </label>
+                  );
+                })}
+                {projectMembers.length === 0 && (
+                  <p className="text-xs text-muted-foreground italic">No team members to assign.</p>
+                )}
+              </div>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">Description</label>

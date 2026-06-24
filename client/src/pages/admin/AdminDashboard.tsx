@@ -101,10 +101,7 @@ export function AdminDashboard() {
   // Fetch Activities for selected user
   const { data: activities = [], isLoading: activitiesLoading } = useQuery<UserActivityResponse[]>({
     queryKey: ['admin-user-activities', selectedUserId],
-    queryFn: () =>
-      selectedUserId
-        ? getUserActivity(selectedUserId)
-        : Promise.resolve([]),
+    queryFn: () => (selectedUserId ? getUserActivity(selectedUserId) : Promise.resolve([])),
     enabled: currentUser?.role === 'ADMIN' && !!selectedUserId && activeTab === 'audit',
   });
 

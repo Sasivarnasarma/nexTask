@@ -220,7 +220,6 @@ export interface Notification {
   taskId?: string | null;
 }
 
-
 // ─── Collaboration (Comments & Attachments) ───────────────────────────────────
 
 export interface CommentAuthor {
@@ -396,4 +395,3 @@ export interface MessageResponse extends ApiResponse<Message> {}
 export interface MessageListResponse extends ApiResponse<Message[]> {}
 export interface NotificationResponse extends ApiResponse<Notification> {}
 export interface NotificationListResponse extends ApiResponse<Notification[]> {}
-
