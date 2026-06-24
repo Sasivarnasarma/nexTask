@@ -307,6 +307,90 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"PaginatedUsersResponse": {
+				"properties": {
+					"users": {
+						"items": {
+							"$ref": "#/components/schemas/User"
+						},
+						"type": "array"
+					},
+					"total": {
+						"type": "number",
+						"format": "double"
+					},
+					"page": {
+						"type": "number",
+						"format": "double"
+					},
+					"limit": {
+						"type": "number",
+						"format": "double"
+					},
+					"totalPages": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"users",
+					"total",
+					"page",
+					"limit",
+					"totalPages"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PaginatedUsersResponseWrapper": {
+				"properties": {
+					"success": {
+						"type": "boolean"
+					},
+					"message": {
+						"type": "string"
+					},
+					"data": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/PaginatedUsersResponse"
+							}
+						],
+						"nullable": true
+					},
+					"errors": {
+						"properties": {},
+						"additionalProperties": {
+							"type": "string"
+						},
+						"type": "object",
+						"nullable": true
+					}
+				},
+				"required": [
+					"success",
+					"message",
+					"data",
+					"errors"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CreateUserResponse": {
+				"properties": {
+					"user": {
+						"$ref": "#/components/schemas/User"
+					},
+					"tempPassword": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"user"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"UserCreateResponse": {
 				"properties": {
 					"success": {
@@ -316,18 +400,11 @@
 						"type": "string"
 					},
 					"data": {
-						"properties": {
-							"tempPassword": {
-								"type": "string"
-							},
-							"user": {
-								"$ref": "#/components/schemas/User"
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/CreateUserResponse"
 							}
-						},
-						"required": [
-							"user"
 						],
-						"type": "object",
 						"nullable": true
 					},
 					"errors": {
@@ -432,6 +509,43 @@
 					"userId": {
 						"type": "string",
 						"nullable": true
+					},
+					"user": {
+						"properties": {
+							"email": {
+								"type": "string"
+							},
+							"name": {
+								"type": "string",
+								"nullable": true
+							},
+							"id": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"email",
+							"name",
+							"id"
+						],
+						"type": "object",
+						"nullable": true
+					},
+					"task": {
+						"properties": {
+							"title": {
+								"type": "string"
+							},
+							"id": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"title",
+							"id"
+						],
+						"type": "object",
+						"nullable": true
 					}
 				},
 				"required": [
@@ -440,7 +554,9 @@
 					"description",
 					"createdAt",
 					"taskId",
-					"userId"
+					"userId",
+					"user",
+					"task"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -1499,6 +1615,78 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"Message": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"content": {
+						"type": "string"
+					},
+					"projectId": {
+						"type": "string"
+					},
+					"senderId": {
+						"type": "string"
+					},
+					"sender": {
+						"$ref": "#/components/schemas/CommentAuthor"
+					},
+					"createdAt": {
+						"anyOf": [
+							{
+								"type": "string",
+								"format": "date-time"
+							},
+							{
+								"type": "string"
+							}
+						]
+					}
+				},
+				"required": [
+					"id",
+					"content",
+					"projectId",
+					"senderId",
+					"createdAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"MessageListResponse": {
+				"properties": {
+					"success": {
+						"type": "boolean"
+					},
+					"message": {
+						"type": "string"
+					},
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/Message"
+						},
+						"type": "array",
+						"nullable": true
+					},
+					"errors": {
+						"properties": {},
+						"additionalProperties": {
+							"type": "string"
+						},
+						"type": "object",
+						"nullable": true
+					}
+				},
+				"required": [
+					"success",
+					"message",
+					"data",
+					"errors"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"CommentListResponse": {
 				"properties": {
 					"success": {
@@ -2061,7 +2249,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/UserListResponse"
+									"$ref": "#/components/schemas/PaginatedUsersResponseWrapper"
 								}
 							}
 						}
@@ -3570,6 +3758,126 @@
 					{
 						"in": "path",
 						"name": "userId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/notifications": {
+			"get": {
+				"operationId": "GetNotifications",
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Retrieves all notifications for the authenticated user (limit 50).",
+				"tags": [
+					"Notifications"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/notifications/{id}/read": {
+			"patch": {
+				"operationId": "MarkAsRead",
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Marks a specific notification as read.",
+				"tags": [
+					"Notifications"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/notifications/mark-all-read": {
+			"post": {
+				"operationId": "MarkAllAsRead",
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Marks all notifications of the authenticated user as read.",
+				"tags": [
+					"Notifications"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/messages/{projectId}": {
+			"get": {
+				"operationId": "GetMessages",
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/MessageListResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Fetches the real-time chat history of a project.\nAccess is restricted to authorized project members only.",
+				"tags": [
+					"Messages"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "projectId",
 						"required": true,
 						"schema": {
 							"type": "string"

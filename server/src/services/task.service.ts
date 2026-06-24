@@ -1,8 +1,9 @@
 import { CreateTaskRequest, Task as SharedTask, UpdateTaskRequest } from '@nextask/types';
-import { Status, Task } from '@prisma/client';
+import { NotificationType, Status, Task } from '@prisma/client';
 
 import { prisma } from '../lib/prisma';
 import { ApiError } from '../utils/apiError.util';
+import { NotificationService } from './notification.service';
 import { deleteFile, generateDownloadUrl } from './s3.service';
 
 export type CreateTaskInput = CreateTaskRequest;
@@ -203,6 +204,21 @@ export const updateTask = async (id: string, data: UpdateTaskInput): Promise<Tas
       position: taskPosition,
     },
   });
+
+  if (data.status && data.status !== existing.status) {
+    const assignments = await prisma.taskAssignment.findMany({
+      where: { taskId: id },
+      select: { userId: true },
+    });
+    for (const assign of assignments) {
+      NotificationService.createNotification(
+        assign.userId,
+        `Task "${existing.title}" status changed to ${data.status}.`,
+        NotificationType.STATUS_CHANGED,
+        id,
+      ).catch((err) => console.error('Failed to dispatch status change notification:', err));
+    }
+  }
 
   return updated;
 };

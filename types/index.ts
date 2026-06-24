@@ -208,6 +208,19 @@ export interface PushSubscriptionRequest {
   keys: PushSubscriptionKeys;
 }
 
+// ─── App Notifications ────────────────────────────────────────────────────────
+
+export interface Notification {
+  id: string;
+  message: string;
+  type: string;
+  isRead: boolean;
+  createdAt: Date | string;
+  userId: string;
+  taskId?: string | null;
+}
+
+
 // ─── Collaboration (Comments & Attachments) ───────────────────────────────────
 
 export interface CommentAuthor {
@@ -265,6 +278,21 @@ export interface GetPresignedUrlResponse {
   fileKey: string;
 }
 
+// ─── Project Chat Messages ───────────────────────────────────────────────────
+
+export interface Message {
+  id: string;
+  content: string;
+  projectId: string;
+  senderId: string;
+  sender?: CommentAuthor;
+  createdAt: Date | string;
+}
+
+export interface CreateMessageRequest {
+  content: string;
+}
+
 // ─── Admin Management Payloads ────────────────────────────────────────────────
 
 export interface AdminCreateUserRequest {
@@ -296,6 +324,15 @@ export interface UserActivityResponse {
   createdAt: Date | string;
   taskId: string | null;
   userId: string | null;
+  user: {
+    id: string;
+    name: string | null;
+    email: string;
+  } | null;
+  task: {
+    id: string;
+    title: string;
+  } | null;
 }
 
 export interface AddMemberInput {
@@ -322,7 +359,19 @@ export interface ProjectMemberView {
 
 export interface VoidResponse extends ApiResponse<null> {}
 export interface UserProfileResponse extends ApiResponse<UserProfile> {}
-export interface UserCreateResponse extends ApiResponse<{ user: User; tempPassword?: string }> {}
+export interface CreateUserResponse {
+  user: User;
+  tempPassword?: string;
+}
+export interface UserCreateResponse extends ApiResponse<CreateUserResponse> {}
+export interface PaginatedUsersResponse {
+  users: User[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+export interface PaginatedUsersResponseWrapper extends ApiResponse<PaginatedUsersResponse> {}
 export interface UserListResponse extends ApiResponse<any> {}
 export interface UserActivityListResponse extends ApiResponse<UserActivityResponse[]> {}
 export interface TaskResponse extends ApiResponse<Task> {}
@@ -343,3 +392,8 @@ export interface LoginResponseWrapper extends ApiResponse<LoginResponse> {}
 export interface GetPresignedUrlResponseWrapper extends ApiResponse<GetPresignedUrlResponse> {}
 export interface SystemHealthResponse extends ApiResponse<{ time: Date | string }> {}
 export interface SystemPublicKeyResponse extends ApiResponse<{ publicKey: string }> {}
+export interface MessageResponse extends ApiResponse<Message> {}
+export interface MessageListResponse extends ApiResponse<Message[]> {}
+export interface NotificationResponse extends ApiResponse<Notification> {}
+export interface NotificationListResponse extends ApiResponse<Notification[]> {}
+

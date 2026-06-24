@@ -2,24 +2,13 @@ import {
   AdminCreateUserRequest,
   AdminUpdateUserRequest,
   ApiResponse,
+  CreateUserResponse,
+  PaginatedUsersResponse,
   User,
   UserActivityResponse,
 } from '@nextask/types';
 
 import apiClient from './client';
-
-export interface PaginatedUsersResponse {
-  users: User[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
-
-export interface CreateUserResponse {
-  user: User;
-  tempPassword?: string;
-}
 
 // 1. GET /users (View All Users with search and pagination)
 export async function listUsers(

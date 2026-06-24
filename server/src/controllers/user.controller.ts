@@ -1,4 +1,5 @@
 import {
+  PaginatedUsersResponseWrapper,
   ProjectListResponse,
   UserActivityListResponse,
   UserCreateResponse,
@@ -136,7 +137,7 @@ export class UserController extends Controller {
     @Query() page: number = 1,
     @Query() limit: number = 10,
     @Query() search?: string,
-  ): Promise<UserListResponse> {
+  ): Promise<PaginatedUsersResponseWrapper> {
     const result = await this.userService.listUsers(page, limit, search);
     return successResponse('Users list retrieved successfully.', result);
   }

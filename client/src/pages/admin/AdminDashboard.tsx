@@ -55,18 +55,6 @@ import { extractApiError } from '@/lib/apiError';
 import { useAuthStore } from '@/store/auth.store';
 import { useToastStore } from '@/store/toast.store';
 
-interface UserActivity extends UserActivityResponse {
-  user: {
-    id: string;
-    name: string | null;
-    email: string;
-  } | null;
-  task: {
-    id: string;
-    title: string;
-  } | null;
-}
-
 export function AdminDashboard() {
   const queryClient = useQueryClient();
   const currentUser = useAuthStore((s) => s.user);
@@ -89,6 +77,11 @@ export function AdminDashboard() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isResetOpen, setIsResetOpen] = useState(false);
   const [resettingUser, setResettingUser] = useState<User | null>(null);
+  const [createdCredentials, setCreatedCredentials] = useState<{
+    name: string;
+    email: string;
+    tempPassword?: string;
+  } | null>(null);
 
   // User Forms State
   const [formEmail, setFormEmail] = useState('');
@@ -106,11 +99,11 @@ export function AdminDashboard() {
   });
 
   // Fetch Activities for selected user
-  const { data: activities = [], isLoading: activitiesLoading } = useQuery<UserActivity[]>({
+  const { data: activities = [], isLoading: activitiesLoading } = useQuery<UserActivityResponse[]>({
     queryKey: ['admin-user-activities', selectedUserId],
     queryFn: () =>
       selectedUserId
-        ? (getUserActivity(selectedUserId) as Promise<UserActivity[]>)
+        ? getUserActivity(selectedUserId)
         : Promise.resolve([]),
     enabled: currentUser?.role === 'ADMIN' && !!selectedUserId && activeTab === 'audit',
   });
@@ -122,10 +115,15 @@ export function AdminDashboard() {
     AdminCreateUserRequest
   >({
     mutationFn: createUser,
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       setIsCreateOpen(false);
-      showSuccess('User account created successfully! Credentials have been sent to their email.');
+      setCreatedCredentials({
+        name: data.user.name || 'N/A',
+        email: data.user.email,
+        tempPassword: data.tempPassword,
+      });
+      showSuccess('User account created successfully!');
     },
     onError: (err) => {
       showError(extractApiError(err, 'Failed to create user.'));
@@ -810,6 +808,62 @@ export function AdminDashboard() {
               {resetPasswordMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Confirm Reset
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Credentials Dialog */}
+      <Dialog
+        open={!!createdCredentials}
+        onOpenChange={(open) => {
+          if (!open) setCreatedCredentials(null);
+        }}
+      >
+        <DialogContent className="bg-background border-border text-foreground sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="text-emerald-500">Account Created Successfully!</DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              A temporary password has been generated for the new user. Please copy and share it
+              with them.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-4 py-4 border border-border rounded-xl p-4 bg-muted/20">
+            <div className="space-y-1">
+              <span className="text-xs text-muted-foreground font-semibold">User Name</span>
+              <p className="text-sm font-bold">{createdCredentials?.name || 'N/A'}</p>
+            </div>
+            <div className="space-y-1">
+              <span className="text-xs text-muted-foreground font-semibold">Email Address</span>
+              <p className="text-sm font-bold">{createdCredentials?.email}</p>
+            </div>
+            <div className="space-y-1">
+              <span className="text-xs text-muted-foreground font-semibold">
+                Temporary Password
+              </span>
+              <div className="flex items-center gap-2 bg-background border border-border p-2 rounded-lg justify-between select-all font-mono text-sm">
+                <span className="text-foreground font-bold">
+                  {createdCredentials?.tempPassword || 'N/A'}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    if (createdCredentials?.tempPassword) {
+                      navigator.clipboard.writeText(createdCredentials.tempPassword);
+                      showSuccess('Temporary password copied to clipboard!');
+                    }
+                  }}
+                  className="h-7 px-2 hover:bg-muted text-primary font-bold text-xs"
+                >
+                  Copy
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button onClick={() => setCreatedCredentials(null)}>Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

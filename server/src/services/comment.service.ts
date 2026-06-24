@@ -1,9 +1,9 @@
 import { CreateAttachmentRequest, Comment as SharedComment } from '@nextask/types';
-import { Attachment } from '@prisma/client';
+import { Attachment, NotificationType } from '@prisma/client';
 
 import { prisma } from '../lib/prisma';
 import { ApiError } from '../utils/apiError.util';
-import { PushService } from './push.service';
+import { NotificationService } from './notification.service';
 import { deleteFile, generateDownloadUrl } from './s3.service';
 
 export const postComment = async (
@@ -89,12 +89,13 @@ export const postComment = async (
 
   for (const assign of assignments) {
     if (assign.userId !== userId) {
-      PushService.sendNotificationToUser(assign.userId, {
-        title: 'New Comment on Task',
-        body: `${authorName} commented: "${content.substring(0, 60)}${content.length > 60 ? '...' : ''}"`,
-        data: { url: `/tasks/${taskId}` },
-      }).catch((err) => {
-        console.error('Failed to dispatch comment push notification:', err);
+      NotificationService.createNotification(
+        assign.userId,
+        `${authorName} commented on task "${task.title}": "${content.substring(0, 40)}${content.length > 40 ? '...' : ''}"`,
+        NotificationType.COMMENT_ADDED,
+        taskId,
+      ).catch((err) => {
+        console.error('Failed to dispatch comment notification:', err);
       });
     }
   }

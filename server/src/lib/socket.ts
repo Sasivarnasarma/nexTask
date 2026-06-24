@@ -1,6 +1,7 @@
 import http from 'http';
 import { Server } from 'socket.io';
 
+import { MessageService } from '../services/message.service';
 import { verifyToken } from '../utils/jwt.util';
 import { prisma } from './prisma';
 
@@ -95,6 +96,23 @@ export const initSocket = (server: http.Server) => {
       socket.leave(`project:${projectId}`);
       console.log(`Socket ${socket.id} left room project:${projectId}`);
       socket.emit('left-project', { projectId });
+    });
+
+    socket.on('send-message', async (data: { projectId: string; content: string }) => {
+      const currentUserId = socket.data.user?.userId;
+      if (!currentUserId) return;
+
+      try {
+        const messageService = new MessageService();
+        const message = await messageService.createMessage(
+          data.projectId,
+          currentUserId,
+          data.content,
+        );
+        broadcastToProject(data.projectId, 'receive-message', message);
+      } catch (err) {
+        console.error('Failed to handle send-message socket event:', err);
+      }
     });
 
     socket.on('disconnect', () => {

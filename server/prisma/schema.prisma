@@ -27,6 +27,7 @@ model User {
   comments           Comment[]
   attachments        Attachment[]
   taskActivities     TaskActivity[]
+  messages           Message[]
 }
 
 model Project {
@@ -43,6 +44,7 @@ model Project {
   owner       User           @relation("ProjectOwner", fields: [ownerId], references: [id])
   members     ProjectMember[]
   tasks       Task[]
+  messages    Message[]
 }
 
 model ProjectMember {
@@ -174,6 +176,22 @@ model TaskActivity {
   @@index([taskId])
   @@index([userId])
 }
+
+model Message {
+  id        String   @id @default(uuid())
+  content   String
+  createdAt DateTime @default(now())
+
+  // Relations
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  senderId  String
+  sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([senderId])
+}
+
 
 enum Role {
   ADMIN
