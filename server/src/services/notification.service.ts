@@ -1,6 +1,7 @@
 import { NotificationType } from '@prisma/client';
 
 import { prisma } from '../lib/prisma';
+import { sendNotificationToUser } from '../lib/socket';
 import { PushService } from './push.service';
 
 export class NotificationService {
@@ -33,6 +34,13 @@ export class NotificationService {
       });
     } catch (err) {
       console.error('[PUSH_ERROR] Failed to send push notification:', err);
+    }
+
+    // 3. Send real-time socket notification to the user's private room
+    try {
+      sendNotificationToUser(userId, 'notification:received', notif);
+    } catch (err) {
+      console.error('[SOCKET_ERROR] Failed to emit real-time notification:', err);
     }
 
     return notif;
@@ -79,6 +87,10 @@ export class NotificationService {
         return 'Task Deadline Alert';
       case NotificationType.COMMENT_ADDED:
         return 'New Comment Added';
+      case NotificationType.CHAT_MESSAGE:
+        return 'New Chat Message';
+      case NotificationType.PROJECT_ADDED:
+        return 'Added to Project';
       case NotificationType.ADMIN_UPDATE:
       default:
         return 'Notification';

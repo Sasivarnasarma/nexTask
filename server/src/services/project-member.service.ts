@@ -1,8 +1,9 @@
-import { Project } from '@prisma/client';
+import { NotificationType, Project } from '@prisma/client';
 
 import { prisma } from '../lib/prisma';
 import { ApiError } from '../utils/apiError.util';
 import { MailService } from './mail.service';
+import { NotificationService } from './notification.service';
 
 const mailService = new MailService();
 
@@ -120,6 +121,13 @@ export class ProjectMemberService {
       mailService
         .sendProjectAddedEmail(user.email, user.name || 'Team Member', project.name)
         .catch((err) => console.error('❌ Failed to send project added email:', err));
+
+      // Create in-app notification and send real-time socket push
+      NotificationService.createNotification(
+        userId,
+        `You have been added as a member to project "${project.name}".`,
+        NotificationType.PROJECT_ADDED,
+      ).catch((err) => console.error('Failed to create project added notification:', err));
     }
 
     return newMember;

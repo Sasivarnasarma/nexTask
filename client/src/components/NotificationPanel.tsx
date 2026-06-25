@@ -26,6 +26,10 @@ const getTitleForType = (type: string, message: string = '') => {
       return 'Deadline Approaching';
     case 'COMMENT_ADDED':
       return 'Comment Added';
+    case 'CHAT_MESSAGE':
+      return 'New Message';
+    case 'PROJECT_ADDED':
+      return 'Added to Project';
     case 'ADMIN_UPDATE':
     default:
       if (msg.includes('project')) return 'Project Workspace Notification';

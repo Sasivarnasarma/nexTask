@@ -1,20 +1,64 @@
 import { Notification } from '@nextask/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Bell, User } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { io } from 'socket.io-client';
 
 import {
   fetchNotifications,
   markAllNotificationsAsRead,
   markNotificationAsRead,
 } from '../api/notifications.api';
+import { useAuthStore } from '../store/auth.store';
+import { useToastStore } from '../store/toast.store';
 import { NotificationPanel } from './NotificationPanel';
 import { Button } from './ui/button';
 
 export function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
   const queryClient = useQueryClient();
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+
+  // Global socket listener for real-time notifications
+  useEffect(() => {
+    const token = useAuthStore.getState().token;
+    if (!token) return;
+
+    const socketUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
+
+    const socket = io(socketUrl, {
+      auth: { token },
+      transports: ['polling', 'websocket'],
+    });
+
+    socket.on('connect', () => {
+      console.log('[WS] Global notification socket connected.');
+    });
+
+    socket.on('connect_error', (err) => {
+      console.error('[WS_ERROR] Global socket connection failed:', err.message);
+    });
+
+    socket.on('notification:received', (notif: Notification) => {
+      console.log('[WS] Received real-time notification:', notif);
+      
+      // Instantly refresh the notification list and badge count
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+
+      // Alert the user via a beautiful toast unless they are already viewing project chat
+      const isChat = notif.type === 'CHAT_MESSAGE';
+      const isOnMessagesPage = window.location.pathname === '/messages';
+
+      if (!isChat || !isOnMessagesPage) {
+        useToastStore.getState().showSuccess(notif.message);
+      }
+    });
+
+    return () => {
+      console.log('[WS] Cleaning up global notification socket.');
+      socket.disconnect();
+    };
+  }, [queryClient]);
 
   // Fetch notifications
   const { data: notifications = [] } = useQuery<Notification[]>({

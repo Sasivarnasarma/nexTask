@@ -71,7 +71,11 @@ export default function MessagesPage() {
 
     const newSocket = io(socketUrl, {
       auth: { token },
-      transports: ['websocket'],
+      transports: ['polling', 'websocket'],
+    });
+
+    newSocket.on('connect_error', (err) => {
+      console.error('[WS_ERROR] Chat socket connection failed:', err.message);
     });
 
     newSocket.on('connect', () => {

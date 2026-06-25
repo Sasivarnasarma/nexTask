@@ -481,7 +481,11 @@ export function Dashboard() {
 
     const newSocket = io(socketUrl, {
       auth: { token },
-      transports: ['websocket'],
+      transports: ['polling', 'websocket'],
+    });
+
+    newSocket.on('connect_error', (err) => {
+      console.error('[WS_ERROR] Dashboard socket connection failed:', err.message);
     });
 
     newSocket.on('connect', () => {

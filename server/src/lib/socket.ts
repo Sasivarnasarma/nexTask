@@ -40,6 +40,11 @@ export const initSocket = (server: http.Server) => {
     const userId = socket.data.user?.userId;
     console.log(`Socket connected: ${socket.id} (User: ${userId})`);
 
+    if (userId) {
+      socket.join(`user:${userId}`);
+      console.log(`Socket ${socket.id} joined user room: user:${userId}`);
+    }
+
     // Room Isolation & Authorization Check
     socket.on('join-project', async (projectId: string) => {
       const currentUserId = socket.data.user?.userId;
@@ -113,6 +118,40 @@ export const initSocket = (server: http.Server) => {
             data.attachments,
           );
           broadcastToProject(data.projectId, 'receive-message', message);
+
+          // Proactively notify other project members via in-app notifications
+          const project = await prisma.project.findUnique({
+            where: { id: data.projectId },
+            include: {
+              members: { select: { userId: true } },
+            },
+          });
+
+          if (project) {
+            const memberIds = new Set<string>();
+            if (project.ownerId !== currentUserId) {
+              memberIds.add(project.ownerId);
+            }
+            project.members.forEach((m) => {
+              if (m.userId !== currentUserId) {
+                memberIds.add(m.userId);
+              }
+            });
+
+            const senderName = socket.data.user?.name || socket.data.user?.email || 'A teammate';
+            const truncatedContent = data.content.substring(0, 40) + (data.content.length > 40 ? '...' : '');
+
+            const { NotificationService } = await import('../services/notification.service');
+
+            for (const memberId of memberIds) {
+              NotificationService.createNotification(
+                memberId,
+                `${senderName} in "${project.name}": "${truncatedContent}"`,
+                'CHAT_MESSAGE' as any,
+                undefined,
+              ).catch((err) => console.error('Failed to create chat notification:', err));
+            }
+          }
         } catch (err) {
           console.error('Failed to handle send-message socket event:', err);
         }
@@ -145,3 +184,13 @@ export const broadcastToProject = (projectId: string, eventName: string, data: a
     io.to(`project:${projectId}`).emit(eventName, data);
   }
 };
+
+/**
+ * Broadcasts an event to a specific user's private room.
+ */
+export const sendNotificationToUser = (userId: string, eventName: string, data: any) => {
+  if (io) {
+    io.to(`user:${userId}`).emit(eventName, data);
+  }
+};
+

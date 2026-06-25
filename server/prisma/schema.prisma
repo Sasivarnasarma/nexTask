@@ -248,6 +248,8 @@ enum NotificationType {
   DEADLINE_ALERT
   COMMENT_ADDED
   ADMIN_UPDATE
+  CHAT_MESSAGE
+  PROJECT_ADDED
 }
 
 enum ActivityType {
