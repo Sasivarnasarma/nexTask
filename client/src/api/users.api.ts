@@ -2,24 +2,13 @@ import {
   AdminCreateUserRequest,
   AdminUpdateUserRequest,
   ApiResponse,
+  CreateUserResponse,
+  PaginatedUsersResponse,
   User,
   UserActivityResponse,
 } from '@nextask/types';
 
 import apiClient from './client';
-
-export interface PaginatedUsersResponse {
-  users: User[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
-
-export interface CreateUserResponse {
-  user: User;
-  tempPassword?: string;
-}
 
 // 1. GET /users (View All Users with search and pagination)
 export async function listUsers(
@@ -92,4 +81,9 @@ export async function getUserActivity(id: string): Promise<UserActivityResponse[
     `/users/${id}/activity`,
   );
   return data.data ?? [];
+}
+
+// 9. POST /users/:id/reset-password (Request Password Reset)
+export async function resetUserPassword(id: string): Promise<void> {
+  await apiClient.post<ApiResponse<null>>(`/users/${id}/reset-password`);
 }

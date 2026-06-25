@@ -1,7 +1,10 @@
 import {
+  ForgotPasswordRequest,
+  ForgotPasswordResetRequest,
   LoginRequest,
   LoginResponseWrapper,
   PasswordResetRequest as ResetPasswordRequest,
+  VoidResponse,
 } from '@nextask/types';
 import type { Request as ExRequest } from 'express';
 import { Body, Controller, Post, Request, Route, Security, SuccessResponse, Tags } from 'tsoa';
@@ -56,5 +59,34 @@ export class AuthController extends Controller {
     const { userId } = (request as any).user;
     const data = await this.authService.refreshSession(userId);
     return successResponse('Session refreshed successfully.', data);
+  }
+
+  /**
+   * Requests a password reset link to be sent via email.
+   * This is a public endpoint and does not require authentication.
+   */
+  @SuccessResponse('200', 'OK')
+  @Post('forgot-password')
+  public async forgotPassword(@Body() requestBody: ForgotPasswordRequest): Promise<VoidResponse> {
+    this.setStatus(200);
+    await this.authService.forgotPassword(requestBody.email);
+    return successResponse(
+      'If an account is associated with this email, a reset link will be sent.',
+      null,
+    );
+  }
+
+  /**
+   * Resets a user's password using a valid, short-lived forgot-password token.
+   * This is a public endpoint and does not require authentication.
+   */
+  @SuccessResponse('200', 'OK')
+  @Post('forgot-password/reset')
+  public async selfResetPassword(
+    @Body() requestBody: ForgotPasswordResetRequest,
+  ): Promise<VoidResponse> {
+    this.setStatus(200);
+    await this.authService.selfResetPassword(requestBody);
+    return successResponse('Password has been reset successfully.', null);
   }
 }

@@ -1,11 +1,11 @@
 import { TaskAssignee } from '@nextask/types';
-import { TaskAssignment } from '@prisma/client';
+import { NotificationType, TaskAssignment } from '@prisma/client';
 
 import { prisma } from '../lib/prisma';
 import { ApiError } from '../utils/apiError.util';
 import { MailService } from './mail.service';
+import { NotificationService } from './notification.service';
 import { verifyProjectManagerAccess, verifyProjectMemberAccess } from './project-member.service';
-import { PushService } from './push.service';
 
 const mailService = new MailService();
 
@@ -76,13 +76,14 @@ export async function assignUserToTask(
 
   // Optional: Send push notification AND Email Alert
   if (userId !== requestorId) {
-    // 1. Send the push notification
-    PushService.sendNotificationToUser(userId, {
-      title: 'Task Assigned',
-      body: `You have been assigned to task "${task.title}".`,
-      data: { url: `/tasks/${taskId}` },
-    }).catch((err) => {
-      console.error('Failed to send push notification for task assignment:', err);
+    // 1. Create in-app notification and send push notification
+    NotificationService.createNotification(
+      userId,
+      `You have been assigned to task "${task.title}".`,
+      NotificationType.TASK_ASSIGNED,
+      taskId,
+    ).catch((err) => {
+      console.error('Failed to create notification for task assignment:', err);
     });
 
     // 2. Send the email notification
@@ -235,13 +236,14 @@ export async function bulkAssignUsersToTask(
   // Notify newly assigned users via Push and Email
   for (const uid of uniqueUserIds) {
     if (!oldUserIds.has(uid) && uid !== requestorId) {
-      // 1. Send push notification
-      PushService.sendNotificationToUser(uid, {
-        title: 'Task Assigned',
-        body: `You have been assigned to task "${task.title}".`,
-        data: { url: `/tasks/${taskId}` },
-      }).catch((err) => {
-        console.error('Failed to send push notification for task assignment:', err);
+      // 1. Create in-app notification and send push notification
+      NotificationService.createNotification(
+        uid,
+        `You have been assigned to task "${task.title}".`,
+        NotificationType.TASK_ASSIGNED,
+        taskId,
+      ).catch((err) => {
+        console.error('Failed to create notification for task assignment:', err);
       });
 
       // 2. Send email notification using pre-fetched user details

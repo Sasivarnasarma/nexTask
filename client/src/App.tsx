@@ -12,10 +12,13 @@ import { ToastContainer } from './components/ui/Toast';
 import './index.css';
 import { Calendar } from './pages/Calendar';
 import { Dashboard } from './pages/Dashboard';
+import MessagesPage from './pages/MessagesPage';
 import { Settings } from './pages/Settings';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import ForceResetPage from './pages/auth/ForceResetPage';
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import LoginPage from './pages/auth/LoginPage';
+import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 import ProfilePage from './pages/profile/ProfilePage';
 import { useAuthStore } from './store/auth.store';
 
@@ -64,6 +67,7 @@ const DashboardLayout: React.FC = () => {
           <Routes>
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="calendar" element={<Calendar />} />
+            <Route path="messages" element={<MessagesPage />} />
             <Route path="admin" element={<AdminDashboard />} />
             <Route path="profile" element={<ProfilePage />} />
             <Route path="settings" element={<Settings />} />
@@ -150,6 +154,22 @@ const App: React.FC = () => {
               element={
                 <RedirectIfAuthenticated>
                   <LoginPage />
+                </RedirectIfAuthenticated>
+              }
+            />
+            <Route
+              path="/forgot-password"
+              element={
+                <RedirectIfAuthenticated>
+                  <ForgotPasswordPage />
+                </RedirectIfAuthenticated>
+              }
+            />
+            <Route
+              path="/reset-password"
+              element={
+                <RedirectIfAuthenticated>
+                  <ResetPasswordPage />
                 </RedirectIfAuthenticated>
               }
             />

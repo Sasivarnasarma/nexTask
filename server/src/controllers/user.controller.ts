@@ -1,4 +1,5 @@
 import {
+  PaginatedUsersResponseWrapper,
   ProjectListResponse,
   UserActivityListResponse,
   UserCreateResponse,
@@ -136,7 +137,7 @@ export class UserController extends Controller {
     @Query() page: number = 1,
     @Query() limit: number = 10,
     @Query() search?: string,
-  ): Promise<UserListResponse> {
+  ): Promise<PaginatedUsersResponseWrapper> {
     const result = await this.userService.listUsers(page, limit, search);
     return successResponse('Users list retrieved successfully.', result);
   }
@@ -228,6 +229,20 @@ export class UserController extends Controller {
     const { userId: actorId } = (request as any).user;
     await this.userService.deleteUser(id, actorId);
     return successResponse('User deleted successfully.', null);
+  }
+
+  /**
+   * Triggers a mandatory password reset on next login (Admin Only)
+   */
+  @Post('{id}/reset-password')
+  @Security('jwt', ['global:admin'])
+  public async requestPasswordReset(
+    @Path() id: string,
+    @Request() request: ExRequest,
+  ): Promise<VoidResponse> {
+    const { userId: actorId } = (request as any).user;
+    await this.userService.adminResetPassword(id, actorId);
+    return successResponse('Password reset requested and notification emailed successfully.', null);
   }
 
   /**

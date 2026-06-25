@@ -1,9 +1,9 @@
 import { CreateAttachmentRequest, Comment as SharedComment } from '@nextask/types';
-import { Attachment } from '@prisma/client';
+import { Attachment, NotificationType } from '@prisma/client';
 
 import { prisma } from '../lib/prisma';
 import { ApiError } from '../utils/apiError.util';
-import { PushService } from './push.service';
+import { NotificationService } from './notification.service';
 import { deleteFile, generateDownloadUrl } from './s3.service';
 
 export const postComment = async (
@@ -78,23 +78,56 @@ export const postComment = async (
     };
   });
 
-  // Send push notification to all assigned users (except the author of the comment)
-  const assignments = await prisma.taskAssignment.findMany({
-    where: { taskId },
-    select: { userId: true },
+  // Send push notification to all assigned users, project owner, and project managers (except the author)
+  const taskWithProject = await prisma.task.findUnique({
+    where: { id: taskId },
+    select: {
+      title: true,
+      project: {
+        select: {
+          name: true,
+          ownerId: true,
+          members: {
+            where: { role: 'PROJECT_MANAGER' },
+            select: { userId: true },
+          },
+        },
+      },
+    },
   });
 
-  const author = comment.author;
-  const authorName = author?.name || author?.email || 'A teammate';
+  if (taskWithProject) {
+    const assignments = await prisma.taskAssignment.findMany({
+      where: { taskId },
+      select: { userId: true },
+    });
 
-  for (const assign of assignments) {
-    if (assign.userId !== userId) {
-      PushService.sendNotificationToUser(assign.userId, {
-        title: 'New Comment on Task',
-        body: `${authorName} commented: "${content.substring(0, 60)}${content.length > 60 ? '...' : ''}"`,
-        data: { url: `/tasks/${taskId}` },
-      }).catch((err) => {
-        console.error('Failed to dispatch comment push notification:', err);
+    const recipientIds = new Set<string>();
+
+    // 1. Add assignees
+    assignments.forEach((a) => recipientIds.add(a.userId));
+
+    // 2. Add project owner
+    recipientIds.add(taskWithProject.project.ownerId);
+
+    // 3. Add project managers
+    taskWithProject.project.members.forEach((m) => recipientIds.add(m.userId));
+
+    // 4. Exclude the comment author
+    recipientIds.delete(userId);
+
+    const author = comment.author;
+    const authorName = author?.name || author?.email || 'A teammate';
+    const truncatedContent = content.substring(0, 40) + (content.length > 40 ? '...' : '');
+
+    for (const recipientId of recipientIds) {
+      NotificationService.createNotification(
+        recipientId,
+        `${authorName} commented on task "${taskWithProject.title}": "${truncatedContent}"`,
+        NotificationType.COMMENT_ADDED,
+        taskId,
+      ).catch((err) => {
+        console.error('Failed to dispatch comment notification:', err);
       });
     }
   }

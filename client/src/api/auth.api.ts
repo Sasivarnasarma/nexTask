@@ -1,4 +1,10 @@
-import { ApiResponse, LoginRequest, LoginResponse, PasswordResetRequest } from '@nextask/types';
+import {
+  ApiResponse,
+  ForgotPasswordResetRequest,
+  LoginRequest,
+  LoginResponse,
+  PasswordResetRequest,
+} from '@nextask/types';
 
 import apiClient from './client';
 
@@ -34,4 +40,12 @@ export async function refreshSession(): Promise<LoginResponse> {
     throw new Error('Refresh session response payload is missing.');
   }
   return data.data;
+}
+
+export async function forgotPassword(email: string): Promise<void> {
+  await apiClient.post<ApiResponse<null>>('/auth/forgot-password', { email });
+}
+
+export async function selfResetPassword(payload: ForgotPasswordResetRequest): Promise<void> {
+  await apiClient.post<ApiResponse<null>>('/auth/forgot-password/reset', payload);
 }

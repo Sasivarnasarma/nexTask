@@ -27,6 +27,8 @@ model User {
   comments           Comment[]
   attachments        Attachment[]
   taskActivities     TaskActivity[]
+  messages           Message[]
+  messageAttachments MessageAttachment[]
 }
 
 model Project {
@@ -43,6 +45,7 @@ model Project {
   owner       User           @relation("ProjectOwner", fields: [ownerId], references: [id])
   members     ProjectMember[]
   tasks       Task[]
+  messages    Message[]
 }
 
 model ProjectMember {
@@ -175,6 +178,41 @@ model TaskActivity {
   @@index([userId])
 }
 
+model Message {
+  id          String              @id @default(uuid())
+  content     String
+  createdAt   DateTime            @default(now())
+  attachments MessageAttachment[]
+
+  // Relations
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  senderId  String
+  sender    User    @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([senderId])
+}
+
+model MessageAttachment {
+  id           String   @id @default(uuid())
+  filename     String
+  fileKey      String
+  mimeType     String
+  fileSize     Int
+  createdAt    DateTime @default(now())
+
+  // Relations
+  messageId    String
+  message      Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  uploadedById String
+  uploadedBy   User     @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+
+  @@index([messageId])
+  @@index([uploadedById])
+}
+
+
 enum Role {
   ADMIN
   PROJECT_MANAGER
@@ -210,6 +248,8 @@ enum NotificationType {
   DEADLINE_ALERT
   COMMENT_ADDED
   ADMIN_UPDATE
+  CHAT_MESSAGE
+  PROJECT_ADDED
 }
 
 enum ActivityType {
