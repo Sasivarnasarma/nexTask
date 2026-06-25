@@ -380,9 +380,6 @@
 				"properties": {
 					"user": {
 						"$ref": "#/components/schemas/User"
-					},
-					"tempPassword": {
-						"type": "string"
 					}
 				},
 				"required": [

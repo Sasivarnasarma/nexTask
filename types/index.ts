@@ -374,7 +374,6 @@ export interface VoidResponse extends ApiResponse<null> {}
 export interface UserProfileResponse extends ApiResponse<UserProfile> {}
 export interface CreateUserResponse {
   user: User;
-  tempPassword?: string;
 }
 export interface UserCreateResponse extends ApiResponse<CreateUserResponse> {}
 export interface PaginatedUsersResponse {

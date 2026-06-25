@@ -271,7 +271,6 @@ export class UserService {
         createdAt: newUser.createdAt,
         updatedAt: newUser.updatedAt,
       },
-      tempPassword,
     };
   }
 
@@ -353,6 +352,13 @@ export class UserService {
       },
     });
 
+    // Trigger deactivation email
+    try {
+      await this.mailService.sendUserStatusChangedEmail(user.email, user.name, false);
+    } catch (mailError) {
+      console.error(`[MAIL_ERROR] Failed to dispatch deactivation email to ${user.email}:`, mailError);
+    }
+
     return {
       id: updated.id,
       email: updated.email,
@@ -387,6 +393,13 @@ export class UserService {
         description: `Activated user ${user.email}`,
       },
     });
+
+    // Trigger activation email
+    try {
+      await this.mailService.sendUserStatusChangedEmail(user.email, user.name, true);
+    } catch (mailError) {
+      console.error(`[MAIL_ERROR] Failed to dispatch activation email to ${user.email}:`, mailError);
+    }
 
     return {
       id: updated.id,
@@ -453,6 +466,13 @@ export class UserService {
         description: `Deleted user ${user.email}`,
       },
     });
+
+    // Trigger deletion email
+    try {
+      await this.mailService.sendUserRemovedEmail(user.email, user.name);
+    } catch (mailError) {
+      console.error(`[MAIL_ERROR] Failed to dispatch user removed email to ${user.email}:`, mailError);
+    }
   }
 
   /**

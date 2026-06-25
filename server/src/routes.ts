@@ -178,7 +178,6 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "user": {"ref":"User","required":true},
-            "tempPassword": {"dataType":"string"},
         },
         "additionalProperties": false,
     },
