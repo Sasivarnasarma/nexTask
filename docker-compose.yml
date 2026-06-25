@@ -1,24 +1,33 @@
-version: '3.8'
-
 services:
   server:
     build:
       context: .
-      dockerfile: server/Dockerfile
+      dockerfile: docker/server/Dockerfile
+
     container_name: nextask_server
-    ports:
-      - "3000:3000"
+
+    restart: unless-stopped
+
     env_file:
-      - server/.env
+      - server/.env.production
+
+    ports:
+      - '3000:3000'
 
   client:
     build:
       context: .
-      dockerfile: client/Dockerfile
+      dockerfile: docker/client/Dockerfile
+
     container_name: nextask_client
-    ports:
-      - "8080:80"
+
+    restart: unless-stopped
+
     env_file:
-      - client/.env
+      - client/.env.production
+
+    ports:
+      - '80:80'
+
     depends_on:
       - server
