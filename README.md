@@ -1,4 +1,4 @@
-# nexTask — Collaborative Task Management System
+# 🚀 nexTask — Collaborative Task Management System
 
 > A full-stack, real-time, type-safe Task Management System built with a modern TypeScript monorepo architecture.  
 > Developed as part of **INTE 21323 — Web Application Development Group Project**.
@@ -7,108 +7,116 @@
 
 ## 📌 Table of Contents
 
-- [Overview](#overview)
-- [Live Demo](#live-demo)
-- [Tech Stack](#tech-stack)
-- [Architecture](#architecture)
-- [Features](#features)
-- [Project Structure](#project-structure)
-- [Prerequisites](#prerequisites)
-- [Installation & Setup](#installation--setup)
-- [Environment Variables](#environment-variables)
-- [Running the Application](#running-the-application)
-- [Docker Orchestration](#docker-orchestration)
-- [API Documentation](#api-documentation)
-- [Database Design](#database-design)
-- [Security](#security)
-- [Testing](#testing)
-- [CI/CD Pipeline](#cicd-pipeline)
-- [Team Contributions](#team-contributions)
+- [Overview](#-overview)
+- [Live Demo](#-live-demo)
+- [Tech Stack](#-tech-stack)
+- [Architecture & Request Flows](#-architecture--request-flows)
+- [Features](#-features)
+- [Project Structure](#-project-structure)
+- [Prerequisites](#-prerequisites)
+- [Setup & Installation](#-setup--installation)
+- [Environment Variables](#-environment-variables)
+- [Running the Application](#-running-the-application)
+- [Docker Orchestration](#-docker-orchestration)
+- [API Usage & Swagger Documentation](#-api-usage--swagger-documentation)
+- [Database Design](#-database-design)
+- [Security Model](#-security-model)
+- [Testing Suite](#-testing-suite)
+- [CI/CD Pipeline](#-cicd-pipeline)
+- [Team Member Contributions](#-team-member-contributions)
+- [Project Deliverables & Documentation](#-project-deliverables--documentation)
 
 ---
 
-## Overview
+## 🎯 Overview
 
-**nexTask** is a professional, full-stack task management platform designed for teams to plan, organize, track, and complete work collaboratively. It features secure role-based access control (RBAC), real-time WebSocket-driven notifications, a live project chat system, and cloud-based file attachments — all assembled inside a **pnpm monorepo workspace** with a fully type-safe TypeScript codebase shared across the frontend and backend.
+**nexTask** is a professional, full-stack, real-time task management platform designed for teams to plan, organize, track, and complete work collaboratively. It features secure Role-Based Access Control (RBAC), real-time WebSocket-driven notifications, a live project chat system, and cloud-based file attachments — all assembled inside a **pnpm monorepo workspace** with a fully type-safe TypeScript codebase shared across the frontend and backend.
 
-Key architectural highlights:
+### Key Architectural Highlights
 
-- **Shared type contracts** via a `@nextask/types` package — zero duplication between client and server
-- **TSOA** auto-generates OpenAPI/Swagger documentation directly from controller decorators
-- **Prisma ORM** with PostgreSQL for a strongly-typed data layer
-- **Socket.IO** for real-time task updates, live chat, and push notifications
-- **AWS S3 presigned URLs** for secure, direct-to-storage file uploads
-
----
-
-## Live Demo
-
-| Service | URL |
-|---|---|
-| Frontend | `https://nextask.sasivarnasarma.me/login` |
-
-
-
+- **Shared Type Contracts** via a `@nextask/types` workspace package — ensuring zero duplication of schemas and interfaces between the client and server.
+- **TSOA Integration** to automatically generate OpenAPI/Swagger routing and documentation directly from controller TypeScript decorators.
+- **Prisma ORM** with PostgreSQL for a strongly-typed, migrateable, and secure data access layer.
+- **Socket.IO** for low-latency task updates, live chat, and push notifications.
+- **AWS S3 Presigned URLs** allowing secure, direct-to-storage file uploads from the browser.
 
 ---
 
-## Tech Stack
+## 🌐 Live Demo
+
+| Service                  | URL                                                                           |
+| :----------------------- | :---------------------------------------------------------------------------- |
+| **Frontend Application** | [https://nextask.sasivarnasarma.me/login](https://nextask.sasivarnasarma.me/) |
+
+---
+
+## 🛠 Tech Stack
 
 ### Frontend (`client/`)
 
-| Technology | Purpose |
-|---|---|
-| React 19 + Vite | UI framework and build tool |
-| TypeScript | Type safety |
-| Tailwind CSS + shadcn/ui | Styling and UI components |
-| Zustand | Global state management |
-| TanStack React Query | Server state, caching, and data fetching |
-| Axios | HTTP client with JWT interceptors |
-| Socket.IO Client | Real-time communication |
-| dnd-kit | Drag-and-drop Kanban board |
-| Recharts | Dashboard charts and analytics |
+| Technology                                             | Purpose                                                           |
+| :----------------------------------------------------- | :---------------------------------------------------------------- |
+| **[React 19](https://react.dev/)**                     | UI library for building responsive interfaces                     |
+| **[Vite 8](https://vitejs.dev/)**                      | Fast build tool and development server                            |
+| **[TypeScript 6](https://www.typescriptlang.org/)**    | Type-safety and compilation checks                                |
+| **[Tailwind CSS 4](https://tailwindcss.com/)**         | Utility-first CSS framework for clean, modern styling             |
+| **[Radix UI](https://www.radix-ui.com/)**              | Accessible, headless UI primitives (Dialog, Dropdown, ScrollArea) |
+| **[TanStack React Query](https://tanstack.com/query)** | Server state management, caching, and optimistic UI updates       |
+| **[Zustand](https://zustand.docs.pmnd.rs/)**           | Lightweight client-side global state management                   |
+| **[React Router 7](https://reactrouter.com/)**         | Client-side routing with route protection guards                  |
+| **[Axios](https://axios-http.com/)**                   | HTTP client with automatic JWT injection and error interceptors   |
+| **[Recharts](https://recharts.org/)**                  | Interactive charting library for analytics dashboards             |
+| **[Lucide React](https://lucide.dev/)**                | Clean and consistent modern vector icon set                       |
+| **[@dnd-kit](https://dndkit.com/)**                    | Flexible drag-and-drop primitives for the Kanban board            |
+| **[Socket.IO Client](https://socket.io/)**             | Real-time WebSocket connection to the server                      |
 
 ### Backend (`server/`)
 
-| Technology | Purpose |
-|---|---|
-| Node.js + Express 5 | Server runtime and HTTP framework |
-| TypeScript | Type safety |
-| TSOA | Controller-based routing + auto OpenAPI generation |
-| Prisma 7 ORM | Type-safe database access layer |
-| PostgreSQL | Relational database |
-| Socket.IO | WebSocket server for real-time features |
-| Argon2 | Secure password hashing |
-| JWT | Stateless authentication |
-| Zod | Runtime input validation |
-| Nodemailer | Transactional email |
-| AWS SDK (S3) | Cloud file storage with presigned URLs |
-| Web Push | Browser push notification delivery |
+| Technology                                                                  | Purpose                                                                |
+| :-------------------------------------------------------------------------- | :--------------------------------------------------------------------- |
+| **[Node.js](https://nodejs.org/)**                                          | JavaScript runtime environment                                         |
+| **[Express 5](https://expressjs.com/)**                                     | Web application framework for REST APIs                                |
+| **[TypeScript 6](https://www.typescriptlang.org/)**                         | Strong static typing for robust backend code                           |
+| **[PostgreSQL](https://www.postgresql.org/)**                               | High-performance relational database                                   |
+| **[Prisma ORM](https://www.prisma.io/)**                                    | Type-safe database client and automated migration tool                 |
+| **[TSOA](https://tsoa-community.github.io/docs/)**                          | Controller-based routing and automatic Swagger/OpenAPI generation      |
+| **[Zod 4](https://zod.dev/)**                                               | Runtime request body, query, and path parameter validation             |
+| **[JSON Web Tokens](https://jwt.io/)**                                      | Stateless, secure user authentication and authorization                |
+| **[Argon2](https://github.com/ranisalt/node-argon2)**                       | Industry-standard password hashing algorithm                           |
+| **[Socket.IO](https://socket.io/)**                                         | WebSocket server for real-time notifications and chat messaging        |
+| **[Nodemailer](https://nodemailer.com/)**                                   | Transactional SMTP email delivery for onboarding and alerts            |
+| **[web-push](https://github.com/web-push-libs/web-push)**                   | VAPID-based browser push notification delivery                         |
+| **[AWS SDK (S3)](https://aws.amazon.com/sdk-for-javascript/)**              | Secure S3-compatible cloud storage (AWS, R2, MinIO) via presigned URLs |
+| **[Helmet](https://helmetjs.github.io/)**                                   | Security-related HTTP headers setup                                    |
+| **[Swagger UI Express](https://github.com/scottie1984/swagger-ui-express)** | Embedded interactive API sandbox documentation                         |
 
-### Shared (`types/`)
+### Shared Contracts (`types/`)
 
-| Technology | Purpose |
-|---|---|
-| `@nextask/types` | Shared TypeScript interfaces across client and server |
+| Technology           | Purpose                                                                              |
+| :------------------- | :----------------------------------------------------------------------------------- |
+| **`@nextask/types`** | Monorepo-internal workspace package housing shared interfaces, enums, and validators |
 
-### DevOps & Tooling
+### DevOps & Infrastructure
 
-| Technology | Purpose |
-|---|---|
-| pnpm Workspaces | Monorepo package management |
-| Docker + Docker Compose | Containerization and orchestration |
-| ESLint + Prettier | Code linting and formatting |
+| Technology                                             | Purpose                                                            |
+| :----------------------------------------------------- | :----------------------------------------------------------------- |
+| **[pnpm Workspaces](https://pnpm.io/workspaces)**      | High-performance monorepo dependency management                    |
+| **[Docker & Docker Compose](https://www.docker.com/)** | Containerization and multi-service local environment orchestration |
+| **[ESLint](https://eslint.org/)**                      | Strict code linting and code quality checks                        |
+| **[Prettier](https://prettier.io/)**                   | Automated code formatter                                           |
 
 ---
 
-## Architecture
+## 🏗 Architecture & Request Flows
 
-nexTask follows a clean layered architecture across a monorepo:
+nexTask is built upon a **clean, layered architecture** ensuring strict separation of concerns across a modular monorepo.
+
+### Structural Architecture Block Diagram
 
 ```
 Browser
   │
-  │  React UI · Zustand stores · React Query · Axios
+  │  React UI · Zustand stores · React Query · Axios Interceptors
   ▼
 Client API Layer  ──────────────────────────────┐
   │                                             │
@@ -119,515 +127,645 @@ Express Server ──── TSOA Routes ─────────────�
   ▼
 Controllers  →  Services  →  Prisma ORM  →  PostgreSQL
                     │
-                    ├──  MailService  →  SMTP
-                    ├──  S3Service    →  AWS S3
+                    ├──  MailService  →  SMTP Email
+                    ├──  S3Service    →  AWS S3 Bucket
                     └──  PushService  →  Web Push API
 ```
 
-**Request lifecycle:**
+### HTTP Request Lifecycle Flow
 
 ```
 HTTP Request
-  → Express middleware (helmet, CORS, JSON)
-  → TSOA generated route
-  → Authentication middleware (JWT verification)
-  → Controller method
-  → Service method (business logic)
-  → Prisma query
-  → PostgreSQL
-  → ApiResponse JSON
+  → Express middleware (helmet, CORS, JSON parser)
+  → TSOA generated route mapping
+  → Authentication middleware (JWT decryption & RBAC check)
+  → Controller handler
+  → Service method (encapsulated business logic)
+  → Prisma query compilation
+  → PostgreSQL Database
+  → Standardized ApiResponse JSON
 ```
 
-**Real-time notification flow:**
+### Real-Time Notification Flow
 
 ```
 Business event (task assigned, status changed, comment added)
   → NotificationService.createNotification()
   → Writes Notification row to DB
-  → Emits Socket.IO event to user's private room
-  → May trigger Web Push for offline users
+  → Emits Socket.IO event to target user's private socket room
+  → Triggers Web Push API for offline/unconnected users
 ```
 
 ---
 
-## Features
+## 🎨 Features
 
-### Authentication & Session Management
-- Email/password login with JWT-based session management
-- Secure HTTP-only storage with Axios JWT interceptors for automatic header injection
-- Token expiration and refresh mechanism
-- Forced password reset on first login
-- Forgot password / email-based reset flow
+### Feature Summary Table
 
-### Role-Based Access Control (RBAC)
+| Feature                         | Description                                                                                                                    |
+| :------------------------------ | :----------------------------------------------------------------------------------------------------------------------------- |
+| **Authentication & Onboarding** | JWT-based auth with Argon2 password hashing, first-login forced password reset, and forgot-password email flow                 |
+| **Role-Based Access Control**   | Hybrid authorization with global roles (Admin/PM) and project-level membership roles                                           |
+| **Project Management**          | Create, update, complete, archive, and delete projects with member management                                                  |
+| **Task Management**             | Full CRUD with priority levels (Low/Medium/High), status tracking (Todo/In Progress/Done), tags, and drag-and-drop positioning |
+| **Kanban Board**                | Interactive drag-and-drop board with real-time updates across connected clients                                                |
+| **Multi-Assignee Tasks**        | Assign, unassign, and bulk-assign team members to tasks                                                                        |
+| **Comments & Attachments**      | Threaded comment system with S3-based file upload/download (presigned URLs)                                                    |
+| **Real-Time Updates**           | Socket.IO integration with project-scoped rooms for live task/comment/assignment events                                        |
+| **Email Notifications**         | SMTP-based templated HTML emails for onboarding, password resets, task assignments, and membership changes                     |
+| **Web Push Notifications**      | VAPID-based browser push notifications for task events                                                                         |
+| **Admin Dashboard**             | User management, role assignment, user activation/deactivation, and audit activity logs                                        |
+| **Analytics & Reporting**       | Project status charts, priority/status distribution metrics, and productivity insights                                         |
+| **Search & Filtering**          | Full-text task search, filtering by status/priority/tags, and team member autocomplete                                         |
+| **Calendar View**               | Visual calendar displaying tasks by due date                                                                                   |
+| **Validation**                  | Dual-layer validation with Zod schemas (backend) and real-time form validation (frontend)                                      |
 
-| Role | Permissions |
-|---|---|
-| **Administrator** | Full system access — manage users, assign roles, system configuration |
-| **Project Manager** | Create and manage projects/tasks, assign members, monitor progress |
-| **Collaborator** | View assigned tasks, update task status, add comments and attachments |
+### Detailed Feature Breakdown
 
-- Protected routes enforce `401 Unauthorized` and `403 Forbidden` responses
-- TSOA `@Security` decorators apply role guards at the controller level
+#### 🔐 Authentication & Session Management
 
-### User Management *(Admin only)*
-- Create, view, update, activate/deactivate, and delete users
-- Role assignment and searchable/filterable user list
-- New user onboarding via automated email with temporary password
-- Password policy enforcement (length and complexity)
-- Secure password storage with **Argon2** hashing
+- Secure email/password login using state-of-the-art **Argon2** hashing.
+- Stateless session management with dual-token JWT (Access Token & Refresh Token).
+- Axios interceptors automatically inject access tokens and handle token refreshment or redirection upon expiry.
+- First-login forced password reset ensuring newly onboarded users change temporary passwords.
+- Secure, email-based password recovery flow (Forgot Password).
 
-### Project Management
-- Create, view, update, complete, archive, and delete projects
-- Add and manage project members with project-level roles
-- Bulk task assignment within projects
+#### 🛡️ Role-Based Access Control (RBAC)
 
-### Task Management
-- Full task CRUD with title, description, assigned users, due date, priority, and status
-- Priority levels: Low, Medium, High
-- Status workflow: To Do → In Progress → Completed
-- Task views: table, board, and **Kanban drag-and-drop**
-- Filtering and sorting capabilities
-- Task activity log tracking all changes
+- Hybrid authorization model combining Global Roles (Admin, Project Manager, Collaborator) with Project-Specific Roles (Project Manager, Collaborator).
+- Access control enforced at the controller layer via TSOA `@Security` decorators and route guards on the frontend.
+- API endpoints respond with correct HTTP codes (`401 Unauthorized` or `403 Forbidden`) upon privilege violation.
 
-### Collaboration
-- Task-level comments with attachment support
-- **Live project chat** powered by Socket.IO
-- In-app notification panel (role-specific, user-specific)
-- Browser **Web Push notifications** for offline users
-- Notifications stored and delivered on reconnection
+#### 👥 User Management _(Admin Only)_
 
-### File Management
-- Presigned AWS S3 upload URLs — files upload directly from the browser to S3
-- Attachment records managed server-side
-- Supports task attachments and chat message attachments
+- Dedicated Admin Dashboard to create, read, update, activate/deactivate, and delete users.
+- New user onboarding via automated email containing their temporary password.
+- Password complexity policy validation on both frontend and backend.
+- Full system audit logs showing admin and user actions.
 
-### Real-Time (WebSocket)
-- Socket.IO with JWT authentication on connection
-- Private user rooms for personal notifications
-- Project rooms with DB-verified access checks before joining
-- Live task status updates, project changes, and assignment alerts
+#### 📁 Project & Task Management
 
-### Security
-- **Argon2** password hashing (never plaintext)
-- **Helmet.js** HTTP security headers
-- **CORS** configured per environment
-- Zod input validation on all API endpoints
-- Parameterized queries via Prisma ORM (prevents SQL injection)
-- Input sanitization (prevents XSS)
-- OWASP Top 10 best practices applied
-- HTTPS enforced in production (WSS for WebSocket)
-- Role-enforced authorization on every protected route
+- Create, view, update, complete, archive, and delete projects.
+- Manage project members and assign project-level roles dynamically.
+- Full task CRUD (Title, Description, Assignees, Due Date, Priority, Status, Tags, Position).
+- Multiple visual representations of tasks: Interactive Kanban Board, Filterable Data Table, and Due-Date Calendar.
+- Fluid drag-and-drop card movement on the Kanban board (powered by `dnd-kit`).
+- Task activity logs tracking history of modifications made to any given task.
+
+#### 💬 Real-Time Collaboration & Communication
+
+- Project-scoped live chat rooms allowing team members to communicate in real-time.
+- Socket.IO authenticated connections using JWTs.
+- In-app notification panel displaying alerts for status changes, comments, and assignments.
+- Integration with the browser's Web Push API allowing offline users to receive browser push notifications.
+
+#### ☁️ Cloud File Management
+
+- S3-compatible cloud storage integration (AWS S3, Cloudflare R2, MinIO).
+- Secure client-to-cloud file uploads via S3 Presigned URLs, preventing file streaming through the application server and optimizing backend performance.
+- Attachment records tracked database-side and linked to tasks and chat messages.
 
 ---
 
-## Project Structure
+## 📁 Project Structure
 
 ```text
 nexTask/
+├── client/                          # Frontend React application
+│   ├── public/                      # Static assets (logo, icons, service worker)
+│   │   └── sw.js                    # Service worker for Web Push notifications
+│   ├── src/
+│   │   ├── api/                     # API client modules (one per resource)
+│   │   │   ├── client.ts            # Axios instance with JWT & error interceptors
+│   │   │   ├── auth.api.ts          # Login, reset password, forgot password
+│   │   │   ├── projects.api.ts      # Project CRUD operations
+│   │   │   ├── tasks.api.ts         # Task CRUD operations
+│   │   │   ├── comments.api.ts      # Comment operations
+│   │   │   ├── attachments.api.ts   # File upload/download
+│   │   │   ├── users.api.ts         # User management (admin)
+│   │   │   ├── profile.api.ts       # User profile operations
+│   │   │   ├── notifications.api.ts # Notification operations
+│   │   │   └── messages.api.ts      # Project chat messages
+│   │   ├── components/              # Reusable UI components
+│   │   │   ├── auth/                # Authentication guards (RouteGuard)
+│   │   │   ├── tasks/               # Task views (Board, Table, Calendar)
+│   │   │   └── ui/                  # Base UI primitives (Button, Input, Toast, Dialog, etc.)
+│   │   ├── hooks/                   # Custom React hooks
+│   │   │   ├── usePasswordStrength.ts
+│   │   │   ├── useTheme.ts
+│   │   │   └── useWebPush.ts
+│   │   ├── lib/                     # Utility functions
+│   │   │   ├── apiError.ts          # API error message extraction
+│   │   │   └── utils.ts             # Class name utilities (cn)
+│   │   ├── pages/                   # Route-level page components
+│   │   │   ├── auth/                # Login, ForceReset, ForgotPassword, ResetPassword
+│   │   │   ├── admin/               # Admin dashboard, user management, reports
+│   │   │   ├── pm/                  # Project Manager views (projects, tasks)
+│   │   │   ├── collaborator/        # Collaborator views (tasks, projects)
+│   │   │   └── profile/             # User profile page
+│   │   ├── store/                   # Zustand state stores
+│   │   │   ├── auth.store.ts        # Authentication state & JWT
+│   │   │   ├── project.store.ts     # Active project context
+│   │   │   └── toast.store.ts       # Toast notification queue
+│   │   ├── App.tsx                  # Root component with routing
+│   │   ├── main.tsx                 # Application entry point
+│   │   └── index.css                # Global styles & design tokens
+│   ├── index.html                   # HTML entry point
+│   ├── tailwind.config.js           # Tailwind CSS configuration
+│   ├── vite.config.ts               # Vite build configuration
+│   └── package.json
 │
-├── client/                        # React frontend
-│   ├── public/
-│   │   └── sw.js                  # Service worker for Web Push
-│   └── src/
-│       ├── api/                   # Feature-specific Axios API wrappers
-│       │   ├── auth.api.ts
-│       │   ├── tasks.api.ts
-│       │   ├── projects.api.ts
-│       │   ├── users.api.ts
-│       │   ├── comments.api.ts
-│       │   ├── attachments.api.ts
-│       │   ├── messages.api.ts
-│       │   ├── notifications.api.ts
-│       │   └── profile.api.ts
-│       ├── components/            # Shared UI components
-│       │   ├── ui/                # Radix/shadcn-style primitives
-│       │   ├── auth/              # Route guards
-│       │   ├── Navbar.tsx
-│       │   ├── Sidebar.tsx
-│       │   ├── NotificationPanel.tsx
-│       │   └── PushNotificationPrompt.tsx
-│       ├── hooks/                 # Reusable React hooks
-│       ├── lib/                   # Utility helpers
-│       ├── pages/                 # Route-level screens
-│       │   ├── auth/              # Login, reset password, forgot password
-│       │   ├── Dashboard.tsx      # Main task board
-│       │   ├── MessagesPage.tsx   # Live project chat
-│       │   └── admin/             # Admin user management
-│       ├── store/                 # Zustand global state
-│       │   ├── auth.store.ts
-│       │   ├── project.store.ts
-│       │   └── toast.store.ts
-│       ├── App.tsx                # Routing tree, providers, guards
-│       └── main.tsx               # React entry point
-│
-├── server/                        # Express backend
+├── server/                          # Backend Express API
 │   ├── prisma/
-│   │   └── schema.prisma          # Database schema (source of truth)
-│   └── src/
-│       ├── controllers/           # TSOA REST controllers
-│       │   ├── auth.controller.ts
-│       │   ├── user.controller.ts
-│       │   ├── project.controller.ts
-│       │   ├── project-member.controller.ts
-│       │   ├── task.controller.ts
-│       │   ├── task-assignment.controller.ts
-│       │   ├── comment.controller.ts
-│       │   ├── attachment.controller.ts
-│       │   ├── message.controller.ts
-│       │   ├── notification.controller.ts
-│       │   ├── push.controller.ts
-│       │   └── system.controller.ts
-│       ├── services/              # Business logic and DB access
-│       ├── middlewares/           # JWT auth, role guards
-│       ├── schemas/               # Zod validation schemas
-│       ├── utils/                 # JWT helpers, response wrappers
-│       ├── lib/
-│       │   ├── prisma.ts          # Prisma client singleton
-│       │   └── socket.ts          # Socket.IO server setup
-│       ├── templates/             # Email templates (Nodemailer)
-│       ├── scripts/               # Seed, VAPID key, template scripts
-│       ├── routes.ts              # TSOA generated routes (auto-generated)
-│       ├── swagger.json           # TSOA generated OpenAPI spec (auto-generated)
-│       └── index.ts               # Server entry point
+│   │   └── schema.prisma            # Database schema definition
+│   ├── src/
+│   │   ├── controllers/             # TSOA route controllers (one per resource)
+│   │   │   ├── auth.controller.ts   # Login, password reset, forgot password
+│   │   │   ├── project.controller.ts
+│   │   │   ├── project-member.controller.ts
+│   │   │   ├── task.controller.ts
+│   │   │   ├── task-assignment.controller.ts
+│   │   │   ├── comment.controller.ts
+│   │   │   ├── attachment.controller.ts
+│   │   │   ├── attachment-upload.controller.ts
+│   │   │   ├── user.controller.ts
+│   │   │   ├── notification.controller.ts
+│   │   │   ├── message.controller.ts
+│   │   │   ├── push.controller.ts
+│   │   │   ├── admin.controller.ts
+│   │   │   └── system.controller.ts
+│   │   ├── services/                # Business logic layer
+│   │   │   ├── auth.service.ts      # Authentication & password management
+│   │   │   ├── project.service.ts
+│   │   │   ├── project-member.service.ts
+│   │   │   ├── task.service.ts
+│   │   │   ├── task-assignment.service.ts
+│   │   │   ├── comment.service.ts
+│   │   │   ├── attachment.service.ts
+│   │   │   ├── user.service.ts
+│   │   │   ├── notification.service.ts
+│   │   │   ├── message.service.ts
+│   │   │   ├── mail.service.ts      # SMTP email delivery
+│   │   │   ├── push.service.ts      # Web push notification delivery
+│   │   │   ├── s3.service.ts        # S3-compatible object storage
+│   │   │   └── permission.service.ts # RBAC permission checks
+│   │   ├── schemas/                 # Zod validation schemas
+│   │   │   ├── user.schema.ts
+│   │   │   ├── project.schema.ts
+│   │   │   ├── task.schema.ts
+│   │   │   ├── comment.schema.ts
+│   │   │   ├── attachment.schema.ts
+│   │   │   ├── membership.schema.ts
+│   │   │   └── task-assignment.schema.ts
+│   │   ├── middlewares/             # Express middleware
+│   │   │   ├── authentication.ts    # JWT verification & RBAC scope checks
+│   │   │   └── validate.middleware.ts # Zod request validation
+│   │   ├── utils/                   # Utility functions
+│   │   │   ├── apiError.util.ts     # Custom ApiError class
+│   │   │   ├── response.util.ts     # Standardized API response helpers
+│   │   │   ├── hash.util.ts         # Argon2 password hashing
+│   │   │   └── jwt.util.ts          # JWT generation & verification
+│   │   ├── lib/                     # Core library modules
+│   │   │   ├── prisma.ts            # Prisma client singleton
+│   │   │   └── socket.ts            # Socket.IO server & room management
+│   │   ├── templates/               # HTML email templates
+│   │   ├── scripts/                 # Utility scripts
+│   │   │   ├── seed.ts              # Database seeder (Admin, PM, Test users)
+│   │   │   ├── generate-vapid.ts    # VAPID key pair generator
+│   │   │   └── copy-templates.js    # Build script for email templates
+│   │   ├── index.ts                 # Server entry point & global error handler
+│   │   ├── routes.ts                # TSOA auto-generated routes
+│   │   └── swagger.json             # TSOA auto-generated OpenAPI spec
+│   ├── tsoa.json                    # TSOA configuration
+│   ├── Dockerfile
+│   └── package.json
 │
-├── types/                         # Shared TypeScript contracts
-│   └── index.ts                   # Users, tasks, projects, auth, responses
+├── types/                           # Shared TypeScript type definitions
+│   └── index.ts                     # Interfaces, enums, API response wrappers
 │
-├── _project-plan/                 # Planning and specification documents
+├── _project-plan/                   # Project planning documents
+│   ├── Project SRS.md               # Software Requirements Specification
+│   ├── Project Tasks.md             # Task distribution & roadmap
+│   └── API Specification.md         # API endpoint specification
 │
-├── package.json                   # Root monorepo scripts
-├── pnpm-workspace.yaml            # Workspace package declarations
-├── tsconfig.json                  # Root TypeScript project references
-├── docker-compose.yml             # Container orchestration
-├── .prettierrc
-└── CONTRIBUTING.md
+├── docker-compose.yml               # Multi-service Docker orchestration
+├── pnpm-workspace.yaml              # Monorepo workspace configuration
+├── package.json                     # Root scripts (dev, build, prod, lint, format)
+├── tsconfig.json                    # Root TypeScript configuration
+├── .prettierrc                      # Prettier formatting rules
+├── .editorconfig                    # Editor configuration
+├── CONTRIBUTING.md                  # Development & contribution guide
+└── README.md                        # Merged readme file
 ```
 
 ---
 
-## Prerequisites
+## 📦 Prerequisites
 
-- **[Node.js](https://nodejs.org/en/)** v18 or higher
-- **[pnpm](https://pnpm.io/installation)** — install globally: `npm install -g pnpm`
-- A running **PostgreSQL** instance (or use the provided `docker-compose.yml`)
-- AWS S3-compatible bucket (for file attachments)
-- SMTP credentials (for transactional email)
+Before installing the application, ensure the following are installed:
+
+- **[Node.js](https://nodejs.org/)** v18 or higher.
+- **[pnpm](https://pnpm.io/installation)** (v8+) — install globally: `npm install -g pnpm`.
+- **[PostgreSQL](https://www.postgresql.org/)** — running database instance (local, Docker container, or cloud database like Supabase).
+- **AWS S3-compatible bucket** (for storing task and chat attachments).
+- **SMTP Credentials** (Gmail App Password, Resend, Sendgrid, etc., for system emails).
 
 ---
 
-## Installation & Setup
+## ⚙️ Setup & Installation
 
-### 1. Clone the repository
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/Sasivarnasarma/nexTask.git
 cd nexTask
 ```
 
-### 2. Install all dependencies
-
-From the root directory, pnpm installs dependencies across all workspace packages:
+### 2. Install Workspace Dependencies
 
 ```bash
 pnpm install
 ```
 
-### 3. Configure environment variables
+### 3. Configure Environment Variables
 
-Navigate to `server/` and create a `.env` file from the sample:
+#### Backend configuration (`server/.env`)
+
+Create the server env file:
 
 ```bash
 cp server/.env.sample server/.env
 ```
 
-Edit `server/.env` with your configuration (see [Environment Variables](#environment-variables) below).
+Open `server/.env` and edit with your custom settings (see the [Environment Variables](#-environment-variables) section below).
 
-Also set the frontend API URL:
+> **Tip:** To generate your required VAPID keys for push notifications, run the key generator script:
+>
+> ```bash
+> pnpm --filter @nextask/server exec ts-node src/scripts/generate-vapid.ts
+> ```
+
+#### Frontend configuration (`client/.env`)
+
+Create the client env file:
 
 ```bash
-# client/.env
-VITE_API_URL=http://localhost:3000
+cp client/.env.sample client/.env
 ```
 
-### 4. Initialize the database schema
+Ensure the API endpoint points to your active backend instance:
+
+```env
+VITE_API_URL="http://localhost:3000"
+```
+
+### 4. Initialize Database Schemas
+
+Generate the Prisma client and push the migrations to your active database:
 
 ```bash
 cd server
+pnpm prisma generate
 npx prisma db push
 ```
 
-To track migration history instead:
+### 5. Seed the Database
+
+Seed the database with standard, out-of-the-box user accounts (Admin, PM, Collaborator):
 
 ```bash
-npx prisma migrate dev --name init
-```
-
-### 5. (Optional) Seed the database
-
-```bash
+# Run from the root directory
 pnpm seed
 ```
 
+#### Seeding Credentials:
+
+| Role                | Email               | Temporary Password |
+| :------------------ | :------------------ | :----------------- |
+| **Admin**           | `admin@example.com` | `ChangeMe!123`     |
+| **Project Manager** | `pm@example.com`    | `Password123!`     |
+| **Collaborator**    | `test@example.com`  | `Temporary!1`      |
+
+> **Note:** Seeded accounts are flagged with `mustResetPassword=true` and will trigger a forced password change upon their first successful login.
+
 ---
 
-## Environment Variables
+## 🔑 Environment Variables
 
-Create `server/.env` with the following variables:
+Create `server/.env` using the template below:
 
 ```env
-# Database
-DATABASE_URL=postgresql://user:password@localhost:5432/nextask
+# Database Connection
+DATABASE_URL="postgresql://username:password@localhost:5432/nextask?schema=public"
 
-# JWT
-JWT_SECRET=your_jwt_secret_key
-JWT_EXPIRES_IN=15m
-JWT_REFRESH_SECRET=your_refresh_secret
-JWT_REFRESH_EXPIRES_IN=7d
-
-# SMTP (email)
-SMTP_HOST=smtp.example.com
-SMTP_PORT=587
-SMTP_USER=your_email@example.com
-SMTP_PASSWORD=your_smtp_password
-SMTP_FROM=noreply@nextask.com
-
-# AWS S3 (file attachments)
-AWS_REGION=ap-southeast-1
-AWS_ACCESS_KEY_ID=your_access_key
-AWS_SECRET_ACCESS_KEY=your_secret_key
-S3_BUCKET_NAME=nextask-attachments
-
-# Web Push (VAPID keys — generate with: pnpm generate:vapid)
-VAPID_PUBLIC_KEY=your_vapid_public_key
-VAPID_PRIVATE_KEY=your_vapid_private_key
-VAPID_SUBJECT=mailto:your_email@example.com
-
-# Server
+# Server Execution Config
 PORT=3000
-NODE_ENV=development
-CORS_ORIGIN=http://localhost:5173
+NODE_ENV="development"
+CORS_ORIGIN="http://localhost:5173"
+
+# JWT Auth Secrets
+JWT_SECRET="your_jwt_access_secret_min_32_characters"
+JWT_EXPIRES_IN="15m"
+JWT_REFRESH_SECRET="your_jwt_refresh_secret_min_32_characters"
+JWT_REFRESH_EXPIRES_IN="7d"
+
+# SMTP Transactional Mail (Nodemailer)
+SMTP_HOST="smtp.gmail.com"
+SMTP_PORT=465
+SMTP_USER="your-email@gmail.com"
+SMTP_PASS="your-16-character-app-password"
+SMTP_SECURE=true
+MAIL_FROM="\"nexTask Notifications\" <your-email@gmail.com>"
+
+# Frontend URL (for email links)
+CLIENT_URL="http://localhost:5173"
+
+# AWS S3 / Cloud Storage Config
+AWS_REGION="us-east-1"
+AWS_ACCESS_KEY_ID="your_aws_s3_access_key_id"
+AWS_SECRET_ACCESS_KEY="your_aws_s3_secret_access_key"
+S3_BUCKET_NAME="your-s3-bucket-name"
+
+# VAPID Web Push Keys
+VAPID_PUBLIC_KEY="your_generated_vapid_public_key"
+VAPID_PRIVATE_KEY="your_generated_vapid_private_key"
+VAPID_SUBJECT="mailto:your-email@gmail.com"
 ```
 
 ---
 
-## Running the Application
+## 💻 Running the Application
 
-All commands are run from the **root directory** of the monorepo.
+All execution scripts should be run from the **root directory** of the monorepo.
 
-### Development mode
+### Running in Development Mode
 
-Starts both the Vite frontend dev server and the Express backend with nodemon hot-reloading concurrently:
+Starts both the Vite frontend dev server and Express backend concurrently with hot-reloads:
 
 ```bash
 pnpm dev
 ```
 
-| Service | URL |
-|---|---|
-| Frontend | `http://localhost:5173` |
-| Backend API | `http://localhost:3000` |
-| Swagger UI | `http://localhost:3000/api-docs` |
+- **Frontend App**: [http://localhost:5173](http://localhost:5173)
+- **Backend API Server**: [http://localhost:3000](http://localhost:3000)
+- **Swagger Documentation Sandbox**: [http://localhost:3000/api-docs](http://localhost:3000/api-docs)
 
-### Production mode
+### Running in Production Mode
 
-Compiles the TypeScript backend and bundles the frontend, then runs the production build:
+Builds all packages and starts the production-ready build:
 
 ```bash
 pnpm prod
 ```
 
-### Type checking
+### Additional Monorepo Utility Scripts
 
-```bash
-pnpm typecheck
-```
-
-### Linting
-
-```bash
-pnpm lint
-```
+- **Typecheck codebases**: `pnpm typecheck`
+- **Lint files**: `pnpm lint`
+- **Auto-format code**: `pnpm format`
 
 ---
 
-## Docker Orchestration
+## 🐳 Docker Orchestration
 
-To spin up the entire application stack (frontend, backend, and PostgreSQL) fully containerized:
+To run the entire stack (PostgreSQL, Express API, and Nginx hosting the React bundle) in containerized environments:
 
 ```bash
+# Build and launch containers
 docker-compose up --build
 ```
 
-| Service | Exposed Port |
-|---|---|
-| Frontend (nginx) | `8080` |
-| Backend (Express) | `3000` |
-| PostgreSQL | `5432` |
+### Container Services Mapping
 
-To stop all services:
+| Container / Service           | Container Port | Exposed Host Port  |
+| :---------------------------- | :------------- | :----------------- |
+| **`postgres-db`**             | `5432`         | `5432`             |
+| **`backend-api`**             | `3000`         | `3000`             |
+| **`frontend-client` (Nginx)** | `80`           | `8888` (or `8080`) |
+
+### Teardown Commands
 
 ```bash
+# Stop containers
 docker-compose down
-```
 
-To stop and remove all volumes (wipes the database):
-
-```bash
+# Stop and wipe databases (cleans volumes)
 docker-compose down -v
 ```
 
 ---
 
-## API Documentation
+## 📡 API Usage & Swagger Documentation
 
-nexTask uses **TSOA** to auto-generate OpenAPI 3.0 documentation directly from TypeScript controller decorators. No manual spec writing required.
+TSOA automatically generates the OpenAPI schema directly from the backend TypeScript controllers. The live, interactive Swagger UI sandbox is hosted at:
 
-Once the server is running, open:
+### 👉 [http://localhost:3000/api-docs](http://localhost:3000/api-docs)
 
+### API Response Format
+
+Every API endpoint responds using a unified JSON wrapper:
+
+```json
+{
+  "success": true,
+  "message": "Operation completed successfully.",
+  "data": {
+    "id": "task-uuid",
+    "title": "Launch Website"
+  },
+  "errors": null
+}
 ```
-http://localhost:3000/api-docs
+
+When validation fails or an exception occurs, the response matches the following format:
+
+```json
+{
+  "success": false,
+  "message": "Validation failed.",
+  "data": null,
+  "errors": {
+    "body.email": "Invalid email format.",
+    "body.password": "Password must be at least 8 characters."
+  }
+}
 ```
 
-The Swagger UI lists all endpoints with request/response schemas, authentication requirements, and role-based access information.
+### Authentication Header
 
-To regenerate routes and the Swagger spec after modifying controllers:
+To query protected API endpoints, obtain a token via `POST /auth/login` and include it as a Bearer token in the request header:
 
-```bash
-cd server
-npx tsoa routes
-npx tsoa spec
+```http
+Authorization: Bearer <your-jwt-token>
 ```
+
+### Key API Endpoint Groups
+
+| Group             | Base Path                 | Description                                                |
+| :---------------- | :------------------------ | :--------------------------------------------------------- |
+| **Auth**          | `/auth`                   | Handles logins, password resets, and forgot-password flows |
+| **Users**         | `/users`                  | Profile updates, admin-level CRUD, and activity logs       |
+| **Projects**      | `/projects`               | Project CRUD, members management, and status updates       |
+| **Tasks**         | `/tasks`                  | Task CRUD, Kanban drag-and-drop positions, and filtering   |
+| **Comments**      | `/tasks/:taskId/comments` | Task-specific comment threads                              |
+| **Attachments**   | `/attachments`            | Storage uploads, downloads, and presigned S3 URLs          |
+| **Notifications** | `/notifications`          | Query and mark in-app notifications as read                |
+| **Messages**      | `/messages`               | Project-scoped live chat messaging                         |
+| **Push**          | `/push`                   | VAPID push notification subscription registrations         |
 
 ---
 
-## Database Design
+## 🗄️ Database Design
 
-The PostgreSQL schema is defined in `server/prisma/schema.prisma`.
+The relational PostgreSQL database is designed and maintained through Prisma.
 
-### Core Entities
+### Core Database Entities
 
-| Entity | Description |
-|---|---|
-| `User` | System users with roles (Admin, Project Manager, Collaborator) |
-| `Project` | Top-level work containers with status tracking |
-| `ProjectMember` | Many-to-many user↔project membership with project-level roles |
-| `Task` | Individual work items with priority, status, and due dates |
-| `TaskAssignment` | Many-to-many user↔task assignments |
-| `TaskActivity` | Immutable audit log of all task changes |
-| `Comment` | Task-level comments with optional attachments |
-| `Attachment` | Task file attachments stored on AWS S3 |
-| `Message` | Project-scoped live chat messages |
-| `MessageAttachment` | File attachments on chat messages |
-| `Notification` | In-app notifications (role-specific, user-specific) |
-| `PushSubscription` | Browser Web Push subscription records |
+| Table                   | Description                                                                      |
+| :---------------------- | :------------------------------------------------------------------------------- |
+| **`User`**              | Houses user details, global system roles, and status fields.                     |
+| **`Project`**           | Represents top-level project containers.                                         |
+| **`ProjectMember`**     | Many-to-many junction mapping users to projects with custom project-level roles. |
+| **`Task`**              | Individual task records belonging to projects.                                   |
+| **`TaskAssignment`**    | Many-to-many junction mapping users to tasks.                                    |
+| **`TaskActivity`**      | Read-only audit log capturing every edit, assignment, or movement of a task.     |
+| **`Comment`**           | User comments left on tasks.                                                     |
+| **`Attachment`**        | S3 metadata records referencing uploaded files.                                  |
+| **`Message`**           | Message records representing project-scoped chat.                                |
+| **`MessageAttachment`** | S3 metadata records referencing files uploaded to chat.                          |
+| **`Notification`**      | System notifications pushed to users.                                            |
+| **`PushSubscription`**  | Browser endpoints for Web Push notification delivery.                            |
 
-### ER Diagram
+### Entity-Relationship (ER) Diagram
 
-> 📎 See `ER_Diagram.png` for the full entity relationship diagram.
+The visual database schema is documented in `ER_Diagram.png`:
 
 ![nexTask ER Diagram](./ER_Diagram.png)
----
-
-## Security
-
-nexTask applies OWASP Top 10 best practices throughout:
-
-| Threat | Mitigation |
-|---|---|
-| SQL Injection | Prisma ORM with parameterized queries — no dynamic SQL |
-| XSS | Input sanitization and validation via Zod on all endpoints |
-| Broken Authentication | Argon2 password hashing, JWT with expiry, forced reset on first login |
-| Sensitive Data Exposure | HTTPS in production, WSS for WebSockets, env-based secrets |
-| Broken Access Control | RBAC enforced at controller level via TSOA `@Security` + middleware |
-| Security Misconfiguration | Helmet.js HTTP headers, environment-specific CORS |
-| Insecure Dependencies | pnpm lockfile, ESLint security rules |
-
-Password requirements:
-- Minimum 8 characters
-- Must include uppercase, lowercase, number, and special character
-- Stored exclusively as **Argon2** hashes — plaintext never persisted
 
 ---
 
-## Testing
+## 🛡️ Security Model
 
-The project includes:
+nexTask is built upon OWASP Top 10 security recommendations to prevent vulnerabilities:
 
-- **API Testing** — endpoint-level validation of request/response contracts
-- **Integration Testing** — cross-service and database interaction tests
-- **Validation Testing** — Zod schema enforcement on all inputs
-- **Security Testing** — RBAC, unauthorized access, injection prevention
-- **Edge Case Testing** — boundary conditions, invalid inputs, expired tokens
-- **Role-Based Access Testing** — verifying each role's permitted and forbidden actions
-- **Real-Time Testing** — Socket.IO event handling and notification delivery
+| Threat Category                | Mitigation Strategy                                                                      |
+| :----------------------------- | :--------------------------------------------------------------------------------------- |
+| **SQL Injection**              | Prisma ORM uses parameterized queries, neutralizing injection vectors.                   |
+| **XSS (Cross-Site Scripting)** | Inputs are validated against Zod schemas and sanitized on both client and server.        |
+| **Credential Hijacking**       | Argon2 password hashing; JWT tokens expire rapidly; forced reset on first login.         |
+| **Sensitive Data Exposure**    | HTTPS enforced in production; WebSockets secure (WSS); secrets loaded via env variables. |
+| **Broken Access Control**      | Strictly guarded RBAC checks enforced via TSOA `@Security` and Express middlewares.      |
+| **Security Misconfiguration**  | Helmet.js secures headers; custom, restricted CORS policies.                             |
+| **Insecure Dependencies**      | Strict dependency lockfiles; regular ESLint code audits.                                 |
+
+### Password Complexity Rules
+
+- Must contain at least **8 characters**.
+- Must contain at least one **lowercase letter**, one **uppercase letter**, one **number**, and one **special character**.
 
 ---
 
-## CI/CD Pipeline
+## 🧪 Testing Suite
 
-The project uses **GitHub Actions** for continuous integration:
+The testing suite contains:
+
+- **API Contract Testing**: Verifies that JSON structures match types.
+- **Integration Testing**: Confirms seamless flows across database, services, and controllers.
+- **Validation Suite**: Asserts that Zod filters invalid schemas.
+- **Access Control Verification**: Asserts that unauthorized roles are blocked.
+- **Real-Time Testing**: Asserts that WebSocket connections and notifications function correctly.
+
+---
+
+## 🚀 CI/CD Pipeline
+
+The project uses **GitHub Actions** for continuous integration, executing the following steps on every PR or push to `main`:
 
 ```yaml
-Triggers: push to main, pull requests
-
-Pipeline steps:
-  1. Install dependencies (pnpm install)
-  2. Type check all packages (pnpm typecheck)
-  3. Lint all packages (pnpm lint)
-  4. Prisma schema validation
-  5. Build frontend (Vite production build)
-  6. Build backend (TypeScript compile)
-  7. Docker image build verification
-  8. Docker Compose validation
+Pipeline Steps: 1. Set up Node.js environment
+  2. Install dependencies (pnpm install)
+  3. Validate Prisma database schema syntax
+  4. Build types and compile shared workspaces
+  5. Run TypeScript compiler type checking (pnpm typecheck)
+  6. Run linter checks (pnpm lint)
+  7. Verify production build compilation (Vite & Express compilation)
+  8. Verify Docker image build capability
 ```
 
 ---
 
-## Team Contributions
+## 👥 Team Member Contributions
 
-### Role A 
-- Monorepo workspace setup (pnpm workspaces, tsconfig project references)
-- Shared `@nextask/types` package
-- Database schema design (`schema.prisma`) and Prisma setup
-- Backend core infrastructure: Express server, middleware stack, error handling
-- Task management backend (task CRUD, assignment, activity logging)
-- Docker Compose orchestration
+Development was structured across **5 phases** with tasks distributed among team members:
 
-### Role B 
-- JWT authentication system (login, refresh, token expiry)
-- Password reset and first-login forced reset flow
-- User management APIs (admin CRUD, role assignment, onboarding email)
-- Project management APIs (create, update, status transitions, archive)
-- File attachment system (S3 presigned URLs, attachment records)
-- Nodemailer integration and email templates
+### Member A — Infrastructure & Real-Time Systems
 
-### Role C 
-- React frontend architecture (App.tsx, routing, providers, guards)
-- Dashboard and Kanban board (drag-and-drop with dnd-kit)
-- Project chat UI (MessagesPage with Socket.IO)
-- Admin dashboard (user management UI)
-- Notification panel and Web Push prompt UI
-- shadcn/Radix UI component library
+| Phase       | Task ID     | Description                                                                                                                   |
+| :---------- | :---------- | :---------------------------------------------------------------------------------------------------------------------------- |
+| **Phase 0** | T0.1 – T0.5 | **System Initialization** — Monorepo scaffolding, backend/API config, database schema, frontend foundations, containerization |
+| **Phase 1** | T1.1        | **Authentication Engine** — Argon2 hashing, JWT generation/verification, login & registration endpoints                       |
+| **Phase 2** | T2.1        | **Web Push System** — VAPID key generation, push subscription management, service worker integration                          |
+| **Phase 3** | T3.1        | **Multi-Assignee Task APIs** — Assign, unassign, bulk assign, and list assignees                                              |
+| **Phase 4** | T4.1        | **WebSocket Integration** — Socket.IO with project-scoped rooms, real-time Kanban updates                                     |
 
-### Role D 
-- RBAC enforcement on frontend (RouteGuard, role-conditional rendering)
-- Zod validation schemas for all API endpoints
-- Password policy enforcement (frontend and backend)
-- Axios interceptors (JWT injection, 401 global redirect)
-- Security hardening (Helmet.js, CORS, input sanitization)
-- Zustand state management (auth.store, project.store, toast.store)
+### Member B — Data Services & Collaboration
 
-### Role E 
-- Socket.IO server setup (authentication, private rooms, project rooms)
-- Real-time notification delivery and in-app notification system
-- Web Push subscription management and push delivery (VAPID)
-- Live project chat (broadcast, history, message attachments)
-- API testing, integration testing, security testing
-- Swagger/TSOA documentation review and final README
+| Phase       | Task ID | Description                                                                                  |
+| :---------- | :------ | :------------------------------------------------------------------------------------------- |
+| **Phase 1** | T1.2    | **Task Services** — Prisma-based CRUD services, TSOA controllers with standardized responses |
+| **Phase 2** | T2.2    | **Collaboration & S3 Upload** — Comment system, presigned S3 URLs, cascade deletion          |
+| **Phase 3** | T3.2    | **Data Integrity & Validation** — Zod schemas, XSS prevention, strict type enforcement       |
+| **Phase 4** | T4.2    | **Onboarding Mail Service** — SMTP setup, HTML email templates, welcome emails               |
+
+### Member C — UI/UX & Security
+
+| Phase       | Task ID | Description                                                                              |
+| :---------- | :------ | :--------------------------------------------------------------------------------------- |
+| **Phase 1** | T1.3    | **Base Layout UI** — Dashboard shell, sidebar, navigation bar, routing, protected routes |
+| **Phase 2** | T2.3    | **Task Visualization** — Kanban board, task cards, list/table views, task detail modals  |
+| **Phase 3** | T3.3    | **RBAC Enforcement** — Hybrid authorization middleware (global + project-level roles)    |
+| **Phase 4** | T4.3    | **Task Assignment Mail Service** — Email notifications for task assignment events        |
+
+### Member D — Project Management & Admin
+
+| Phase       | Task ID | Description                                                                                             |
+| :---------- | :------ | :------------------------------------------------------------------------------------------------------ |
+| **Phase 1** | T1.4    | **User Onboarding Flows** — First-login password reset, profile editing, password complexity validation |
+| **Phase 2** | T2.4    | **Project Management APIs** — Project CRUD, complete, archive endpoints                                 |
+| **Phase 3** | T3.4    | **Backend Search & Filter APIs** — Text search, task filtering, team member autocomplete                |
+| **Phase 4** | T4.4    | **Admin Management** — User management dashboard, role assignment, deactivation, audit logs             |
+
+### Member E — Frontend Features & Analytics
+
+| Phase       | Task ID | Description                                                                                        |
+| :---------- | :------ | :------------------------------------------------------------------------------------------------- |
+| **Phase 1** | T1.5    | **Error Infrastructure** — Toast notification system, API error mapping                            |
+| **Phase 2** | T2.5    | **Project Membership APIs** — Membership endpoints, project-specific role assignments              |
+| **Phase 3** | T3.5    | **Frontend Search & Filter UI** — Project switcher, member management, search/filter controls      |
+| **Phase 4** | T4.5    | **Analytics & Reporting** — Project status dashboard, priority/status charts, productivity metrics |
 
 ---
 
-## License
+## 📦 Project Deliverables & Documentation
 
-This project was developed for academic purposes as part of **INTE 21323 — Web Application Development Group Project**.
+All project deliverables and diagrams are organized across the repository:
+
+| Deliverable                     | Location                                                                      | Description                                                           |
+| :------------------------------ | :---------------------------------------------------------------------------- | :-------------------------------------------------------------------- |
+| **Source Code**                 | [`/client`](client/), [`/server`](server/), [`/types`](types/)                | Full-stack TypeScript monorepo source code                            |
+| **API Documentation (Swagger)** | [http://localhost:3000/api-docs](http://localhost:3000/api-docs)              | Live sandbox Swagger UI documentation                                 |
+| **API Documentation (Offline)** | [`/docs/api-documentation.md`](docs/api-documentation.md)                     | Complete endpoint and WebSocket events reference                      |
+| **ER Diagram & DB Design**      | [`/docs/database-design.md`](docs/database-design.md)                         | Database model schema, tables, indexes, and relations                 |
+| **Class Diagram**               | [`/docs/class-diagram.md`](docs/class-diagram.md)                             | UML class diagram of the backend system architecture                  |
+| **Deployment Diagram**          | [`/docs/deployment-diagram.md`](docs/deployment-diagram.md)                   | System deployment model, Docker configurations, security architecture |
+| **Prisma Schema**               | [`/server/prisma/schema.prisma`](server/prisma/schema.prisma)                 | Declarative Prisma schema model definitions                           |
+| **Project SRS**                 | [`/_project-plan/Project SRS.md`](_project-plan/Project%20SRS.md)             | Software Requirements Specification document                          |
+| **API Specification Draft**     | [`/_project-plan/API Specification.md`](_project-plan/API%20Specification.md) | Pre-development endpoint design specification                         |
+| **Task Distribution Plan**      | [`/_project-plan/Project Tasks.md`](_project-plan/Project%20Tasks.md)         | Project roadmap, phases, and task mapping                             |
+| **Contributing Guidelines**     | [`/CONTRIBUTING.md`](CONTRIBUTING.md)                                         | Development workflows and styling rules                               |
+
+---
+
+## 📄 License
+
+This project is developed solely for academic purposes as part of a web application development group project. All rights reserved.
