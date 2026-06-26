@@ -50,6 +50,7 @@ import {
   addProjectMember,
   assignTaskUser,
   bulkAssignTaskUsers,
+  createProject,
   fetchProjectMembers,
   fetchTeamMembersAutocomplete,
   removeProjectMember,
@@ -220,6 +221,39 @@ export function Dashboard() {
     }, 300);
     return () => clearTimeout(timer);
   }, [searchQuery]);
+
+  // Project Creation states
+  const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
+  const [newProjectName, setNewProjectName] = useState('');
+  const [newProjectDesc, setNewProjectDesc] = useState('');
+  const [newProjectEndDate, setNewProjectEndDate] = useState('');
+
+  const canCreateProject = user?.role === 'ADMIN' || user?.role === 'PROJECT_MANAGER';
+
+  const createProjectMutation = useMutation({
+    mutationFn: createProject,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      setActiveProjectId(data.id);
+      setIsCreateProjectOpen(false);
+      setNewProjectName('');
+      setNewProjectDesc('');
+      setNewProjectEndDate('');
+      useToastStore.getState().showSuccess('Project created successfully!');
+    },
+    onError: () => {
+      useToastStore.getState().showError('Failed to create project.');
+    },
+  });
+
+  const handleCreateProject = () => {
+    if (!newProjectName.trim() || newProjectName.trim().length < 3) return;
+    createProjectMutation.mutate({
+      name: newProjectName.trim(),
+      description: newProjectDesc.trim() || undefined,
+      endDate: newProjectEndDate ? new Date(newProjectEndDate).toISOString() : undefined,
+    });
+  };
 
   // Project Members management console states
   const [isMembersModalOpen, setIsMembersModalOpen] = useState(false);
@@ -737,19 +771,32 @@ export function Dashboard() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="bg-popover border-border text-popover-foreground w-56">
-                    {projects.map((project) => (
-                      <DropdownMenuItem
-                        key={project.id}
-                        onClick={() => setActiveProjectId(project.id)}
-                        className={
-                          project.id === activeProjectIdResolved
-                            ? 'bg-primary/10 text-primary font-medium'
-                            : ''
-                        }
-                      >
-                        {project.name}
-                      </DropdownMenuItem>
-                    ))}
+                    <div className="max-h-60 overflow-y-auto">
+                      {projects.map((project) => (
+                        <DropdownMenuItem
+                          key={project.id}
+                          onClick={() => setActiveProjectId(project.id)}
+                          className={
+                            project.id === activeProjectIdResolved
+                              ? 'bg-primary/10 text-primary font-medium'
+                              : ''
+                          }
+                        >
+                          {project.name}
+                        </DropdownMenuItem>
+                      ))}
+                    </div>
+                    {canCreateProject && (
+                      <>
+                        <div className="h-px bg-border my-1" />
+                        <DropdownMenuItem
+                          onClick={() => setIsCreateProjectOpen(true)}
+                          className="cursor-pointer text-primary focus:text-primary font-semibold"
+                        >
+                          + Create New Project
+                        </DropdownMenuItem>
+                      </>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
 
@@ -1390,6 +1437,64 @@ export function Dashboard() {
               </div>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ─── MODAL: CREATE NEW PROJECT ────────────────────────────────────────── */}
+      <Dialog open={isCreateProjectOpen} onOpenChange={setIsCreateProjectOpen}>
+        <DialogContent className="bg-background border-border text-foreground sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Create New Project</DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              Set up a new workspace for your team.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
+                Project Name <span className="text-destructive">*</span>
+              </label>
+              <Input
+                placeholder="e.g. Website Redesign"
+                className="bg-background border-border focus-visible:ring-primary w-full"
+                value={newProjectName}
+                onChange={(e) => setNewProjectName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Description</label>
+              <Textarea
+                placeholder="Briefly describe the project goals..."
+                className="bg-background border-border focus-visible:ring-primary resize-none w-full"
+                value={newProjectDesc}
+                onChange={(e) => setNewProjectDesc(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">End Date</label>
+              <Input
+                type="date"
+                className="bg-background border-border focus-visible:ring-primary w-full"
+                value={newProjectEndDate}
+                onChange={(e) => setNewProjectEndDate(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="ghost"
+              onClick={() => setIsCreateProjectOpen(false)}
+              className="hover:bg-muted text-muted-foreground hover:text-foreground"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateProject}
+              disabled={createProjectMutation.isPending || !newProjectName.trim() || newProjectName.trim().length < 3}
+            >
+              Create Project
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

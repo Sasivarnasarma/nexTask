@@ -21,7 +21,7 @@ interface AnalyticsDashboardProps {
 export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ tasks }) => {
   // 1. Calculations for completion metrics
   const totalTasks = tasks.length;
-  const completedTasks = tasks.filter((t) => t.status === 'COMPLETED').length;
+  const completedTasks = tasks.filter((t) => t.status === 'DONE').length;
   const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
   // 2. Format data specifically for the Pie Chart (Status Distribution)

@@ -136,11 +136,12 @@ async function main() {
       data: {
         title: 'Setup Core API Scaffolding',
         description: 'Initialize express with typescript, controllers and routing layers.',
-        status: 'COMPLETED',
+        status: 'DONE',
         priority: 'HIGH',
         tags: ['Backend', 'Infrastructure'],
         position: 1000,
         projectId: project.id,
+        createdBy: pmUser.id,
       },
     }));
 
@@ -157,6 +158,7 @@ async function main() {
         tags: ['Backend', 'Security'],
         position: 2000,
         projectId: project.id,
+        createdBy: pmUser.id,
       },
     }));
 
@@ -174,6 +176,7 @@ async function main() {
         tags: ['Frontend', 'UI'],
         position: 3000,
         projectId: project.id,
+        createdBy: pmUser.id,
       },
     }));
 

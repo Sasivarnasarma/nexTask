@@ -4,7 +4,7 @@ import apiClient from './client';
 
 // ─── Mapping Helpers ─────────────────────────────────────────────────────────
 
-export function mapStatusToBackend(status: string): 'TODO' | 'IN_PROGRESS' | 'COMPLETED' {
+export function mapStatusToBackend(status: string): 'TODO' | 'IN_PROGRESS' | 'DONE' {
   switch (status) {
     case 'To Do':
     case 'TODO':
@@ -13,8 +13,8 @@ export function mapStatusToBackend(status: string): 'TODO' | 'IN_PROGRESS' | 'CO
     case 'IN_PROGRESS':
       return 'IN_PROGRESS';
     case 'Done':
-    case 'COMPLETED':
-      return 'COMPLETED';
+    case 'DONE':
+      return 'DONE';
     default:
       return 'TODO';
   }
@@ -26,7 +26,7 @@ export function mapStatusToFrontend(status: string): string {
       return 'To Do';
     case 'IN_PROGRESS':
       return 'In Progress';
-    case 'COMPLETED':
+    case 'DONE':
       return 'Done';
     default:
       return 'To Do';
@@ -73,15 +73,25 @@ export async function fetchTasks(
     tags?: string[];
   },
 ): Promise<Task[]> {
-  const params: Record<string, string | string[]> = { projectId };
+  const params: Record<string, any> = {};
   if (filters?.search) params.search = filters.search;
   if (filters?.status) params.status = mapStatusToBackend(filters.status);
   if (filters?.priority) params.priority = mapPriorityToBackend(filters.priority);
   if (filters?.tags && filters.tags.length > 0) params.tags = filters.tags;
 
-  const { data } = await apiClient.get<ApiResponse<Task[]>>('/tasks', {
+  const { data } = await apiClient.get<ApiResponse<Task[]>>(`/tasks/project/${projectId}`, {
     params,
   });
+  return data.data ?? [];
+}
+
+export async function fetchMyTasks(): Promise<Task[]> {
+  const { data } = await apiClient.get<ApiResponse<Task[]>>('/tasks/me');
+  return data.data ?? [];
+}
+
+export async function fetchAllTasksAdmin(): Promise<Task[]> {
+  const { data } = await apiClient.get<ApiResponse<Task[]>>('/tasks/admin/all');
   return data.data ?? [];
 }
 

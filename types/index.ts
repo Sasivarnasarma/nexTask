@@ -19,15 +19,20 @@ export interface Task {
   description?: string | null;
   dueDate?: Date | string | null;
   priority: 'LOW' | 'MEDIUM' | 'HIGH';
-  status: 'TODO' | 'IN_PROGRESS' | 'COMPLETED';
+  status: 'TODO' | 'IN_PROGRESS' | 'DONE';
   tags: string[];
   position: number;
   projectId: string;
+  createdBy: string;
   createdAt: Date | string;
   updatedAt: Date | string;
   comments?: Comment[];
   attachments?: Attachment[];
   assignees?: TaskAssignee[];
+  permissions: {
+    canEdit: boolean;
+    canDelete: boolean;
+  };
 }
 
 export interface CreateTaskRequest {
@@ -36,7 +41,7 @@ export interface CreateTaskRequest {
   projectId: string;
   dueDate?: Date | string;
   priority?: 'LOW' | 'MEDIUM' | 'HIGH';
-  status?: 'TODO' | 'IN_PROGRESS' | 'COMPLETED';
+  status?: 'TODO' | 'IN_PROGRESS' | 'DONE';
   tags?: string[];
   position?: number;
 }
@@ -46,7 +51,7 @@ export interface UpdateTaskRequest {
   description?: string;
   dueDate?: Date | string;
   priority?: 'LOW' | 'MEDIUM' | 'HIGH';
-  status?: 'TODO' | 'IN_PROGRESS' | 'COMPLETED';
+  status?: 'TODO' | 'IN_PROGRESS' | 'DONE';
   tags?: string[];
   position?: number;
 }
@@ -169,6 +174,7 @@ export interface Project {
 export interface CreateProjectRequest {
   name: string;
   description?: string;
+  endDate?: string | Date;
 }
 
 export interface UpdateProjectRequest {
@@ -323,13 +329,19 @@ export interface AdminUpdateUserRequest {
 export interface UserActivityResponse {
   id: string;
   action:
-    | 'CREATED'
-    | 'UPDATED'
-    | 'ASSIGNED'
-    | 'COMMENTED'
-    | 'COMPLETED'
-    | 'DELETED'
+    | 'TASK_CREATED'
+    | 'TASK_UPDATED'
+    | 'TASK_DELETED'
+    | 'TASK_STATUS_CHANGED'
+    | 'TASK_ASSIGNED'
+    | 'TASK_COMMENT_ADDED'
+    | 'TASK_COMMENT_UPDATED'
+    | 'TASK_COMMENT_DELETED'
+    | 'TASK_ATTACHMENT_ADDED'
+    | 'TASK_ATTACHMENT_DELETED'
     | 'USER_CREATED'
+    | 'USER_UPDATED'
+    | 'USER_DELETED'
     | 'USER_DEACTIVATED'
     | 'USER_ACTIVATED'
     | 'ROLE_CHANGED';

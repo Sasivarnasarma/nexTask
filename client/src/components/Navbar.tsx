@@ -2,8 +2,10 @@ import { Notification } from '@nextask/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Bell, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
+
+import { useWebPush } from '@/hooks/useWebPush';
 
 import {
   fetchNotifications,
@@ -18,6 +20,21 @@ import { Button } from './ui/button';
 export function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
   const queryClient = useQueryClient();
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const user = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
+  const { unsubscribe } = useWebPush();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await unsubscribe();
+    } catch (e) {
+      console.error('Failed to unsubscribe push notifications on logout:', e);
+    }
+    logout();
+    navigate('/login');
+  };
 
   // Global socket listener for real-time notifications
   useEffect(() => {
@@ -123,13 +140,79 @@ export function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
           </Button>
         </div>
 
-        <Link
-          to="/profile"
-          title="Profile Settings"
-          className="h-8 w-8 bg-primary/10 hover:bg-primary/20 text-primary rounded-full flex items-center justify-center transition-colors border border-primary/20"
-        >
-          <User size={16} />
-        </Link>
+        <div className="relative">
+          <button
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className="h-8 w-8 bg-primary/10 hover:bg-primary/20 text-primary rounded-full flex items-center justify-center transition-colors border border-primary/20 focus:outline-none cursor-pointer"
+            aria-label="Toggle profile menu"
+          >
+            <User size={16} />
+          </button>
+          
+          {isDropdownOpen && (
+            <>
+              {/* Overlay to close dropdown when clicking outside */}
+              <div 
+                className="fixed inset-0 z-40 cursor-default" 
+                onClick={() => setIsDropdownOpen(false)}
+              />
+              <div className="absolute right-0 mt-2 w-[220px] rounded-xl bg-slate-950/95 backdrop-blur-[12px] border border-slate-800 shadow-[0_10px_30px_rgba(0,0,0,0.5)] p-2 z-50 animate-fade-in origin-top-right">
+                {/* User details header */}
+                <div className="px-3 py-2 border-b border-slate-800/80 mb-1.5 select-none text-left">
+                  <span className="text-sm font-semibold text-slate-100 truncate block">
+                    {user?.name || 'Workspace Member'}
+                  </span>
+                  <span className="text-xs text-slate-400 truncate block mt-0.5">
+                    {user?.email || 'member@nextask.com'}
+                  </span>
+                </div>
+                
+                {/* Menu items */}
+                <Link
+                  to="/settings"
+                  onClick={() => setIsDropdownOpen(false)}
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors text-left"
+                >
+                  <span className="text-base select-none">👤</span>
+                  <span>My Profile</span>
+                </Link>
+                
+                <Link
+                  to="/settings"
+                  onClick={() => setIsDropdownOpen(false)}
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors text-left"
+                >
+                  <span className="text-base select-none">⚙️</span>
+                  <span>Settings</span>
+                </Link>
+                
+                <button
+                  onClick={() => {
+                    setIsDropdownOpen(false);
+                    useToastStore.getState().showSuccess("Support center contact: support@nextask.com");
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors text-left cursor-pointer"
+                >
+                  <span className="text-base select-none">❓</span>
+                  <span>Help</span>
+                </button>
+                
+                <div className="h-px bg-slate-800/80 my-1.5" />
+                
+                <button
+                  onClick={() => {
+                    setIsDropdownOpen(false);
+                    handleLogout();
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-red-400 hover:text-red-300 hover:bg-red-950/30 transition-colors text-left cursor-pointer"
+                >
+                  <span className="text-base select-none">🚪</span>
+                  <span>Logout</span>
+                </button>
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Slide-in Notification Panel */}

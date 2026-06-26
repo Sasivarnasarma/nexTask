@@ -472,13 +472,19 @@
 					"action": {
 						"type": "string",
 						"enum": [
-							"CREATED",
-							"UPDATED",
-							"ASSIGNED",
-							"COMMENTED",
-							"COMPLETED",
-							"DELETED",
+							"TASK_CREATED",
+							"TASK_UPDATED",
+							"TASK_DELETED",
+							"TASK_STATUS_CHANGED",
+							"TASK_ASSIGNED",
+							"TASK_COMMENT_ADDED",
+							"TASK_COMMENT_UPDATED",
+							"TASK_COMMENT_DELETED",
+							"TASK_ATTACHMENT_ADDED",
+							"TASK_ATTACHMENT_DELETED",
 							"USER_CREATED",
+							"USER_UPDATED",
+							"USER_DELETED",
 							"USER_DEACTIVATED",
 							"USER_ACTIVATED",
 							"ROLE_CHANGED"
@@ -800,7 +806,7 @@
 						"enum": [
 							"TODO",
 							"IN_PROGRESS",
-							"COMPLETED"
+							"DONE"
 						]
 					},
 					"tags": {
@@ -814,6 +820,9 @@
 						"format": "double"
 					},
 					"projectId": {
+						"type": "string"
+					},
+					"createdBy": {
 						"type": "string"
 					},
 					"createdAt": {
@@ -855,6 +864,21 @@
 							"$ref": "#/components/schemas/TaskAssignee"
 						},
 						"type": "array"
+					},
+					"permissions": {
+						"properties": {
+							"canDelete": {
+								"type": "boolean"
+							},
+							"canEdit": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"canDelete",
+							"canEdit"
+						],
+						"type": "object"
 					}
 				},
 				"required": [
@@ -865,8 +889,10 @@
 					"tags",
 					"position",
 					"projectId",
+					"createdBy",
 					"createdAt",
-					"updatedAt"
+					"updatedAt",
+					"permissions"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -973,7 +999,7 @@
 						"enum": [
 							"TODO",
 							"IN_PROGRESS",
-							"COMPLETED"
+							"DONE"
 						]
 					},
 					"tags": {
@@ -1026,7 +1052,7 @@
 						"enum": [
 							"TODO",
 							"IN_PROGRESS",
-							"COMPLETED"
+							"DONE"
 						]
 					},
 					"tags": {
@@ -1372,6 +1398,17 @@
 					},
 					"description": {
 						"type": "string"
+					},
+					"endDate": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "string",
+								"format": "date-time"
+							}
+						]
 					}
 				},
 				"required": [
@@ -2662,9 +2699,63 @@
 				]
 			}
 		},
-		"/tasks": {
+		"/tasks/me": {
 			"get": {
-				"operationId": "GetTasks",
+				"operationId": "GetTasksMe",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/TaskListResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Tasks"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/tasks/admin/all": {
+			"get": {
+				"operationId": "GetTasksAdmin",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/TaskListResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Tasks"
+				],
+				"security": [
+					{
+						"jwt": [
+							"global:admin"
+						]
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/tasks/project/{projectId}": {
+			"get": {
+				"operationId": "GetTasksByProject",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -2689,7 +2780,7 @@
 				],
 				"parameters": [
 					{
-						"in": "query",
+						"in": "path",
 						"name": "projectId",
 						"required": true,
 						"schema": {
@@ -2713,7 +2804,7 @@
 							"enum": [
 								"TODO",
 								"IN_PROGRESS",
-								"COMPLETED"
+								"DONE"
 							]
 						}
 					},
@@ -2742,42 +2833,6 @@
 						}
 					}
 				]
-			},
-			"post": {
-				"operationId": "CreateNewTask",
-				"responses": {
-					"201": {
-						"description": "Task Created",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/TaskResponse"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Tasks"
-				],
-				"security": [
-					{
-						"jwt": [
-							"project:manager"
-						]
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/CreateTaskRequest"
-							}
-						}
-					}
-				}
 			}
 		},
 		"/tasks/{id}": {
@@ -2881,7 +2936,7 @@
 				"security": [
 					{
 						"jwt": [
-							"project:manager"
+							"project:member"
 						]
 					}
 				],
@@ -2895,6 +2950,44 @@
 						}
 					}
 				]
+			}
+		},
+		"/tasks": {
+			"post": {
+				"operationId": "CreateNewTask",
+				"responses": {
+					"201": {
+						"description": "Task Created",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/TaskResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Tasks"
+				],
+				"security": [
+					{
+						"jwt": [
+							"project:member"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateTaskRequest"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/tasks/{id}/assignees": {
@@ -3310,6 +3403,60 @@
 				"parameters": []
 			}
 		},
+		"/projects/me": {
+			"get": {
+				"operationId": "GetMyProjects",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProjectListResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Projects"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/projects/admin/all": {
+			"get": {
+				"operationId": "GetAdminAllProjects",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProjectListResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Projects"
+				],
+				"security": [
+					{
+						"jwt": [
+							"global:admin"
+						]
+					}
+				],
+				"parameters": []
+			}
+		},
 		"/projects/{id}": {
 			"get": {
 				"operationId": "GetById",
@@ -3411,7 +3558,7 @@
 				"security": [
 					{
 						"jwt": [
-							"global:admin"
+							"project:manager"
 						]
 					}
 				],
@@ -3920,7 +4067,7 @@
 						}
 					}
 				},
-				"description": "Fetches the real-time chat history of a project.\nAccess is restricted to authorized project members only.",
+				"description": "Fetches the real-time chat history of a project.\r\nAccess is restricted to authorized project members only.",
 				"tags": [
 					"Messages"
 				],
@@ -4382,6 +4529,87 @@
 						}
 					}
 				}
+			}
+		},
+		"/admin/dashboard/summary": {
+			"get": {
+				"operationId": "GetDashboardSummary",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Retrieves system summary analytics for the administrator dashboard.\nDerived purely on the backend.",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"jwt": [
+							"global:admin"
+						]
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/admin/metrics/system": {
+			"get": {
+				"operationId": "GetSystemMetrics",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Retrieves active users and projects counts.",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"jwt": [
+							"global:admin"
+						]
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/admin/reports/overview": {
+			"get": {
+				"operationId": "GetReportsOverview",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Compiles overview reports for all registered projects.",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"jwt": [
+							"global:admin"
+						]
+					}
+				],
+				"parameters": []
 			}
 		}
 	},

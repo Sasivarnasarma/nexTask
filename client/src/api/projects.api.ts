@@ -15,6 +15,11 @@ import apiClient from './client';
 
 // ─── Project APIs ────────────────────────────────────────────────────────────
 
+export async function fetchAllProjects(): Promise<Project[]> {
+  const { data } = await apiClient.get<ApiResponse<Project[]>>('/projects');
+  return data.data ?? [];
+}
+
 export async function createProject(payload: CreateProjectRequest): Promise<Project> {
   const { data } = await apiClient.post<ApiResponse<Project>>('/projects', payload);
   if (!data.data) {

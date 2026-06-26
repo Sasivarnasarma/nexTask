@@ -10,6 +10,7 @@ export class ProjectService {
     name: string,
     description: string | undefined,
     ownerId: string,
+    endDate?: string | Date | null,
   ): Promise<Project> {
     if (name.trim().length < 3) {
       throw new ApiError(400, 'Project name must be at least 3 characters long.');
@@ -20,6 +21,7 @@ export class ProjectService {
         data: {
           name: name.trim(),
           description: description?.trim() || null,
+          endDate: endDate ? new Date(endDate) : null,
           ownerId,
           status: 'ACTIVE',
         },

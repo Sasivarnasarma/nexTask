@@ -1,25 +1,37 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 
 import { refreshSession } from './api/auth.api';
-import { Navbar } from './components/Navbar';
-import { PushNotificationPrompt } from './components/PushNotificationPrompt';
-import { Sidebar } from './components/Sidebar';
 import { ThemeProvider } from './components/ThemeProvider';
 import { RedirectIfAuthenticated, RequireAuth } from './components/auth/RouteGuard';
 import { ToastContainer } from './components/ui/Toast';
 import './index.css';
-import { Calendar } from './pages/Calendar';
-import { Dashboard } from './pages/Dashboard';
-import MessagesPage from './pages/MessagesPage';
-import { Settings } from './pages/Settings';
-import { AdminDashboard } from './pages/admin/AdminDashboard';
+import { AdminLayout } from './pages/admin/AdminLayout';
+import { AdminDashboardView } from './pages/admin/AdminDashboardView';
+import { AdminUsersView } from './pages/admin/AdminUsersView';
+import { AdminProjectsView } from './pages/admin/AdminProjectsView';
+import { AdminReportsView } from './pages/admin/AdminReportsView';
+import { AdminNotificationsView } from './pages/admin/AdminNotificationsView';
+import { AdminSettingsView } from './pages/admin/AdminSettingsView';
+import { AdminProfileView } from './pages/admin/AdminProfileView';
+import { PmLayout } from './pages/pm/PmLayout';
+import { PmDashboardView } from './pages/pm/PmDashboardView';
+import { PmProjectsView } from './pages/pm/PmProjectsView';
+import { PmTasksView } from './pages/pm/PmTasksView';
+import { PmReportsView } from './pages/pm/PmReportsView';
+import { PmNotificationsView } from './pages/pm/PmNotificationsView';
+import { PmProfileView } from './pages/pm/PmProfileView';
+import { CollaboratorLayout } from './pages/collaborator/CollaboratorLayout';
+import { CollaboratorDashboardView } from './pages/collaborator/CollaboratorDashboardView';
+import { CollaboratorTasksView } from './pages/collaborator/CollaboratorTasksView';
+import { CollaboratorProjectsView } from './pages/collaborator/CollaboratorProjectsView';
+import { CollaboratorNotificationsView } from './pages/collaborator/CollaboratorNotificationsView';
+import { CollaboratorProfileView } from './pages/collaborator/CollaboratorProfileView';
 import ForceResetPage from './pages/auth/ForceResetPage';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import LoginPage from './pages/auth/LoginPage';
 import ResetPasswordPage from './pages/auth/ResetPasswordPage';
-import ProfilePage from './pages/profile/ProfilePage';
 import { useAuthStore } from './store/auth.store';
 
 const queryClient = new QueryClient({
@@ -33,51 +45,89 @@ const queryClient = new QueryClient({
 
 const DashboardLayout: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { user } = useAuthStore();
+  const location = useLocation();
 
-  return (
-    // Changed bg-slate-50 to bg-background and added text-foreground
-    <div className="flex h-screen bg-transparent text-foreground overflow-hidden relative transition-colors duration-300">
-      {isSidebarOpen && (
-        <button
-          type="button"
-          aria-label="Close sidebar"
-          // Changed bg-slate-950/40 to bg-background/80 for a universal theme blur
-          className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 md:hidden transition-opacity duration-300 focus:ring-2 focus:ring-primary"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
+  if (user?.role === 'ADMIN') {
+    if (!location.pathname.startsWith('/admin')) {
+      if (location.pathname === '/settings') {
+        return <Navigate to="/admin/settings" replace />;
+      }
+      if (location.pathname === '/profile') {
+        return <Navigate to="/admin/profile" replace />;
+      }
+      return <Navigate to="/admin/dashboard" replace />;
+    }
 
-      <div
-        className={`fixed inset-y-0 left-0 z-50 transform ${
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } transition-transform duration-300 ease-in-out shrink-0 bg-background md:relative md:translate-x-0 ${
-          isSidebarOpen ? 'md:w-64' : 'md:w-20'
-        }`}
-      >
-        <div className="w-full h-full overflow-hidden">
-          <Sidebar isOpen={isSidebarOpen} />
-        </div>
-      </div>
+    return (
+      <AdminLayout isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen}>
+        <Routes>
+          <Route path="admin/dashboard" element={<AdminDashboardView />} />
+          <Route path="admin/users" element={<AdminUsersView />} />
+          <Route path="admin/projects" element={<AdminProjectsView />} />
+          <Route path="admin/reports" element={<AdminReportsView />} />
+          <Route path="admin/notifications" element={<AdminNotificationsView />} />
+          <Route path="admin/settings" element={<AdminSettingsView />} />
+          <Route path="admin/profile" element={<AdminProfileView />} />
+          <Route path="*" element={<Navigate to="admin/dashboard" replace />} />
+        </Routes>
+      </AdminLayout>
+    );
+  }
 
-      {/* Changed bg-white and border-slate-200 to theme variables */}
-      <div className="flex-1 flex flex-col bg-transparent border-l border-border min-w-0 transition-all duration-300 h-screen">
-        <Navbar onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
-        {/* Changed bg-zinc-950 to bg-background */}
-        <main className="flex-1 flex flex-col min-h-0 bg-transparent overflow-y-auto">
-          <Routes>
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="calendar" element={<Calendar />} />
-            <Route path="messages" element={<MessagesPage />} />
-            <Route path="admin" element={<AdminDashboard />} />
-            <Route path="profile" element={<ProfilePage />} />
-            <Route path="settings" element={<Settings />} />
-            <Route path="*" element={<Navigate to="dashboard" replace />} />
-          </Routes>
-        </main>
-      </div>
-      <PushNotificationPrompt />
-    </div>
-  );
+  if (user?.role === 'PROJECT_MANAGER') {
+    if (!location.pathname.startsWith('/pm')) {
+      if (location.pathname === '/profile' || location.pathname === '/settings') {
+        return <Navigate to="/pm/profile" replace />;
+      }
+      return <Navigate to="/pm/dashboard" replace />;
+    }
+
+    return (
+      <PmLayout isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen}>
+        <Routes>
+          <Route path="pm/dashboard" element={<PmDashboardView />} />
+          <Route path="pm/projects" element={<PmProjectsView />} />
+          <Route path="pm/tasks" element={<PmTasksView />} />
+          <Route path="pm/reports" element={<PmReportsView />} />
+          <Route path="pm/notifications" element={<PmNotificationsView />} />
+          <Route path="pm/profile" element={<PmProfileView />} />
+          <Route path="*" element={<Navigate to="pm/dashboard" replace />} />
+        </Routes>
+      </PmLayout>
+    );
+  }
+
+  if (user?.role === 'COLLABORATOR') {
+    if (!location.pathname.startsWith('/collaborator')) {
+      if (location.pathname === '/profile' || location.pathname === '/settings') {
+        return <Navigate to="/collaborator/profile" replace />;
+      }
+      return <Navigate to="/collaborator/dashboard" replace />;
+    }
+
+    return (
+      <CollaboratorLayout isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen}>
+        <Routes>
+          <Route path="collaborator/dashboard" element={<CollaboratorDashboardView />} />
+          <Route path="collaborator/tasks" element={<CollaboratorTasksView />} />
+          <Route path="collaborator/projects" element={<CollaboratorProjectsView />} />
+          <Route path="collaborator/notifications" element={<CollaboratorNotificationsView />} />
+          <Route path="collaborator/profile" element={<CollaboratorProfileView />} />
+          <Route path="*" element={<Navigate to="collaborator/dashboard" replace />} />
+        </Routes>
+      </CollaboratorLayout>
+    );
+  }
+
+  // Redirect users away from incorrect prefixes if logged in but role mismatch
+  if (location.pathname.startsWith('/admin') || location.pathname.startsWith('/pm') || location.pathname.startsWith('/collaborator')) {
+    if (user?.role === 'ADMIN') return <Navigate to="/admin/dashboard" replace />;
+    if (user?.role === 'PROJECT_MANAGER') return <Navigate to="/pm/dashboard" replace />;
+    if (user?.role === 'COLLABORATOR') return <Navigate to="/collaborator/dashboard" replace />;
+  }
+
+  return <Navigate to="/login" replace />;
 };
 
 // Helper to decode JWT payload client-side without external dependencies

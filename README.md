@@ -39,7 +39,7 @@ nexTask is a professional, full-stack, real-time Task Management System (TMS) de
 **1. Clone the repository:**
 
 ```bash
-git clone <repo_url>
+git clone https://github.com/Sasivarnasarma/nexTask.git
 cd nexTask
 ```
 

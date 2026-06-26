@@ -7,7 +7,7 @@ export const createTaskSchema = z.object({
     projectId: z.uuid({ message: 'Invalid Project ID' }),
     dueDate: z.iso.datetime({ message: 'Invalid due date' }).optional(),
     priority: z.enum(['LOW', 'MEDIUM', 'HIGH']).optional(),
-    status: z.enum(['TODO', 'IN_PROGRESS', 'COMPLETED']).optional(),
+    status: z.enum(['TODO', 'IN_PROGRESS', 'DONE']).optional(),
     tags: z.array(z.string()).optional(),
     position: z.number().optional(),
   }),
@@ -22,7 +22,7 @@ export const updateTaskSchema = z.object({
     description: z.string().optional(),
     dueDate: z.iso.datetime({ message: 'Invalid due date' }).optional().nullable(),
     priority: z.enum(['LOW', 'MEDIUM', 'HIGH']).optional(),
-    status: z.enum(['TODO', 'IN_PROGRESS', 'COMPLETED']).optional(),
+    status: z.enum(['TODO', 'IN_PROGRESS', 'DONE']).optional(),
     tags: z.array(z.string()).optional(),
     position: z.number().optional(),
   }),
@@ -32,7 +32,7 @@ export const getTasksQuerySchema = z.object({
   query: z.object({
     projectId: z.uuid({ message: 'Invalid Project ID' }),
     search: z.string().optional(),
-    status: z.enum(['TODO', 'IN_PROGRESS', 'COMPLETED']).optional(),
+    status: z.enum(['TODO', 'IN_PROGRESS', 'DONE']).optional(),
     priority: z.enum(['LOW', 'MEDIUM', 'HIGH']).optional(),
     tags: z
       .union([z.string(), z.array(z.string())])

@@ -39,6 +39,10 @@ export class NotificationService {
     // 3. Send real-time socket notification to the user's private room
     try {
       sendNotificationToUser(userId, 'notification:received', notif);
+      const structuredEvent = this.getSocketEventForType(type);
+      if (structuredEvent) {
+        sendNotificationToUser(userId, structuredEvent, notif);
+      }
     } catch (err) {
       console.error('[SOCKET_ERROR] Failed to emit real-time notification:', err);
     }
@@ -94,6 +98,21 @@ export class NotificationService {
       case NotificationType.ADMIN_UPDATE:
       default:
         return 'Notification';
+    }
+  }
+
+  private static getSocketEventForType(type: NotificationType): string | null {
+    switch (type) {
+      case NotificationType.TASK_ASSIGNED:
+        return 'task.assigned';
+      case NotificationType.STATUS_CHANGED:
+        return 'task.updated';
+      case NotificationType.DEADLINE_ALERT:
+        return 'deadline.warning';
+      case NotificationType.COMMENT_ADDED:
+        return 'comment.created';
+      default:
+        return null;
     }
   }
 }

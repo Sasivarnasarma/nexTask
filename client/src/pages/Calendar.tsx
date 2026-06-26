@@ -129,7 +129,7 @@ export function Calendar() {
   // Status badge styling helper
   const getStatusBadgeClass = (status: Task['status']) => {
     switch (status) {
-      case 'COMPLETED':
+      case 'DONE':
         return 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/10 border-emerald-500/30';
       case 'IN_PROGRESS':
         return 'bg-blue-500/10 text-blue-500 hover:bg-blue-500/10 border-blue-500/30';

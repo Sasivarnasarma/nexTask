@@ -33,6 +33,8 @@ import { AttachmentController } from './controllers/attachment.controller';
 import { AttachmentDeleteController } from './controllers/attachment.controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { AttachmentUploadController } from './controllers/attachment-upload.controller';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { AdminController } from './controllers/admin.controller';
 import { expressAuthentication } from './middlewares/authentication';
 // @ts-ignore - no great way to install types from subpackage
 import type { Request as ExRequest, Response as ExResponse, RequestHandler, Router } from 'express';
@@ -217,7 +219,7 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "id": {"dataType":"string","required":true},
-            "action": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["CREATED"]},{"dataType":"enum","enums":["UPDATED"]},{"dataType":"enum","enums":["ASSIGNED"]},{"dataType":"enum","enums":["COMMENTED"]},{"dataType":"enum","enums":["COMPLETED"]},{"dataType":"enum","enums":["DELETED"]},{"dataType":"enum","enums":["USER_CREATED"]},{"dataType":"enum","enums":["USER_DEACTIVATED"]},{"dataType":"enum","enums":["USER_ACTIVATED"]},{"dataType":"enum","enums":["ROLE_CHANGED"]}],"required":true},
+            "action": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["TASK_CREATED"]},{"dataType":"enum","enums":["TASK_UPDATED"]},{"dataType":"enum","enums":["TASK_DELETED"]},{"dataType":"enum","enums":["TASK_STATUS_CHANGED"]},{"dataType":"enum","enums":["TASK_ASSIGNED"]},{"dataType":"enum","enums":["TASK_COMMENT_ADDED"]},{"dataType":"enum","enums":["TASK_COMMENT_UPDATED"]},{"dataType":"enum","enums":["TASK_COMMENT_DELETED"]},{"dataType":"enum","enums":["TASK_ATTACHMENT_ADDED"]},{"dataType":"enum","enums":["TASK_ATTACHMENT_DELETED"]},{"dataType":"enum","enums":["USER_CREATED"]},{"dataType":"enum","enums":["USER_UPDATED"]},{"dataType":"enum","enums":["USER_DELETED"]},{"dataType":"enum","enums":["USER_DEACTIVATED"]},{"dataType":"enum","enums":["USER_ACTIVATED"]},{"dataType":"enum","enums":["ROLE_CHANGED"]}],"required":true},
             "description": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
             "createdAt": {"dataType":"union","subSchemas":[{"dataType":"datetime"},{"dataType":"string"}],"required":true},
             "taskId": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
@@ -301,15 +303,17 @@ const models: TsoaRoute.Models = {
             "description": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
             "dueDate": {"dataType":"union","subSchemas":[{"dataType":"datetime"},{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
             "priority": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["LOW"]},{"dataType":"enum","enums":["MEDIUM"]},{"dataType":"enum","enums":["HIGH"]}],"required":true},
-            "status": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["TODO"]},{"dataType":"enum","enums":["IN_PROGRESS"]},{"dataType":"enum","enums":["COMPLETED"]}],"required":true},
+            "status": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["TODO"]},{"dataType":"enum","enums":["IN_PROGRESS"]},{"dataType":"enum","enums":["DONE"]}],"required":true},
             "tags": {"dataType":"array","array":{"dataType":"string"},"required":true},
             "position": {"dataType":"double","required":true},
             "projectId": {"dataType":"string","required":true},
+            "createdBy": {"dataType":"string","required":true},
             "createdAt": {"dataType":"union","subSchemas":[{"dataType":"datetime"},{"dataType":"string"}],"required":true},
             "updatedAt": {"dataType":"union","subSchemas":[{"dataType":"datetime"},{"dataType":"string"}],"required":true},
             "comments": {"dataType":"array","array":{"dataType":"refObject","ref":"Comment"}},
             "attachments": {"dataType":"array","array":{"dataType":"refObject","ref":"Attachment"}},
             "assignees": {"dataType":"array","array":{"dataType":"refObject","ref":"TaskAssignee"}},
+            "permissions": {"dataType":"nestedObjectLiteral","nestedProperties":{"canDelete":{"dataType":"boolean","required":true},"canEdit":{"dataType":"boolean","required":true}},"required":true},
         },
         "additionalProperties": false,
     },
@@ -344,7 +348,7 @@ const models: TsoaRoute.Models = {
             "projectId": {"dataType":"string","required":true},
             "dueDate": {"dataType":"union","subSchemas":[{"dataType":"datetime"},{"dataType":"string"}]},
             "priority": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["LOW"]},{"dataType":"enum","enums":["MEDIUM"]},{"dataType":"enum","enums":["HIGH"]}]},
-            "status": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["TODO"]},{"dataType":"enum","enums":["IN_PROGRESS"]},{"dataType":"enum","enums":["COMPLETED"]}]},
+            "status": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["TODO"]},{"dataType":"enum","enums":["IN_PROGRESS"]},{"dataType":"enum","enums":["DONE"]}]},
             "tags": {"dataType":"array","array":{"dataType":"string"}},
             "position": {"dataType":"double"},
         },
@@ -358,7 +362,7 @@ const models: TsoaRoute.Models = {
             "description": {"dataType":"string"},
             "dueDate": {"dataType":"union","subSchemas":[{"dataType":"datetime"},{"dataType":"string"}]},
             "priority": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["LOW"]},{"dataType":"enum","enums":["MEDIUM"]},{"dataType":"enum","enums":["HIGH"]}]},
-            "status": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["TODO"]},{"dataType":"enum","enums":["IN_PROGRESS"]},{"dataType":"enum","enums":["COMPLETED"]}]},
+            "status": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["TODO"]},{"dataType":"enum","enums":["IN_PROGRESS"]},{"dataType":"enum","enums":["DONE"]}]},
             "tags": {"dataType":"array","array":{"dataType":"string"}},
             "position": {"dataType":"double"},
         },
@@ -489,6 +493,7 @@ const models: TsoaRoute.Models = {
         "properties": {
             "name": {"dataType":"string","required":true},
             "description": {"dataType":"string"},
+            "endDate": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"datetime"}]},
         },
         "additionalProperties": false,
     },
@@ -1235,30 +1240,93 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsTaskController_getTasks: Record<string, TsoaRoute.ParameterSchema> = {
-                projectId: {"in":"query","name":"projectId","required":true,"dataType":"string"},
-                search: {"in":"query","name":"search","dataType":"string"},
-                status: {"in":"query","name":"status","dataType":"union","subSchemas":[{"dataType":"enum","enums":["TODO"]},{"dataType":"enum","enums":["IN_PROGRESS"]},{"dataType":"enum","enums":["COMPLETED"]}]},
-                priority: {"in":"query","name":"priority","dataType":"union","subSchemas":[{"dataType":"enum","enums":["LOW"]},{"dataType":"enum","enums":["MEDIUM"]},{"dataType":"enum","enums":["HIGH"]}]},
-                tags: {"in":"query","name":"tags","dataType":"array","array":{"dataType":"string"}},
+        const argsTaskController_getTasksMe: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
-        app.get('/tasks',
-            authenticateMiddleware([{"jwt":["project:member"]}]),
+        app.get('/tasks/me',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(TaskController)),
-            ...(fetchMiddlewares<RequestHandler>(TaskController.prototype.getTasks)),
+            ...(fetchMiddlewares<RequestHandler>(TaskController.prototype.getTasksMe)),
 
-            async function TaskController_getTasks(request: ExRequest, response: ExResponse, next: any) {
+            async function TaskController_getTasksMe(request: ExRequest, response: ExResponse, next: any) {
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
             let validatedArgs: any[] = [];
             try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsTaskController_getTasks, request, response });
+                validatedArgs = templateService.getValidatedArgs({ args: argsTaskController_getTasksMe, request, response });
 
                 const controller = new TaskController();
 
               await templateService.apiHandler({
-                methodName: 'getTasks',
+                methodName: 'getTasksMe',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsTaskController_getTasksAdmin: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.get('/tasks/admin/all',
+            authenticateMiddleware([{"jwt":["global:admin"]}]),
+            ...(fetchMiddlewares<RequestHandler>(TaskController)),
+            ...(fetchMiddlewares<RequestHandler>(TaskController.prototype.getTasksAdmin)),
+
+            async function TaskController_getTasksAdmin(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsTaskController_getTasksAdmin, request, response });
+
+                const controller = new TaskController();
+
+              await templateService.apiHandler({
+                methodName: 'getTasksAdmin',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsTaskController_getTasksByProject: Record<string, TsoaRoute.ParameterSchema> = {
+                projectId: {"in":"path","name":"projectId","required":true,"dataType":"string"},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                search: {"in":"query","name":"search","dataType":"string"},
+                status: {"in":"query","name":"status","dataType":"union","subSchemas":[{"dataType":"enum","enums":["TODO"]},{"dataType":"enum","enums":["IN_PROGRESS"]},{"dataType":"enum","enums":["DONE"]}]},
+                priority: {"in":"query","name":"priority","dataType":"union","subSchemas":[{"dataType":"enum","enums":["LOW"]},{"dataType":"enum","enums":["MEDIUM"]},{"dataType":"enum","enums":["HIGH"]}]},
+                tags: {"in":"query","name":"tags","dataType":"array","array":{"dataType":"string"}},
+        };
+        app.get('/tasks/project/:projectId',
+            authenticateMiddleware([{"jwt":["project:member"]}]),
+            ...(fetchMiddlewares<RequestHandler>(TaskController)),
+            ...(fetchMiddlewares<RequestHandler>(TaskController.prototype.getTasksByProject)),
+
+            async function TaskController_getTasksByProject(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsTaskController_getTasksByProject, request, response });
+
+                const controller = new TaskController();
+
+              await templateService.apiHandler({
+                methodName: 'getTasksByProject',
                 controller,
                 response,
                 next,
@@ -1272,6 +1340,7 @@ export function RegisterRoutes(app: Router) {
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsTaskController_getTask: Record<string, TsoaRoute.ParameterSchema> = {
                 id: {"in":"path","name":"id","required":true,"dataType":"string"},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
         app.get('/tasks/:id',
             authenticateMiddleware([{"jwt":["project:member"]}]),
@@ -1303,9 +1372,10 @@ export function RegisterRoutes(app: Router) {
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsTaskController_createNewTask: Record<string, TsoaRoute.ParameterSchema> = {
                 body: {"in":"body","name":"body","required":true,"ref":"CreateTaskRequest"},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
         app.post('/tasks',
-            authenticateMiddleware([{"jwt":["project:manager"]}]),
+            authenticateMiddleware([{"jwt":["project:member"]}]),
             ...(fetchMiddlewares<RequestHandler>(TaskController)),
             ...(fetchMiddlewares<RequestHandler>(TaskController.prototype.createNewTask)),
 
@@ -1367,9 +1437,10 @@ export function RegisterRoutes(app: Router) {
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsTaskController_deleteExistingTask: Record<string, TsoaRoute.ParameterSchema> = {
                 id: {"in":"path","name":"id","required":true,"dataType":"string"},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
         app.delete('/tasks/:id',
-            authenticateMiddleware([{"jwt":["project:manager"]}]),
+            authenticateMiddleware([{"jwt":["project:member"]}]),
             ...(fetchMiddlewares<RequestHandler>(TaskController)),
             ...(fetchMiddlewares<RequestHandler>(TaskController.prototype.deleteExistingTask)),
 
@@ -1771,6 +1842,68 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsProjectController_getMyProjects: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.get('/projects/me',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(ProjectController)),
+            ...(fetchMiddlewares<RequestHandler>(ProjectController.prototype.getMyProjects)),
+
+            async function ProjectController_getMyProjects(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsProjectController_getMyProjects, request, response });
+
+                const controller = new ProjectController();
+
+              await templateService.apiHandler({
+                methodName: 'getMyProjects',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsProjectController_getAdminAllProjects: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.get('/projects/admin/all',
+            authenticateMiddleware([{"jwt":["global:admin"]}]),
+            ...(fetchMiddlewares<RequestHandler>(ProjectController)),
+            ...(fetchMiddlewares<RequestHandler>(ProjectController.prototype.getAdminAllProjects)),
+
+            async function ProjectController_getAdminAllProjects(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsProjectController_getAdminAllProjects, request, response });
+
+                const controller = new ProjectController();
+
+              await templateService.apiHandler({
+                methodName: 'getAdminAllProjects',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsProjectController_getById: Record<string, TsoaRoute.ParameterSchema> = {
                 id: {"in":"path","name":"id","required":true,"dataType":"string"},
         };
@@ -1900,7 +2033,7 @@ export function RegisterRoutes(app: Router) {
                 id: {"in":"path","name":"id","required":true,"dataType":"string"},
         };
         app.delete('/projects/:id',
-            authenticateMiddleware([{"jwt":["global:admin"]}]),
+            authenticateMiddleware([{"jwt":["project:manager"]}]),
             ...(fetchMiddlewares<RequestHandler>(ProjectController)),
             ...(fetchMiddlewares<RequestHandler>(ProjectController.prototype.delete)),
 
@@ -2650,6 +2783,96 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getPresignedUrl',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAdminController_getDashboardSummary: Record<string, TsoaRoute.ParameterSchema> = {
+        };
+        app.get('/admin/dashboard/summary',
+            authenticateMiddleware([{"jwt":["global:admin"]}]),
+            ...(fetchMiddlewares<RequestHandler>(AdminController)),
+            ...(fetchMiddlewares<RequestHandler>(AdminController.prototype.getDashboardSummary)),
+
+            async function AdminController_getDashboardSummary(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAdminController_getDashboardSummary, request, response });
+
+                const controller = new AdminController();
+
+              await templateService.apiHandler({
+                methodName: 'getDashboardSummary',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAdminController_getSystemMetrics: Record<string, TsoaRoute.ParameterSchema> = {
+        };
+        app.get('/admin/metrics/system',
+            authenticateMiddleware([{"jwt":["global:admin"]}]),
+            ...(fetchMiddlewares<RequestHandler>(AdminController)),
+            ...(fetchMiddlewares<RequestHandler>(AdminController.prototype.getSystemMetrics)),
+
+            async function AdminController_getSystemMetrics(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAdminController_getSystemMetrics, request, response });
+
+                const controller = new AdminController();
+
+              await templateService.apiHandler({
+                methodName: 'getSystemMetrics',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAdminController_getReportsOverview: Record<string, TsoaRoute.ParameterSchema> = {
+        };
+        app.get('/admin/reports/overview',
+            authenticateMiddleware([{"jwt":["global:admin"]}]),
+            ...(fetchMiddlewares<RequestHandler>(AdminController)),
+            ...(fetchMiddlewares<RequestHandler>(AdminController.prototype.getReportsOverview)),
+
+            async function AdminController_getReportsOverview(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAdminController_getReportsOverview, request, response });
+
+                const controller = new AdminController();
+
+              await templateService.apiHandler({
+                methodName: 'getReportsOverview',
                 controller,
                 response,
                 next,
