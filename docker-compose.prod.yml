@@ -1,0 +1,10 @@
+services:
+  server:
+    image: ghcr.io/sasivarnasarma/nextask-server:latest
+    build: null
+    pull_policy: always
+
+  client:
+    image: ghcr.io/sasivarnasarma/nextask-client:latest
+    build: null
+    pull_policy: always
