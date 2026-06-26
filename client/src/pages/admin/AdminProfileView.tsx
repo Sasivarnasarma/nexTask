@@ -1,12 +1,23 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CheckCircle, Key, Loader2, Phone, Save, Shield, User as UserIcon } from 'lucide-react';
+import {
+  AlertCircle,
+  Bell,
+  BellOff,
+  CheckCircle,
+  Key,
+  Loader2,
+  Save,
+  Shield,
+  User as UserIcon,
+} from 'lucide-react';
 import React, { useState } from 'react';
 
 import { changePassword, getProfile, updateProfile } from '@/api/profile.api';
-import { Badge } from '@/components/ui/badge';
 import { PasswordInput } from '@/components/ui/PasswordInput';
 import { PasswordStrengthMeter } from '@/components/ui/PasswordStrengthMeter';
+import { Badge } from '@/components/ui/badge';
 import { usePasswordStrength } from '@/hooks/usePasswordStrength';
+import { useWebPush } from '@/hooks/useWebPush';
 import { extractApiError } from '@/lib/apiError';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth.store';
@@ -14,6 +25,7 @@ import { useAuthStore } from '@/store/auth.store';
 export const AdminProfileView: React.FC = () => {
   const queryClient = useQueryClient();
   const { updateUser, user: storeUser } = useAuthStore();
+  const { isSupported, permission, isSubscribed, isPending, subscribe, unsubscribe } = useWebPush();
 
   // Fetch fresh profile from server
   const { data: profile, isLoading } = useQuery({
@@ -25,11 +37,10 @@ export const AdminProfileView: React.FC = () => {
   // Profile forms
   const [name, setName] = useState(profile?.name ?? '');
   const [email, setEmail] = useState(profile?.email ?? '');
-  const [phone, setPhone] = useState('+1 (555) 019-2834');
-  const [location, setLocation] = useState('San Francisco, CA');
-  const [timezone, setTimezone] = useState('UTC-8 (PST)');
 
-  const [profileMsg, setProfileMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [profileMsg, setProfileMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(
+    null,
+  );
 
   const profileMutation = useMutation({
     mutationFn: updateProfile,
@@ -183,38 +194,6 @@ export const AdminProfileView: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-slate-850 pt-4">
-                <div className="space-y-1.5 flex flex-col">
-                  <label className="text-xs font-semibold text-slate-450 flex items-center gap-1">
-                    <Phone size={12} /> Phone
-                  </label>
-                  <input
-                    type="text"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl text-sm bg-slate-950 border border-slate-800 text-slate-100 placeholder:text-slate-650 outline-none focus:border-indigo-500 transition-colors"
-                  />
-                </div>
-                <div className="space-y-1.5 flex flex-col">
-                  <label className="text-xs font-semibold text-slate-450">Location</label>
-                  <input
-                    type="text"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl text-sm bg-slate-950 border border-slate-800 text-slate-100 placeholder:text-slate-650 outline-none focus:border-indigo-500 transition-colors"
-                  />
-                </div>
-                <div className="space-y-1.5 flex flex-col">
-                  <label className="text-xs font-semibold text-slate-450">Timezone</label>
-                  <input
-                    type="text"
-                    value={timezone}
-                    onChange={(e) => setTimezone(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl text-sm bg-slate-950 border border-slate-800 text-slate-100 placeholder:text-slate-650 outline-none focus:border-indigo-500 transition-colors"
-                  />
-                </div>
-              </div>
-
               <button
                 type="submit"
                 disabled={profileMutation.isPending}
@@ -233,6 +212,79 @@ export const AdminProfileView: React.FC = () => {
                 )}
               </button>
             </form>
+          </section>
+
+          {/* Web Push Notifications Card */}
+          <section className="bg-slate-900 border border-slate-800/80 rounded-2xl p-6 space-y-6">
+            <h3 className="text-sm font-semibold text-slate-350 uppercase tracking-wider flex items-center gap-2">
+              <Bell size={16} /> Web Push Notification
+            </h3>
+
+            <div className="space-y-4">
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Enable background push notifications to receive real-time updates when users are
+                created or tasks are created.
+              </p>
+
+              {!isSupported ? (
+                <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs bg-amber-950/40 border border-amber-900/50 text-amber-500">
+                  <AlertCircle size={16} />
+                  Push notifications are not supported by this browser.
+                </div>
+              ) : (
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-slate-950 border border-slate-850">
+                  <div>
+                    <div className="text-xs font-semibold text-slate-200">
+                      Device Opt-in:{' '}
+                      {permission === 'denied' ? (
+                        <span className="text-rose-500 font-bold">Blocked</span>
+                      ) : isSubscribed ? (
+                        <span className="text-emerald-450 font-bold">Subscribed</span>
+                      ) : (
+                        <span className="text-slate-500 font-bold">Not Subscribed</span>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-slate-500 mt-1.5">
+                      {permission === 'denied'
+                        ? 'Please reset notification permissions in your browser settings to enable.'
+                        : isSubscribed
+                          ? 'Your device is configured to receive push notifications.'
+                          : 'Opt-in to start receiving background notifications on this device.'}
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    disabled={isPending || permission === 'denied'}
+                    onClick={isSubscribed ? unsubscribe : subscribe}
+                    className={cn(
+                      'flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-[.98]',
+                      isSubscribed
+                        ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
+                        : 'bg-indigo-600 hover:bg-indigo-500 text-white',
+                      (isPending || permission === 'denied') && 'opacity-50 cursor-not-allowed',
+                    )}
+                  >
+                    {isPending ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin text-white" />
+                        Processing…
+                      </>
+                    ) : isSubscribed ? (
+                      <>
+                        <BellOff size={14} />
+                        Disable Notifications
+                      </>
+                    ) : (
+                      <>
+                        <Bell size={14} />
+                        Enable Notifications
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
           </section>
 
           {/* Change Password Card */}

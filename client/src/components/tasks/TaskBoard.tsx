@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   DndContext,
   DragEndEvent,
@@ -13,9 +12,11 @@ import {
 } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { Task } from '@nextask/types';
-import { Badge } from '@/components/ui/badge';
 import { Clock } from 'lucide-react';
-import { mapStatusToFrontend, mapPriorityToFrontend } from '@/api/tasks.api';
+import React from 'react';
+
+import { mapPriorityToFrontend, mapStatusToFrontend } from '@/api/tasks.api';
+import { Badge } from '@/components/ui/badge';
 
 // ─── DND KANBAN COLUMN COMPONENT ──────────────────────────────────────────────
 interface KanbanColumnProps {
@@ -36,9 +37,7 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({ title, status, children }) 
       <div className="flex items-center justify-between mb-4">
         <h4 className="text-xs font-extrabold text-slate-400 tracking-wider uppercase">{title}</h4>
       </div>
-      <div className="flex-1 flex flex-col gap-3 overflow-y-auto pr-1">
-        {children}
-      </div>
+      <div className="flex-1 flex flex-col gap-3 overflow-y-auto pr-1">{children}</div>
     </div>
   );
 };
@@ -57,7 +56,7 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ task, onClick, readOnly }) => {
   });
 
   const style: React.CSSProperties = {
-    transform: transform ? CSS.Transform.toString(transform) : undefined,
+    transform: transform && !isDragging ? CSS.Transform.toString(transform) : undefined,
     opacity: isDragging ? 0.3 : 1,
   };
 
@@ -84,7 +83,9 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ task, onClick, readOnly }) => {
       }`}
     >
       <div className="flex justify-between items-start mb-2.5">
-        <Badge className={`${getPriorityBadgeStyle(task.priority)} text-[9px] font-bold border uppercase tracking-wider`}>
+        <Badge
+          className={`${getPriorityBadgeStyle(task.priority)} text-[9px] font-bold border uppercase tracking-wider`}
+        >
           {mapPriorityToFrontend(task.priority)}
         </Badge>
       </div>

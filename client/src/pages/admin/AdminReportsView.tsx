@@ -40,9 +40,7 @@ export const AdminReportsView: React.FC = () => {
     queryKey: ['admin-reports-tasks', projects.map((p) => p.id).join(',')],
     queryFn: async () => {
       if (projects.length === 0) return [];
-      const tasksPromises = projects.map((p) =>
-        fetchTasks(p.id).catch(() => [] as Task[]),
-      );
+      const tasksPromises = projects.map((p) => fetchTasks(p.id).catch(() => [] as Task[]));
       const results = await Promise.all(tasksPromises);
       return results.flat();
     },
@@ -56,7 +54,9 @@ export const AdminReportsView: React.FC = () => {
   const activeProjects = projects.filter((p) => p.status === 'ACTIVE').length;
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter((t) => t.status === 'DONE').length;
-  const pendingTasks = tasks.filter((t) => t.status === 'TODO' || t.status === 'IN_PROGRESS').length;
+  const pendingTasks = tasks.filter(
+    (t) => t.status === 'TODO' || t.status === 'IN_PROGRESS',
+  ).length;
   const overdueTasks = tasks.filter(
     (t) => t.dueDate && new Date(t.dueDate).getTime() < Date.now() && t.status !== 'DONE',
   ).length;
@@ -90,15 +90,6 @@ export const AdminReportsView: React.FC = () => {
     count,
   }));
 
-  // Project progress mapping
-  const projectProgressData = projects.map((p) => {
-    const projectTasks = tasks.filter((t) => t.projectId === p.id);
-    const total = projectTasks.length;
-    const completed = projectTasks.filter((t) => t.status === 'DONE').length;
-    const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
-    return { name: p.name, progress: rate };
-  });
-
   const COLORS = ['#F59E0B', '#3B82F6', '#10B981'];
 
   // Exports
@@ -115,11 +106,16 @@ export const AdminReportsView: React.FC = () => {
       ['Overdue Tasks', overdueTasks],
     ];
 
-    let csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
+    let csvContent =
+      'data:text/csv;charset=utf-8,' +
+      [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `nexTask_System_Report_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute(
+      'download',
+      `nexTask_System_Report_${new Date().toISOString().split('T')[0]}.csv`,
+    );
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -140,14 +136,17 @@ export const AdminReportsView: React.FC = () => {
       },
       taskStatuses: statusData,
       taskPriorities: priorityData,
-      projectProgress: projectProgressData,
       userAllocations: productivityData,
     };
 
-    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data, null, 2));
+    const dataStr =
+      'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data, null, 2));
     const link = document.createElement('a');
     link.setAttribute('href', dataStr);
-    link.setAttribute('download', `nexTask_System_Report_${new Date().toISOString().split('T')[0]}.json`);
+    link.setAttribute(
+      'download',
+      `nexTask_System_Report_${new Date().toISOString().split('T')[0]}.json`,
+    );
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -164,7 +163,8 @@ export const AdminReportsView: React.FC = () => {
             <BarChart2 className="h-8 w-8 text-indigo-400" /> Platform Reports
           </h1>
           <p className="text-slate-400 mt-1 text-sm">
-            Generate and export system-wide performance, project progressions, and task statuses reports.
+            Generate and export system-wide performance, project progressions, and task statuses
+            reports.
           </p>
         </div>
         <div className="flex items-center gap-3 shrink-0">
@@ -196,8 +196,16 @@ export const AdminReportsView: React.FC = () => {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {[
               { label: 'Platform Users', value: totalUsers, sub: `${activeUsers} active accounts` },
-              { label: 'Boards Administered', value: totalProjects, sub: `${activeProjects} active boards` },
-              { label: 'Total Tasks Created', value: totalTasks, sub: `${completedTasks} closed tasks` },
+              {
+                label: 'Boards Administered',
+                value: totalProjects,
+                sub: `${activeProjects} active boards`,
+              },
+              {
+                label: 'Total Tasks Created',
+                value: totalTasks,
+                sub: `${completedTasks} closed tasks`,
+              },
               { label: 'Urgent Overdue Tasks', value: overdueTasks, sub: 'Needs attention' },
             ].map((card, i) => (
               <div
@@ -286,44 +294,12 @@ export const AdminReportsView: React.FC = () => {
               </CardContent>
             </Card>
 
-            {/* Project Progress Report */}
-            <Card className="bg-slate-900 border-slate-800/80 text-slate-100 rounded-2xl shadow-sm lg:col-span-2">
-              <CardHeader>
-                <CardTitle className="text-base font-semibold">Active Boards Progress Tracking</CardTitle>
-                <CardDescription className="text-slate-400 text-xs">
-                  Progress indicators computed for each individual active team board.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="h-72">
-                {projectProgressData.length === 0 ? (
-                  <div className="flex justify-center items-center h-full text-slate-500 italic text-sm">
-                    No active boards to display progress.
-                  </div>
-                ) : (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={projectProgressData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                      <XAxis dataKey="name" stroke="#64748b" fontSize={11} />
-                      <YAxis stroke="#64748b" fontSize={11} unit="%" />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: '#0f172a',
-                          borderColor: '#1e293b',
-                          color: '#f8fafc',
-                          borderRadius: '0.75rem',
-                        }}
-                      />
-                      <Bar dataKey="progress" fill="#06b6d4" name="Progress (%)" radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                )}
-              </CardContent>
-            </Card>
-
             {/* Team Productivity & Resource Allocations */}
             <Card className="bg-slate-900 border-slate-800/80 text-slate-100 rounded-2xl shadow-sm lg:col-span-2">
               <CardHeader>
-                <CardTitle className="text-base font-semibold">Team Allocation & Workload</CardTitle>
+                <CardTitle className="text-base font-semibold">
+                  Team Allocation & Workload
+                </CardTitle>
                 <CardDescription className="text-slate-400 text-xs">
                   Quantity of tasks allocated per active team member.
                 </CardDescription>
@@ -338,7 +314,13 @@ export const AdminReportsView: React.FC = () => {
                     <BarChart data={productivityData} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
                       <XAxis type="number" allowDecimals={false} stroke="#64748b" fontSize={11} />
-                      <YAxis type="category" dataKey="name" stroke="#64748b" fontSize={11} width={100} />
+                      <YAxis
+                        type="category"
+                        dataKey="name"
+                        stroke="#64748b"
+                        fontSize={11}
+                        width={100}
+                      />
                       <Tooltip
                         contentStyle={{
                           backgroundColor: '#0f172a',
@@ -347,7 +329,12 @@ export const AdminReportsView: React.FC = () => {
                           borderRadius: '0.75rem',
                         }}
                       />
-                      <Bar dataKey="count" fill="#10b981" name="Assigned Tasks" radius={[0, 4, 4, 0]} />
+                      <Bar
+                        dataKey="count"
+                        fill="#10b981"
+                        name="Assigned Tasks"
+                        radius={[0, 4, 4, 0]}
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 )}

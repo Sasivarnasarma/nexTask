@@ -11,19 +11,7 @@ import {
   Users,
 } from 'lucide-react';
 import React from 'react';
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  Legend,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
+import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 
 import { fetchAllProjects } from '@/api/projects.api';
 import { fetchTasks } from '@/api/tasks.api';
@@ -96,13 +84,14 @@ export const AdminDashboardView: React.FC = () => {
   const activeProjects = projects.filter((p) => p.status === 'ACTIVE').length || 0;
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter((t) => t.status === 'DONE').length;
-  const pendingTasks = tasks.filter((t) => t.status === 'TODO' || t.status === 'IN_PROGRESS').length;
+  const pendingTasks = tasks.filter(
+    (t) => t.status === 'TODO' || t.status === 'IN_PROGRESS',
+  ).length;
   const overdueTasks = tasks.filter(
     (t) => t.dueDate && new Date(t.dueDate).getTime() < Date.now() && t.status !== 'DONE',
   ).length;
 
-  const projectProgressRate =
-    totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+  const projectProgressRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
   // Chart Formats
   const statusData = [
@@ -111,26 +100,7 @@ export const AdminDashboardView: React.FC = () => {
     { name: 'Completed', value: completedTasks },
   ];
 
-  const priorityData = [
-    { name: 'Low', count: tasks.filter((t) => t.priority === 'LOW').length },
-    { name: 'Medium', count: tasks.filter((t) => t.priority === 'MEDIUM').length },
-    { name: 'High', count: tasks.filter((t) => t.priority === 'HIGH').length },
-  ];
-
-  const roleData = [
-    { name: 'Admin', value: usersData?.users.filter((u) => u.role === 'ADMIN').length || 0 },
-    {
-      name: 'Project Manager',
-      value: usersData?.users.filter((u) => u.role === 'PROJECT_MANAGER').length || 0,
-    },
-    {
-      name: 'Collaborator',
-      value: usersData?.users.filter((u) => u.role === 'COLLABORATOR').length || 0,
-    },
-  ];
-
   const COLORS = ['#F59E0B', '#3B82F6', '#10B981'];
-  const ROLE_COLORS = ['#6366F1', '#A855F7', '#EC4899'];
 
   const isDataLoading = usersLoading || projectsLoading || tasksLoading;
 
@@ -157,13 +127,43 @@ export const AdminDashboardView: React.FC = () => {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {[
               { label: 'Total Users', value: totalUsers, icon: Users, color: 'text-indigo-400' },
-              { label: 'Active Users', value: activeUsers, icon: UserCheck, color: 'text-emerald-400' },
-              { label: 'Total Projects', value: totalProjects, icon: Folder, color: 'text-blue-400' },
-              { label: 'Active Projects', value: activeProjects, icon: Activity, color: 'text-purple-400' },
+              {
+                label: 'Active Users',
+                value: activeUsers,
+                icon: UserCheck,
+                color: 'text-emerald-400',
+              },
+              {
+                label: 'Total Projects',
+                value: totalProjects,
+                icon: Folder,
+                color: 'text-blue-400',
+              },
+              {
+                label: 'Active Projects',
+                value: activeProjects,
+                icon: Activity,
+                color: 'text-purple-400',
+              },
               { label: 'Total Tasks', value: totalTasks, icon: BarChart2, color: 'text-cyan-400' },
-              { label: 'Completed Tasks', value: completedTasks, icon: CheckCircle, color: 'text-green-400' },
-              { label: 'Pending Tasks', value: pendingTasks, icon: AlertCircle, color: 'text-amber-400' },
-              { label: 'Overdue Tasks', value: overdueTasks, icon: AlertCircle, color: 'text-rose-450 font-bold' },
+              {
+                label: 'Completed Tasks',
+                value: completedTasks,
+                icon: CheckCircle,
+                color: 'text-green-400',
+              },
+              {
+                label: 'Pending Tasks',
+                value: pendingTasks,
+                icon: AlertCircle,
+                color: 'text-amber-400',
+              },
+              {
+                label: 'Overdue Tasks',
+                value: overdueTasks,
+                icon: AlertCircle,
+                color: 'text-rose-450 font-bold',
+              },
             ].map((card, i) => {
               const Icon = card.icon;
               return (
@@ -172,7 +172,9 @@ export const AdminDashboardView: React.FC = () => {
                   className="bg-slate-900 border border-slate-800/80 rounded-2xl p-5 hover:border-slate-700/85 transition-all shadow-sm flex flex-col justify-between"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs md:text-sm text-slate-400 font-medium">{card.label}</span>
+                    <span className="text-xs md:text-sm text-slate-400 font-medium">
+                      {card.label}
+                    </span>
                     <Icon className={`w-4 h-4 ${card.color}`} />
                   </div>
                   <h3 className="text-2xl md:text-3xl font-extrabold mt-3 tracking-tight">
@@ -184,7 +186,7 @@ export const AdminDashboardView: React.FC = () => {
           </div>
 
           {/* Section 2 — Analytics */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Status Distribution */}
             <Card className="bg-slate-900 border-slate-800/80 text-slate-100">
               <CardHeader className="pb-2">
@@ -221,76 +223,6 @@ export const AdminDashboardView: React.FC = () => {
                       verticalAlign="bottom"
                       height={36}
                       iconType="circle"
-                      formatter={(val) => <span className="text-xs text-slate-300">{val}</span>}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            {/* Task Priority Distribution */}
-            <Card className="bg-slate-900 border-slate-800/80 text-slate-100">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base font-semibold">Task Priorities</CardTitle>
-                <CardDescription className="text-slate-400 text-xs">
-                  Distribution of workload urgency.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={priorityData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                    <XAxis dataKey="name" stroke="#64748b" fontSize={11} />
-                    <YAxis allowDecimals={false} stroke="#64748b" fontSize={11} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: '#0f172a',
-                        borderColor: '#1e293b',
-                        color: '#f8fafc',
-                        borderRadius: '0.75rem',
-                      }}
-                    />
-                    <Bar dataKey="count" fill="#38bdf8" name="Tasks" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            {/* User Roles */}
-            <Card className="bg-slate-900 border-slate-800/80 text-slate-100">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base font-semibold">User Role Distribution</CardTitle>
-                <CardDescription className="text-slate-400 text-xs">
-                  Breakdown of accounts in the workspace.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={roleData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={0}
-                      outerRadius={70}
-                      dataKey="value"
-                    >
-                      {roleData.map((_, index) => (
-                        <Cell key={`cell-${index}`} fill={ROLE_COLORS[index % ROLE_COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: '#0f172a',
-                        borderColor: '#1e293b',
-                        color: '#f8fafc',
-                        borderRadius: '0.75rem',
-                      }}
-                    />
-                    <Legend
-                      verticalAlign="bottom"
-                      height={36}
-                      iconType="square"
                       formatter={(val) => <span className="text-xs text-slate-300">{val}</span>}
                     />
                   </PieChart>

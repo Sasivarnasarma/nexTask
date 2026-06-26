@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import { login } from '@/api/auth.api';
 import { getProfile } from '@/api/profile.api';
+import { StarBackground } from '@/components/StarBackground';
 import { extractApiError } from '@/lib/apiError';
 import { useAuthStore } from '@/store/auth.store';
 
@@ -55,6 +56,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#090B18] to-[#0D1022] relative overflow-hidden flex items-center justify-center p-6 w-full font-sans animate-fade-in">
+      <StarBackground />
       {/* Light grain/noise texture overlay */}
       <div className="noise-bg" />
 

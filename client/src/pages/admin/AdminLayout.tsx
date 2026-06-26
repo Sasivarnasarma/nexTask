@@ -1,15 +1,7 @@
-import {
-  BarChart2,
-  Bell,
-  Folder,
-  LayoutDashboard,
-  Settings,
-  User,
-  Users,
-  MessageSquare,
-} from 'lucide-react';
+import { BarChart2, Bell, Folder, LayoutDashboard, MessageSquare, User, Users } from 'lucide-react';
 import React from 'react';
 import { Outlet } from 'react-router-dom';
+
 import { BaseLayout } from '@/components/BaseLayout';
 
 interface AdminLayoutProps {
@@ -30,7 +22,6 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
     { label: 'Chat', path: '/admin/messages', icon: MessageSquare },
     { label: 'Reports', path: '/admin/reports', icon: BarChart2 },
     { label: 'Notifications', path: '/admin/notifications', icon: Bell },
-    { label: 'Settings', path: '/admin/settings', icon: Settings },
     { label: 'Profile', path: '/admin/profile', icon: User },
   ];
 

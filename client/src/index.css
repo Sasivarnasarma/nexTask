@@ -212,3 +212,7 @@
   }
 }
 
+.animate-twinkle {
+  animation: twinkle 5s infinite ease-in-out;
+}
+

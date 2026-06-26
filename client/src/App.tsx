@@ -7,33 +7,32 @@ import { ThemeProvider } from './components/ThemeProvider';
 import { RedirectIfAuthenticated, RequireAuth } from './components/auth/RouteGuard';
 import { ToastContainer } from './components/ui/Toast';
 import './index.css';
-import { AdminLayout } from './pages/admin/AdminLayout';
+import MessagesPage from './pages/MessagesPage';
 import { AdminDashboardView } from './pages/admin/AdminDashboardView';
-import { AdminUsersView } from './pages/admin/AdminUsersView';
+import { AdminLayout } from './pages/admin/AdminLayout';
+import { AdminNotificationsView } from './pages/admin/AdminNotificationsView';
+import { AdminProfileView } from './pages/admin/AdminProfileView';
 import { AdminProjectsView } from './pages/admin/AdminProjectsView';
 import { AdminReportsView } from './pages/admin/AdminReportsView';
-import { AdminNotificationsView } from './pages/admin/AdminNotificationsView';
-import { AdminSettingsView } from './pages/admin/AdminSettingsView';
-import { AdminProfileView } from './pages/admin/AdminProfileView';
-import { PmLayout } from './pages/pm/PmLayout';
-import { PmDashboardView } from './pages/pm/PmDashboardView';
-import { PmProjectsView } from './pages/pm/PmProjectsView';
-import { PmTasksView } from './pages/pm/PmTasksView';
-import { PmReportsView } from './pages/pm/PmReportsView';
-import { PmNotificationsView } from './pages/pm/PmNotificationsView';
-import { PmProfileView } from './pages/pm/PmProfileView';
-import { CollaboratorLayout } from './pages/collaborator/CollaboratorLayout';
-import { CollaboratorDashboardView } from './pages/collaborator/CollaboratorDashboardView';
-import { CollaboratorTasksView } from './pages/collaborator/CollaboratorTasksView';
-import { CollaboratorProjectsView } from './pages/collaborator/CollaboratorProjectsView';
-import { CollaboratorNotificationsView } from './pages/collaborator/CollaboratorNotificationsView';
-import { CollaboratorProfileView } from './pages/collaborator/CollaboratorProfileView';
+import { AdminUsersView } from './pages/admin/AdminUsersView';
 import ForceResetPage from './pages/auth/ForceResetPage';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import LoginPage from './pages/auth/LoginPage';
 import ResetPasswordPage from './pages/auth/ResetPasswordPage';
+import { CollaboratorDashboardView } from './pages/collaborator/CollaboratorDashboardView';
+import { CollaboratorLayout } from './pages/collaborator/CollaboratorLayout';
+import { CollaboratorNotificationsView } from './pages/collaborator/CollaboratorNotificationsView';
+import { CollaboratorProfileView } from './pages/collaborator/CollaboratorProfileView';
+import { CollaboratorProjectsView } from './pages/collaborator/CollaboratorProjectsView';
+import { CollaboratorTasksView } from './pages/collaborator/CollaboratorTasksView';
+import { PmDashboardView } from './pages/pm/PmDashboardView';
+import { PmLayout } from './pages/pm/PmLayout';
+import { PmNotificationsView } from './pages/pm/PmNotificationsView';
+import { PmProfileView } from './pages/pm/PmProfileView';
+import { PmProjectsView } from './pages/pm/PmProjectsView';
+import { PmReportsView } from './pages/pm/PmReportsView';
+import { PmTasksView } from './pages/pm/PmTasksView';
 import { useAuthStore } from './store/auth.store';
-import MessagesPage from './pages/MessagesPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -52,7 +51,7 @@ const DashboardLayout: React.FC = () => {
   if (user?.role === 'ADMIN') {
     if (!location.pathname.startsWith('/admin')) {
       if (location.pathname === '/settings') {
-        return <Navigate to="/admin/settings" replace />;
+        return <Navigate to="/admin/profile" replace />;
       }
       if (location.pathname === '/profile') {
         return <Navigate to="/admin/profile" replace />;
@@ -69,7 +68,6 @@ const DashboardLayout: React.FC = () => {
           <Route path="admin/reports" element={<AdminReportsView />} />
           <Route path="admin/notifications" element={<AdminNotificationsView />} />
           <Route path="admin/messages" element={<MessagesPage />} />
-          <Route path="admin/settings" element={<AdminSettingsView />} />
           <Route path="admin/profile" element={<AdminProfileView />} />
           <Route path="*" element={<Navigate to="admin/dashboard" replace />} />
         </Routes>
@@ -125,7 +123,11 @@ const DashboardLayout: React.FC = () => {
   }
 
   // Redirect users away from incorrect prefixes if logged in but role mismatch
-  if (location.pathname.startsWith('/admin') || location.pathname.startsWith('/pm') || location.pathname.startsWith('/collaborator')) {
+  if (
+    location.pathname.startsWith('/admin') ||
+    location.pathname.startsWith('/pm') ||
+    location.pathname.startsWith('/collaborator')
+  ) {
     if (user?.role === 'ADMIN') return <Navigate to="/admin/dashboard" replace />;
     if (user?.role === 'PROJECT_MANAGER') return <Navigate to="/pm/dashboard" replace />;
     if (user?.role === 'COLLABORATOR') return <Navigate to="/collaborator/dashboard" replace />;

@@ -1,24 +1,25 @@
+import { Comment, Project, ProjectMemberView, Task } from '@nextask/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  Calendar as CalendarIcon,
   Loader2,
   MessageSquare,
   Paperclip,
   Search,
   Send,
-  Calendar as CalendarIcon,
 } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
-import {
-  createTaskAttachment,
-  getPresignedUploadUrl,
-  uploadFileToS3,
-} from '@/api/attachments.api';
+import { createTaskAttachment, getPresignedUploadUrl, uploadFileToS3 } from '@/api/attachments.api';
 import { fetchComments, postComment } from '@/api/comments.api';
 import { fetchUserProjects } from '@/api/profile.api';
 import { fetchProjectMembers } from '@/api/projects.api';
 import { fetchTaskById, updateTask } from '@/api/tasks.api';
+import { fetchMyTasks } from '@/api/tasks.api';
+import { TaskBoard } from '@/components/tasks/TaskBoard';
+import { TaskCalendar } from '@/components/tasks/TaskCalendar';
+import { TaskTable } from '@/components/tasks/TaskTable';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -28,13 +29,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { useToastStore } from '@/store/toast.store';
 import { extractApiError } from '@/lib/apiError';
-import { Project, Task, ProjectMemberView, Comment } from '@nextask/types';
-import { TaskBoard } from '@/components/tasks/TaskBoard';
-import { TaskTable } from '@/components/tasks/TaskTable';
-import { TaskCalendar } from '@/components/tasks/TaskCalendar';
-import { fetchMyTasks } from '@/api/tasks.api';
+import { useToastStore } from '@/store/toast.store';
 
 // ─── COLLABORATOR TASKS VIEW ──────────────────────────────────────────────────
 export const CollaboratorTasksView: React.FC = () => {
@@ -52,16 +48,10 @@ export const CollaboratorTasksView: React.FC = () => {
   const [projectFilter, setProjectFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [priorityFilter, setPriorityFilter] = useState('ALL');
-  const [sortField, setSortField] = useState<'title' | 'dueDate' | 'priority' | 'status' | 'updatedAt'>('dueDate');
+  const [sortField, setSortField] = useState<
+    'title' | 'dueDate' | 'priority' | 'status' | 'updatedAt'
+  >('dueDate');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-
-  // Sync search query param
-  useEffect(() => {
-    const searchVal = searchParams.get('search');
-    if (searchVal !== null) {
-      setSearchQuery(searchVal);
-    }
-  }, [searchParams]);
 
   // Selected entities for details drawer
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -81,6 +71,25 @@ export const CollaboratorTasksView: React.FC = () => {
     queryFn: fetchMyTasks,
   });
 
+  // Sync search query param
+  useEffect(() => {
+    const searchVal = searchParams.get('search');
+    if (searchVal !== null) {
+      setSearchQuery(searchVal);
+    }
+  }, [searchParams]);
+
+  // Sync taskId search param to auto-open task details
+  useEffect(() => {
+    const taskId = searchParams.get('taskId');
+    if (taskId && myAssignedTasks.length > 0) {
+      const task = myAssignedTasks.find((t) => t.id === taskId);
+      if (task) {
+        setSelectedTask(task);
+      }
+    }
+  }, [searchParams, myAssignedTasks]);
+
   const { data: taskDetails, refetch: refetchTaskDetails } = useQuery<Task>({
     queryKey: ['collaborator-task-details', selectedTask?.id],
     queryFn: () => fetchTaskById(selectedTask!.id),
@@ -95,7 +104,8 @@ export const CollaboratorTasksView: React.FC = () => {
 
   const { data: projectMembers = [] } = useQuery<ProjectMemberView[]>({
     queryKey: ['collaborator-task-project-members', selectedTask?.projectId],
-    queryFn: () => (selectedTask ? fetchProjectMembers(selectedTask.projectId) : Promise.resolve([])),
+    queryFn: () =>
+      selectedTask ? fetchProjectMembers(selectedTask.projectId) : Promise.resolve([]),
     enabled: !!selectedTask,
   });
 
@@ -203,7 +213,8 @@ export const CollaboratorTasksView: React.FC = () => {
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight">My Tasks</h1>
           <p className="text-slate-400 mt-1 text-sm">
-            Workspace for executing your assigned tasks. Transition states, post comments, or check targets.
+            Workspace for executing your assigned tasks. Transition states, post comments, or check
+            targets.
           </p>
         </div>
         <div className="flex bg-slate-900 p-1 rounded-xl border border-slate-800 self-start">
@@ -226,14 +237,35 @@ export const CollaboratorTasksView: React.FC = () => {
       {/* Statistics Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total Assigned', count: myAssignedTasks.length, bg: 'bg-indigo-650/10 text-indigo-400' },
-          { label: 'Todo Tasks', count: myAssignedTasks.filter((t) => t.status === 'TODO').length, bg: 'bg-slate-800 text-slate-300' },
-          { label: 'In Progress', count: myAssignedTasks.filter((t) => t.status === 'IN_PROGRESS').length, bg: 'bg-amber-500/10 text-amber-400' },
-          { label: 'Completed', count: myAssignedTasks.filter((t) => t.status === 'DONE').length, bg: 'bg-emerald-500/10 text-emerald-400' },
+          {
+            label: 'Total Assigned',
+            count: myAssignedTasks.length,
+            bg: 'bg-indigo-650/10 text-indigo-400',
+          },
+          {
+            label: 'Todo Tasks',
+            count: myAssignedTasks.filter((t) => t.status === 'TODO').length,
+            bg: 'bg-slate-800 text-slate-300',
+          },
+          {
+            label: 'In Progress',
+            count: myAssignedTasks.filter((t) => t.status === 'IN_PROGRESS').length,
+            bg: 'bg-amber-500/10 text-amber-400',
+          },
+          {
+            label: 'Completed',
+            count: myAssignedTasks.filter((t) => t.status === 'DONE').length,
+            bg: 'bg-emerald-500/10 text-emerald-400',
+          },
         ].map((stat, idx) => (
-          <div key={idx} className="bg-slate-900/40 border border-slate-800/80 p-4 rounded-xl flex items-center justify-between">
+          <div
+            key={idx}
+            className="bg-slate-900/40 border border-slate-800/80 p-4 rounded-xl flex items-center justify-between"
+          >
             <span className="text-xs text-slate-400 font-medium">{stat.label}</span>
-            <span className={`text-sm font-black px-2.5 py-0.5 rounded-full ${stat.bg}`}>{stat.count}</span>
+            <span className={`text-sm font-black px-2.5 py-0.5 rounded-full ${stat.bg}`}>
+              {stat.count}
+            </span>
           </div>
         ))}
       </div>
@@ -336,19 +368,12 @@ export const CollaboratorTasksView: React.FC = () => {
 
           {/* 2. Table View */}
           {viewMode === 'table' && (
-            <TaskTable
-              tasks={sortedTasks}
-              projects={projects}
-              onTaskClick={setSelectedTask}
-            />
+            <TaskTable tasks={sortedTasks} projects={projects} onTaskClick={setSelectedTask} />
           )}
 
           {/* 3. Calendar View */}
           {viewMode === 'calendar' && (
-            <TaskCalendar
-              tasks={sortedTasks}
-              onTaskClick={setSelectedTask}
-            />
+            <TaskCalendar tasks={sortedTasks} onTaskClick={setSelectedTask} />
           )}
         </div>
       )}
@@ -361,15 +386,23 @@ export const CollaboratorTasksView: React.FC = () => {
             <div className="flex-1 p-6 border-r border-slate-800 overflow-y-auto space-y-5 text-left">
               <DialogHeader>
                 <div className="flex items-center justify-between">
-                  <Badge className={`text-[9px] font-bold uppercase tracking-wider ${
-                    selectedTask?.priority === 'HIGH' ? 'bg-red-500/10 text-red-400 border-red-500/25' : 'bg-slate-800'
-                  }`}>
+                  <Badge
+                    className={`text-[9px] font-bold uppercase tracking-wider ${
+                      selectedTask?.priority === 'HIGH'
+                        ? 'bg-red-500/10 text-red-400 border-red-500/25'
+                        : 'bg-slate-800'
+                    }`}
+                  >
                     {selectedTask?.priority} PRIORITY
                   </Badge>
-                  <span className="text-[10px] font-medium text-slate-450 italic">Collaborator Workspace</span>
+                  <span className="text-[10px] font-medium text-slate-450 italic">
+                    Collaborator Workspace
+                  </span>
                 </div>
 
-                <DialogTitle className="text-xl font-extrabold text-slate-100 pt-2">{selectedTask?.title}</DialogTitle>
+                <DialogTitle className="text-xl font-extrabold text-slate-100 pt-2">
+                  {selectedTask?.title}
+                </DialogTitle>
                 <DialogDescription className="text-slate-400 text-xs pt-1 leading-relaxed whitespace-pre-wrap">
                   {selectedTask?.description || 'No description provided.'}
                 </DialogDescription>
@@ -378,29 +411,41 @@ export const CollaboratorTasksView: React.FC = () => {
               {/* Task Dates & Project info */}
               <div className="grid grid-cols-2 gap-4 border-t border-slate-800/80 pt-4">
                 <div>
-                  <span className="text-[10px] text-slate-500 font-bold block uppercase tracking-wider">Project</span>
+                  <span className="text-[10px] text-slate-500 font-bold block uppercase tracking-wider">
+                    Project
+                  </span>
                   <span className="text-xs font-semibold text-slate-300 block mt-1">
                     {currentProject?.name || 'Unknown Project'}
                   </span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-slate-500 font-bold block uppercase tracking-wider">Assigned By</span>
+                  <span className="text-[10px] text-slate-500 font-bold block uppercase tracking-wider">
+                    Assigned By
+                  </span>
                   <span className="text-xs font-semibold text-slate-300 block mt-1">
-                    {projectManager ? `${projectManager.name || projectManager.email}` : 'Project Manager'}
+                    {projectManager
+                      ? `${projectManager.name || projectManager.email}`
+                      : 'Project Manager'}
                   </span>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4 border-t border-slate-800/80 pt-4">
                 <div>
-                  <span className="text-[10px] text-slate-550 font-bold block uppercase tracking-wider">Due Date</span>
+                  <span className="text-[10px] text-slate-550 font-bold block uppercase tracking-wider">
+                    Due Date
+                  </span>
                   <span className="text-xs font-semibold text-slate-300 block mt-1 flex items-center gap-1">
                     <CalendarIcon size={12} className="text-slate-500" />
-                    {selectedTask?.dueDate ? new Date(selectedTask.dueDate).toLocaleDateString() : 'No Target Date'}
+                    {selectedTask?.dueDate
+                      ? new Date(selectedTask.dueDate).toLocaleDateString()
+                      : 'No Target Date'}
                   </span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-slate-550 font-bold block uppercase tracking-wider">Update Status</span>
+                  <span className="text-[10px] text-slate-550 font-bold block uppercase tracking-wider">
+                    Update Status
+                  </span>
                   {selectedTask && (
                     <select
                       value={selectedTask.status}
@@ -423,7 +468,9 @@ export const CollaboratorTasksView: React.FC = () => {
               {/* Attachments Section */}
               <div className="space-y-2.5 border-t border-slate-800/80 pt-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Attachments</span>
+                  <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                    Attachments
+                  </span>
                   <label className="bg-slate-950 hover:bg-slate-850 border border-slate-800/80 h-7 px-2.5 rounded-lg flex items-center gap-1.5 cursor-pointer text-[10px] font-semibold text-slate-300 transition-colors">
                     <Paperclip size={10} />
                     <span>Upload Attachment</span>
@@ -438,10 +485,15 @@ export const CollaboratorTasksView: React.FC = () => {
                 )}
                 <div className="space-y-2 max-h-32 overflow-y-auto pr-1">
                   {taskDetails?.attachments?.map((att: any) => (
-                    <div key={att.id} className="bg-slate-950 border border-slate-855 p-2 rounded-xl flex items-center justify-between gap-3">
+                    <div
+                      key={att.id}
+                      className="bg-slate-950 border border-slate-855 p-2 rounded-xl flex items-center justify-between gap-3"
+                    >
                       <div className="min-w-0 flex items-center gap-2">
                         <Paperclip size={12} className="text-slate-500 shrink-0" />
-                        <span className="text-[11px] text-slate-300 truncate max-w-[200px]">{att.filename}</span>
+                        <span className="text-[11px] text-slate-300 truncate max-w-[200px]">
+                          {att.filename}
+                        </span>
                       </div>
                       {att.presignedUrl && (
                         <a
@@ -466,12 +518,17 @@ export const CollaboratorTasksView: React.FC = () => {
             <div className="w-full md:w-80 bg-slate-950/20 flex flex-col h-full border-t md:border-t-0 md:border-l border-slate-800">
               <div className="p-4 border-b border-slate-800 flex items-center gap-2 bg-slate-955/40">
                 <MessageSquare size={16} className="text-blue-500" />
-                <h4 className="font-bold text-xs tracking-wider uppercase text-slate-400">Task Comments</h4>
+                <h4 className="font-bold text-xs tracking-wider uppercase text-slate-400">
+                  Task Comments
+                </h4>
               </div>
 
               <div className="flex-1 p-4 overflow-y-auto space-y-4 max-h-[300px] md:max-h-none text-left">
                 {comments.map((comment) => (
-                  <div key={comment.id} className="bg-slate-900 border border-slate-855 p-3 rounded-xl">
+                  <div
+                    key={comment.id}
+                    className="bg-slate-900 border border-slate-855 p-3 rounded-xl"
+                  >
                     <div className="flex justify-between items-center mb-1">
                       <span className="text-[10px] font-bold text-blue-400 block truncate max-w-[120px]">
                         {comment.author?.name || comment.author?.email}
@@ -480,11 +537,15 @@ export const CollaboratorTasksView: React.FC = () => {
                         {new Date(comment.createdAt).toLocaleDateString()}
                       </span>
                     </div>
-                    <p className="text-xs text-slate-200 leading-relaxed word-break-all">{comment.content}</p>
+                    <p className="text-xs text-slate-200 leading-relaxed word-break-all">
+                      {comment.content}
+                    </p>
                   </div>
                 ))}
                 {comments.length === 0 && (
-                  <div className="text-center py-10 text-[10px] text-slate-600 italic">No comments posted yet.</div>
+                  <div className="text-center py-10 text-[10px] text-slate-600 italic">
+                    No comments posted yet.
+                  </div>
                 )}
               </div>
 

@@ -3,6 +3,7 @@ import { FormEvent, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { selfResetPassword } from '@/api/auth.api';
+import { StarBackground } from '@/components/StarBackground';
 import { PasswordInput } from '@/components/ui/PasswordInput';
 import { PasswordStrengthMeter } from '@/components/ui/PasswordStrengthMeter';
 import { usePasswordStrength } from '@/hooks/usePasswordStrength';
@@ -52,21 +53,34 @@ export default function ResetPasswordPage() {
   // ── No Token State ─────────────────────────────────────────────────────────
   if (!token) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-6 w-full">
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 text-center w-full max-w-sm">
-          <div className="w-12 h-12 rounded-full bg-red-950 border border-red-900 flex items-center justify-center mx-auto mb-4">
-            <AlertCircle className="text-red-400" size={20} />
+      <div className="min-h-screen bg-gradient-to-br from-[#090B18] to-[#0D1022] relative overflow-hidden flex items-center justify-center p-6 w-full font-sans animate-fade-in">
+        <StarBackground />
+        <div className="noise-bg" />
+        <div className="absolute inset-0 bg-dot-grid pointer-events-none opacity-45 z-0" />
+        <div className="absolute top-[15%] left-[10%] w-[500px] h-[500px] bg-purple-600/10 rounded-full filter blur-[130px] pointer-events-none z-0 animate-pulse-slow" />
+        <div className="absolute bottom-[15%] right-[10%] w-[600px] h-[600px] bg-blue-600/10 rounded-full filter blur-[150px] pointer-events-none z-0 animate-pulse-slow-delay" />
+
+        <div className="w-[90%] sm:w-[420px] flex flex-col items-center relative z-10 animate-slide-up-fade">
+          <div className="flex flex-col items-center mb-8 select-none animate-fade-in-down">
+            <h2 className="text-3xl font-extrabold tracking-wider bg-gradient-to-r from-[#c084fc] via-[#818cf8] to-[#60a5fa] bg-clip-text text-transparent filter drop-shadow-[0_0_8px_rgba(99,102,241,0.3)]">
+              nexTask
+            </h2>
           </div>
-          <h1 className="text-xl font-bold text-zinc-100 mb-2 tracking-tight">Invalid Link</h1>
-          <p className="text-sm text-zinc-400 mb-6 leading-relaxed">
-            No password reset token was provided. Please request a new link.
-          </p>
-          <button
-            onClick={() => navigate('/forgot-password')}
-            className="w-full py-2.5 rounded-lg text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 transition-colors"
-          >
-            Go to Forgot Password
-          </button>
+          <div className="w-full bg-[rgba(255,255,255,0.08)] backdrop-blur-[18px] border border-[rgba(255,255,255,0.12)] rounded-[20px] p-[35px] shadow-[0_25px_60px_rgba(0,0,0,0.45)] text-center">
+            <div className="w-12 h-12 rounded-full bg-red-950/50 border border-red-900/50 flex items-center justify-center mx-auto mb-4">
+              <AlertCircle className="text-red-400" size={20} />
+            </div>
+            <h1 className="text-xl font-bold text-white mb-2 tracking-tight">Invalid Link</h1>
+            <p className="text-sm text-[#B8B8C8] mb-6 leading-relaxed">
+              No password reset token was provided. Please request a new link.
+            </p>
+            <button
+              onClick={() => navigate('/forgot-password')}
+              className="w-full h-[50px] rounded-[10px] text-sm font-semibold text-white bg-gradient-to-r from-[#6D4BFF] to-[#4D7BFF] hover:from-[#7e60ff] hover:to-[#5e8bff] hover:-translate-y-[2px] active:translate-y-0 shadow-[0_4px_15px_rgba(109,75,255,0.25)] hover:shadow-[0_8px_25px_rgba(109,75,255,0.4)] transition-all duration-300 cursor-pointer"
+            >
+              Go to Forgot Password
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -75,42 +89,100 @@ export default function ResetPasswordPage() {
   // ── Success State ──────────────────────────────────────────────────────────
   if (done) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-6 w-full">
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-10 text-center w-full max-w-sm">
-          <div className="w-14 h-14 rounded-full bg-green-900/50 border border-green-800 flex items-center justify-center mx-auto mb-5">
-            <CheckCircle size={28} className="text-green-400" />
+      <div className="min-h-screen bg-gradient-to-br from-[#090B18] to-[#0D1022] relative overflow-hidden flex items-center justify-center p-6 w-full font-sans animate-fade-in">
+        <StarBackground />
+        <div className="noise-bg" />
+        <div className="absolute inset-0 bg-dot-grid pointer-events-none opacity-45 z-0" />
+        <div className="absolute top-[15%] left-[10%] w-[500px] h-[500px] bg-purple-600/10 rounded-full filter blur-[130px] pointer-events-none z-0 animate-pulse-slow" />
+        <div className="absolute bottom-[15%] right-[10%] w-[600px] h-[600px] bg-blue-600/10 rounded-full filter blur-[150px] pointer-events-none z-0 animate-pulse-slow-delay" />
+
+        <div className="w-[90%] sm:w-[420px] flex flex-col items-center relative z-10 animate-slide-up-fade">
+          <div className="flex flex-col items-center mb-8 select-none animate-fade-in-down">
+            <h2 className="text-3xl font-extrabold tracking-wider bg-gradient-to-r from-[#c084fc] via-[#818cf8] to-[#60a5fa] bg-clip-text text-transparent filter drop-shadow-[0_0_8px_rgba(99,102,241,0.3)]">
+              nexTask
+            </h2>
           </div>
-          <h2 className="text-lg font-bold text-zinc-100 mb-2">Password reset!</h2>
-          <p className="text-sm text-zinc-400">Taking you to the login screen…</p>
+          <div className="w-full bg-[rgba(255,255,255,0.08)] backdrop-blur-[18px] border border-[rgba(255,255,255,0.12)] rounded-[20px] p-[35px] shadow-[0_25px_60px_rgba(0,0,0,0.45)] text-center">
+            <div className="w-14 h-14 rounded-full bg-green-900/50 border border-green-800 flex items-center justify-center mx-auto mb-5">
+              <CheckCircle size={28} className="text-green-400" />
+            </div>
+            <h2 className="text-lg font-bold text-white mb-2">Password reset!</h2>
+            <p className="text-sm text-[#B8B8C8]">Taking you to the login screen…</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-6 w-full">
-      <div className="w-full max-w-md">
-        <h1 className="text-2xl font-bold text-zinc-100 tracking-tight mb-2">
-          Reset your password
-        </h1>
-        <p className="text-sm text-zinc-400 mb-7 leading-relaxed">
-          Please enter a strong new password below to reset your account credentials.
-        </p>
+    <div className="min-h-screen bg-gradient-to-br from-[#090B18] to-[#0D1022] relative overflow-hidden flex items-center justify-center p-6 w-full font-sans animate-fade-in">
+      <StarBackground />
+      <div className="noise-bg" />
+      <div className="absolute inset-0 bg-dot-grid pointer-events-none opacity-45 z-0" />
+      <div className="absolute top-[15%] left-[10%] w-[500px] h-[500px] bg-purple-600/10 rounded-full filter blur-[130px] pointer-events-none z-0 animate-pulse-slow" />
+      <div className="absolute bottom-[15%] right-[10%] w-[600px] h-[600px] bg-blue-600/10 rounded-full filter blur-[150px] pointer-events-none z-0 animate-pulse-slow-delay" />
 
-        {/* Card */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-7 space-y-5">
+      {/* Large 3D Torus Ring Top Right */}
+      <div className="absolute -top-[10%] -right-[5%] w-[380px] h-[380px] opacity-35 animate-float-slower pointer-events-none select-none z-0">
+        <svg
+          width="100%"
+          height="100%"
+          viewBox="0 0 200 200"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="100"
+            cy="100"
+            r="70"
+            stroke="url(#torus-gradient-1)"
+            strokeWidth="30"
+            filter="url(#torus-glow-1)"
+          />
+          <defs>
+            <linearGradient id="torus-gradient-1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#1e1b4b" />
+              <stop offset="35%" stopColor="#312e81" />
+              <stop offset="70%" stopColor="#4338ca" />
+              <stop offset="100%" stopColor="#1e1b4b" />
+            </linearGradient>
+            <filter id="torus-glow-1" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="5" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+          </defs>
+        </svg>
+      </div>
+
+      <div className="w-[90%] sm:w-[420px] flex flex-col items-center relative z-10 animate-slide-up-fade">
+        {/* Centered Logo & Branding Section */}
+        <div className="flex flex-col items-center mb-8 select-none animate-fade-in-down">
+          <h2 className="text-3xl font-extrabold tracking-wider bg-gradient-to-r from-[#c084fc] via-[#818cf8] to-[#60a5fa] bg-clip-text text-transparent filter drop-shadow-[0_0_8px_rgba(99,102,241,0.3)]">
+            nexTask
+          </h2>
+        </div>
+
+        {/* Central Glassmorphic Card Container */}
+        <div className="w-full bg-[rgba(255,255,255,0.08)] backdrop-blur-[18px] border border-[rgba(255,255,255,0.12)] rounded-[20px] p-[35px] shadow-[0_25px_60px_rgba(0,0,0,0.45)]">
+          <h1 className="text-[28px] font-bold text-white tracking-tight mb-2 select-none">
+            Reset your password
+          </h1>
+          <p className="text-xs text-[#B8B8C8] mb-6 leading-relaxed select-none font-medium">
+            Please enter a strong new password below to reset your account credentials.
+          </p>
+
           {/* Error banner */}
           {error && (
-            <div className="flex items-start gap-2 px-3 py-2.5 bg-red-950 border border-red-900 rounded-lg text-sm text-red-300">
+            <div className="flex items-start gap-2 px-3 py-2.5 bg-red-950/50 border border-red-900/50 rounded-lg text-sm text-red-300 mb-4 animate-shake">
               <AlertTriangle size={14} className="shrink-0 mt-0.5" />
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {/* New password + strength meter */}
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-zinc-400">New password</label>
+              <label className="text-xs font-semibold text-slate-300">New password</label>
               <PasswordInput
                 required
                 autoComplete="new-password"
@@ -128,7 +200,7 @@ export default function ResetPasswordPage() {
 
             {/* Confirm password */}
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-zinc-400">Confirm new password</label>
+              <label className="text-xs font-semibold text-slate-300">Confirm new password</label>
               <PasswordInput
                 required
                 autoComplete="new-password"
@@ -138,7 +210,7 @@ export default function ResetPasswordPage() {
                 error={mismatch ? "Passwords don't match" : undefined}
               />
               {matchesConfirm && (
-                <p className="text-xs text-green-400 flex items-center gap-1 mt-1">
+                <p className="text-xs text-green-400 flex items-center gap-1 mt-1 font-medium">
                   <CheckCircle size={11} />
                   Passwords match
                 </p>
@@ -150,9 +222,7 @@ export default function ResetPasswordPage() {
               type="submit"
               disabled={!canSubmit}
               className={cn(
-                'w-full py-2.5 rounded-lg text-sm font-semibold text-white transition-all',
-                'bg-indigo-600 hover:bg-indigo-500 active:scale-[.98]',
-                !canSubmit && 'opacity-40 cursor-not-allowed',
+                'w-full h-[50px] rounded-[10px] text-sm font-semibold text-white bg-gradient-to-r from-[#6D4BFF] to-[#4D7BFF] hover:from-[#7e60ff] hover:to-[#5e8bff] hover:-translate-y-[2px] active:translate-y-0 shadow-[0_4px_15px_rgba(109,75,255,0.25)] hover:shadow-[0_8px_25px_rgba(109,75,255,0.4)] transition-all duration-300 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none flex items-center justify-center gap-2 mt-2',
               )}
             >
               {loading ? (
