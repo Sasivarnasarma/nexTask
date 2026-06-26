@@ -5,7 +5,6 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import { fetchNotifications } from '@/api/notifications.api';
 import { PushNotificationPrompt } from '@/components/PushNotificationPrompt';
-import { StarBackground } from '@/components/StarBackground';
 import { useWebPush } from '@/hooks/useWebPush';
 import { useAuthStore } from '@/store/auth.store';
 
@@ -187,7 +186,6 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 bg-slate-950/40 border-l border-slate-900 overflow-hidden h-screen relative">
-        <StarBackground />
         {/* Mobile Sidebar Trigger */}
         <button
           onClick={() => setIsSidebarOpen(true)}
@@ -197,7 +195,7 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
         </button>
 
         {/* Dynamic Route Content */}
-        <div className="flex-1 overflow-y-auto p-6 md:p-8 pt-16 md:pt-8 bg-transparent relative z-10">
+        <div className="flex-1 overflow-y-auto p-6 md:p-8 pt-16 md:pt-8 bg-slate-950">
           {children}
         </div>
       </div>

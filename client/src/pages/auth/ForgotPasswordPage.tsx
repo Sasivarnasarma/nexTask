@@ -3,7 +3,6 @@ import { FormEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { forgotPassword } from '@/api/auth.api';
-import { StarBackground } from '@/components/StarBackground';
 import { extractApiError } from '@/lib/apiError';
 
 export default function ForgotPasswordPage() {
@@ -29,7 +28,6 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#090B18] to-[#0D1022] relative overflow-hidden flex items-center justify-center p-6 w-full font-sans animate-fade-in">
-      <StarBackground />
       {/* Light grain/noise texture overlay */}
       <div className="noise-bg" />
 
