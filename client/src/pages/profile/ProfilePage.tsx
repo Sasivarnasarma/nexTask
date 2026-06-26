@@ -82,7 +82,7 @@ export default function ProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center w-full">
+      <div className="min-h-screen bg-transparent flex items-center justify-center w-full">
         <div className="w-6 h-6 rounded-full border-2 border-indigo-500/30 border-t-indigo-500 animate-spin" />
       </div>
     );
@@ -96,7 +96,7 @@ export default function ProfilePage() {
     .toUpperCase();
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 p-6 lg:p-10 w-full">
+    <div className="min-h-screen bg-transparent text-zinc-100 p-6 lg:p-10 w-full">
       <div className="max-w-2xl mx-auto space-y-8">
         {/* Page header */}
         <div>

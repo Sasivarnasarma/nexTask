@@ -305,7 +305,7 @@ export class UserService {
     // Record audit activity
     await prisma.taskActivity.create({
       data: {
-        action: roleChanged ? 'ROLE_CHANGED' : 'UPDATED',
+        action: roleChanged ? 'ROLE_CHANGED' : 'USER_UPDATED',
         userId: actorId,
         description: roleChanged
           ? `Changed role of user ${email} from ${userToUpdate.role} to ${data.role}`
@@ -461,7 +461,7 @@ export class UserService {
     // Record audit activity
     await prisma.taskActivity.create({
       data: {
-        action: 'DELETED',
+        action: 'USER_DELETED',
         userId: actorId,
         description: `Deleted user ${user.email}`,
       },
@@ -499,7 +499,7 @@ export class UserService {
     // Record audit activity
     await prisma.taskActivity.create({
       data: {
-        action: 'UPDATED',
+        action: 'USER_UPDATED',
         userId: actorId,
         description: `Triggered mandatory password reset for user ${user.email}`,
       },

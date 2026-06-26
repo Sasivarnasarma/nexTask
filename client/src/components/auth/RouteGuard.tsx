@@ -21,7 +21,7 @@ export function RequireAuth({ children }: Props) {
   const location = useLocation();
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !user?.mustResetPassword) {
       getProfile()
         .then((profile) => {
           updateUser(profile);
@@ -31,7 +31,7 @@ export function RequireAuth({ children }: Props) {
           logout();
         });
     }
-  }, [isAuthenticated, logout, updateUser]);
+  }, [isAuthenticated, user?.mustResetPassword, logout, updateUser]);
 
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;

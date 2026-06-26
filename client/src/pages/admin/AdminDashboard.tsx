@@ -240,7 +240,7 @@ export function AdminDashboard() {
   };
 
   return (
-    <div className="flex-1 space-y-6 p-8 max-w-7xl mx-auto w-full text-foreground bg-background">
+    <div className="flex-1 space-y-6 p-8 max-w-7xl mx-auto w-full text-foreground bg-transparent">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-border pb-5">
         <div>
@@ -528,7 +528,7 @@ export function AdminDashboard() {
                 {activities.map((act) => (
                   <div key={act.id} className="relative">
                     {/* Timeline Node */}
-                    <span className="absolute left-[31px] top-1 bg-background border-2 border-primary rounded-full p-1 h-4.5 w-4.5 flex items-center justify-center">
+                    <span className="absolute -left-[31px] top-1 bg-background border-2 border-primary rounded-full p-1 h-4.5 w-4.5 flex items-center justify-center">
                       <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                     </span>
 

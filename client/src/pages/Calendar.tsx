@@ -129,7 +129,7 @@ export function Calendar() {
   // Status badge styling helper
   const getStatusBadgeClass = (status: Task['status']) => {
     switch (status) {
-      case 'COMPLETED':
+      case 'DONE':
         return 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/10 border-emerald-500/30';
       case 'IN_PROGRESS':
         return 'bg-blue-500/10 text-blue-500 hover:bg-blue-500/10 border-blue-500/30';
@@ -141,7 +141,7 @@ export function Calendar() {
 
   if (!activeProjectId) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-background text-foreground h-[80vh]">
+      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-transparent text-foreground h-[80vh]">
         <div className="max-w-md space-y-4 p-8 border border-border rounded-xl bg-card shadow-sm">
           <CalendarIcon className="h-12 w-12 text-muted-foreground mx-auto animate-pulse" />
           <h2 className="text-xl font-bold">No Workspace Selected</h2>
@@ -155,7 +155,7 @@ export function Calendar() {
   }
 
   return (
-    <div className="flex-1 flex flex-col lg:flex-row gap-6 p-8 max-w-7xl mx-auto w-full text-foreground bg-background overflow-y-auto min-h-0">
+    <div className="flex-1 flex flex-col lg:flex-row gap-6 p-8 max-w-7xl mx-auto w-full text-foreground bg-transparent overflow-y-auto min-h-0">
       {/* Calendar Grid Container */}
       <div className="flex-1 flex flex-col space-y-4 min-w-0">
         {/* Calendar Header Control Bar */}
@@ -377,13 +377,27 @@ export function Calendar() {
             </CardContent>
           </Card>
         ) : (
-          <Card className="border-border bg-card shadow-sm text-center p-8 h-64 flex flex-col items-center justify-center gap-2 sticky top-6">
-            <Info className="h-8 w-8 text-muted-foreground/60" />
-            <CardTitle className="text-sm font-bold text-muted-foreground">Task Preview</CardTitle>
-            <CardDescription className="text-xs max-w-[200px] mx-auto">
-              Select any task card from the calendar grid to view description, assignees, and label
-              details.
-            </CardDescription>
+          <Card className="border border-white/[0.06] bg-card/50 backdrop-blur-md shadow-sm text-center p-8 h-80 flex flex-col items-center justify-center gap-4 sticky top-6 rounded-2xl">
+            <div className="h-12 w-12 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center mb-1 text-primary shadow-lg shadow-primary/5 animate-pulse">
+              <Info className="h-5 w-5" />
+            </div>
+            <div className="space-y-1">
+              <CardTitle className="text-base font-extrabold tracking-tight text-foreground">Task Preview</CardTitle>
+              <CardDescription className="text-xs text-muted-foreground max-w-[220px] mx-auto leading-relaxed">
+                Select any task card from the calendar grid to view description, assignees, and label
+                details.
+              </CardDescription>
+            </div>
+            
+            {/* Visual Skeleton Placeholder */}
+            <div className="w-full pt-4 border-t border-border/40 flex flex-col gap-2 opacity-30 mt-2">
+              <div className="flex gap-2 justify-center">
+                <div className="h-4 w-12 bg-muted rounded-full" />
+                <div className="h-4 w-16 bg-muted rounded-full" />
+              </div>
+              <div className="h-3 w-4/5 bg-muted rounded mx-auto" />
+              <div className="h-3 w-3/5 bg-muted rounded mx-auto" />
+            </div>
           </Card>
         )}
       </div>

@@ -99,69 +99,105 @@ async function main() {
     }));
 
   // Join Collaborator to the project
-  await prisma.projectMember.create({
-    data: {
-      projectId: project.id,
-      userId: collaboratorUser.id,
-      role: 'COLLABORATOR',
-    },
+  const hasCollaborator = await prisma.projectMember.findFirst({
+    where: { projectId: project.id, userId: collaboratorUser.id },
   });
+  if (!hasCollaborator) {
+    await prisma.projectMember.create({
+      data: {
+        projectId: project.id,
+        userId: collaboratorUser.id,
+        role: 'COLLABORATOR',
+      },
+    });
+  }
 
   // Join PM to the project
-  await prisma.projectMember.create({
-    data: {
-      projectId: project.id,
-      userId: pmUser.id,
-      role: 'PROJECT_MANAGER',
-    },
+  const hasPM = await prisma.projectMember.findFirst({
+    where: { projectId: project.id, userId: pmUser.id },
   });
+  if (!hasPM) {
+    await prisma.projectMember.create({
+      data: {
+        projectId: project.id,
+        userId: pmUser.id,
+        role: 'PROJECT_MANAGER',
+      },
+    });
+  }
 
   // Seed tasks
   console.log('📦 Creating sample tasks with tags and positioning...');
-  await prisma.task.create({
-    data: {
-      title: 'Setup Core API Scaffolding',
-      description: 'Initialize express with typescript, controllers and routing layers.',
-      status: 'COMPLETED',
-      priority: 'HIGH',
-      tags: ['Backend', 'Infrastructure'],
-      position: 1000,
-      projectId: project.id,
-    },
-  });
+  const task1 =
+    (await prisma.task.findFirst({
+      where: { title: 'Setup Core API Scaffolding', projectId: project.id },
+    })) ??
+    (await prisma.task.create({
+      data: {
+        title: 'Setup Core API Scaffolding',
+        description: 'Initialize express with typescript, controllers and routing layers.',
+        status: 'DONE',
+        priority: 'HIGH',
+        tags: ['Backend', 'Infrastructure'],
+        position: 1000,
+        projectId: project.id,
+        createdBy: pmUser.id,
+      },
+    }));
 
-  const task2 = await prisma.task.create({
-    data: {
-      title: 'Build Authentication & Onboarding',
-      description: 'Enforce JWT-based access controls and password resets on first login.',
-      status: 'IN_PROGRESS',
-      priority: 'MEDIUM',
-      tags: ['Backend', 'Security'],
-      position: 2000,
-      projectId: project.id,
-    },
-  });
+  const task2 =
+    (await prisma.task.findFirst({
+      where: { title: 'Build Authentication & Onboarding', projectId: project.id },
+    })) ??
+    (await prisma.task.create({
+      data: {
+        title: 'Build Authentication & Onboarding',
+        description: 'Enforce JWT-based access controls and password resets on first login.',
+        status: 'IN_PROGRESS',
+        priority: 'MEDIUM',
+        tags: ['Backend', 'Security'],
+        position: 2000,
+        projectId: project.id,
+        createdBy: pmUser.id,
+      },
+    }));
 
-  const task3 = await prisma.task.create({
-    data: {
-      title: 'Design Kanban Board Workspace',
-      description:
-        'Build board columns supporting status movements, card sorting, and tags rendering.',
-      status: 'TODO',
-      priority: 'HIGH',
-      tags: ['Frontend', 'UI'],
-      position: 3000,
-      projectId: project.id,
-    },
-  });
+  const task3 =
+    (await prisma.task.findFirst({
+      where: { title: 'Design Kanban Board Workspace', projectId: project.id },
+    })) ??
+    (await prisma.task.create({
+      data: {
+        title: 'Design Kanban Board Workspace',
+        description:
+          'Build board columns supporting status movements, card sorting, and tags rendering.',
+        status: 'TODO',
+        priority: 'HIGH',
+        tags: ['Frontend', 'UI'],
+        position: 3000,
+        projectId: project.id,
+        createdBy: pmUser.id,
+      },
+    }));
 
   // Assign Collaborator to Task 2 and Task 3
-  await prisma.taskAssignment.createMany({
-    data: [
-      { taskId: task2.id, userId: collaboratorUser.id },
-      { taskId: task3.id, userId: collaboratorUser.id },
-    ],
+  const hasAssignment2 = await prisma.taskAssignment.findFirst({
+    where: { taskId: task2.id, userId: collaboratorUser.id },
   });
+  if (!hasAssignment2) {
+    await prisma.taskAssignment.create({
+      data: { taskId: task2.id, userId: collaboratorUser.id },
+    });
+  }
+
+  const hasAssignment3 = await prisma.taskAssignment.findFirst({
+    where: { taskId: task3.id, userId: collaboratorUser.id },
+  });
+  if (!hasAssignment3) {
+    await prisma.taskAssignment.create({
+      data: { taskId: task3.id, userId: collaboratorUser.id },
+    });
+  }
 
   console.log('🎉 Database seeded successfully!');
 }

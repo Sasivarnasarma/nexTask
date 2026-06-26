@@ -17,7 +17,11 @@ const RESET_ALLOWED_PATHS: Array<{ method: string; path: string }> = [
 async function getProjectIdFromRequest(request: Request): Promise<string | null> {
   const { params, query, body, path, method } = request;
 
-  // 1. Project ID direct path parameter (e.g. /projects/:id)
+  // 1. Project ID direct path parameter (e.g. /projects/:id or /tasks/project/:projectId)
+  if (params.projectId && typeof params.projectId === 'string') {
+    return params.projectId;
+  }
+
   if (path.startsWith('/projects/') && params.id && typeof params.id === 'string') {
     return params.id;
   }

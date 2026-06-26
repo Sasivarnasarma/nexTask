@@ -2452,7 +2452,7 @@ For scalability, efficiency, and security, clients do not receive a global feed 
 
 The system automatically generates OpenAPI spec documentation via the `tsoa` package parsing TypeScript controller decorations.
 
-- **Documentation UI Endpoint:** `/api-docs` (accessible at `http://localhost:5000/api-docs` in development).
+- **Documentation UI Endpoint:** `/api-docs` (accessible at `http://localhost:3000/api-docs` in development).
 - **Documented Modules:** Authentication, User Management, Project Management, Project Member, Task Management, Task Assignment, Comment, Attachment, Notification, Task Activity.
 - **Maintenance Requirement:** All new routes must define their route params, method, body interface inputs, success/error models, and authentication parameters in `tsoa` declarations to keep the interactive API exploration valid.
 

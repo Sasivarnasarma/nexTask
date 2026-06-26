@@ -1,96 +1,23 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Calendar,
-  ChevronDown,
-  Folder,
   LayoutDashboard,
   LogOut,
-  MessageSquare,
-  Plus,
   Settings,
   Shield,
 } from 'lucide-react';
-import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import { useWebPush } from '@/hooks/useWebPush';
 import { useAuthStore } from '@/store/auth.store';
-import { useProjectStore } from '@/store/project.store';
-import { useToastStore } from '@/store/toast.store';
 
-import { fetchUserProjects } from '../api/profile.api';
-import { createProject } from '../api/projects.api';
-import { Button } from './ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from './ui/dialog';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from './ui/dropdown-menu';
-import { Input } from './ui/input';
-import { Textarea } from './ui/textarea';
-
-export function Sidebar({ isOpen }: { isOpen: boolean }) {
+export function Sidebar(_props: { isOpen?: boolean }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const logout = useAuthStore((s) => s.logout);
   const user = useAuthStore((s) => s.user);
   const { unsubscribe } = useWebPush();
 
-  const { activeProjectId, setActiveProjectId } = useProjectStore();
-  const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
-  const [newProjectName, setNewProjectName] = useState('');
-  const [newProjectDesc, setNewProjectDesc] = useState('');
-
   const isActive = (path: string) => location.pathname.includes(path);
-
-  // Fetch projects list
-  const { data: projects = [] } = useQuery({
-    queryKey: ['projects'],
-    queryFn: fetchUserProjects,
-  });
-
-  const activeProjectIdResolved =
-    (activeProjectId && projects.some((p) => p.id === activeProjectId)
-      ? activeProjectId
-      : projects[0]?.id) || null;
-  const activeProject = projects.find((p) => p.id === activeProjectIdResolved);
-  const activeProjectName = activeProject ? activeProject.name : 'Select Project';
-
-  const canCreateProject = user?.role === 'ADMIN' || user?.role === 'PROJECT_MANAGER';
-
-  // Create Project mutation
-  const createProjectMutation = useMutation({
-    mutationFn: createProject,
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
-      setActiveProjectId(data.id);
-      setIsCreateProjectOpen(false);
-      setNewProjectName('');
-      setNewProjectDesc('');
-      useToastStore.getState().showSuccess('Project created successfully!');
-    },
-    onError: () => {
-      useToastStore.getState().showError('Failed to create project.');
-    },
-  });
-
-  const handleCreateProject = () => {
-    if (!newProjectName.trim()) return;
-    createProjectMutation.mutate({
-      name: newProjectName.trim(),
-      description: newProjectDesc.trim() || undefined,
-    });
-  };
 
   const handleLogout = async () => {
     try {
@@ -102,223 +29,156 @@ export function Sidebar({ isOpen }: { isOpen: boolean }) {
     navigate('/login');
   };
 
+  const formatRole = (role?: string) => {
+    if (!role) return 'Workspace Member';
+    if (role === 'ADMIN') return 'Administrator';
+    if (role === 'PROJECT_MANAGER') return 'Project Manager';
+    return role
+      .split('_')
+      .map((word) => word.charAt(0) + word.slice(1).toLowerCase())
+      .join(' ');
+  };
+
   return (
-    <aside className="w-full border-r border-border h-full py-6 bg-background flex flex-col justify-between transition-all duration-300">
+    <aside className="w-full border-r border-slate-800/60 h-full pb-6 bg-slate-950 flex flex-col justify-between transition-all duration-300">
       <div className="flex flex-col gap-6">
-        <div
-          className={`font-extrabold tracking-tight text-foreground transition-all duration-300 ${isOpen ? 'text-2xl px-6' : 'text-xl text-center'}`}
-        >
-          {isOpen ? 'nexTask' : 'T'}
+        {/* Header Section */}
+        <div className="pt-[28px] pl-[24px]">
+          <div className="flex items-center gap-[12px] select-none group cursor-pointer">
+            <img 
+              src="/logo.png" 
+              alt="NexTask Logo" 
+              className="w-[32px] h-[32px] sm:w-[36px] sm:h-[36px] md:w-[40px] md:h-[40px] object-contain transition-all duration-[250ms] ease-in-out group-hover:scale-[1.05] filter drop-shadow-[0_4px_12px_rgba(110,90,255,0.35)] group-hover:drop-shadow-[0_0_12px_rgba(110,90,255,0.6)]" 
+            />
+            <span 
+              className="font-bold text-[28px] tracking-[-0.5px]"
+              style={{
+                background: 'linear-gradient(90deg, #7C5CFF, #59A8FF)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                color: 'transparent'
+              }}
+            >
+              NexTask
+            </span>
+          </div>
         </div>
 
-        {/* Project Switcher */}
-        <div className="px-3">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                className={`w-full flex items-center gap-2 border-border bg-background hover:bg-muted text-foreground text-sm font-semibold h-10 ${
-                  isOpen ? 'px-3 justify-between' : 'p-0 justify-center'
-                }`}
-              >
-                <div className="flex items-center gap-2 truncate">
-                  <Folder className="h-4 w-4 shrink-0 text-primary" />
-                  {isOpen && <span className="truncate">{activeProjectName}</span>}
-                </div>
-                {isOpen && <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-popover border-border text-popover-foreground w-56">
-              {projects.map((project) => (
-                <DropdownMenuItem
-                  key={project.id}
-                  onClick={() => setActiveProjectId(project.id)}
-                  className={`cursor-pointer ${
-                    project.id === activeProjectIdResolved
-                      ? 'bg-primary/10 text-primary font-medium'
-                      : ''
-                  }`}
-                >
-                  <Folder className="h-4 w-4 mr-2 shrink-0 text-muted-foreground" />
-                  <span className="truncate">{project.name}</span>
-                </DropdownMenuItem>
-              ))}
-              {canCreateProject && (
-                <>
-                  <div className="h-px bg-border my-1" />
-                  <DropdownMenuItem
-                    onClick={() => setIsCreateProjectOpen(true)}
-                    className="cursor-pointer text-primary focus:text-primary font-medium"
-                  >
-                    <Plus className="h-4 w-4 mr-2 shrink-0" />
-                    Create Project...
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+        {/* User Profile Card */}
+        <div className="px-4">
+          <div className="w-full flex items-center gap-3 bg-slate-900/60 border border-slate-800/80 p-3 rounded-xl">
+            <div className="h-9 w-9 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-md shadow-blue-600/10">
+              {user?.name?.charAt(0).toUpperCase() || 'U'}
+            </div>
+            <div className="flex flex-col min-w-0 leading-tight">
+              <span className="text-sm font-semibold text-slate-100 truncate">
+                {user?.name || 'User'}
+              </span>
+              <span className="text-xs text-slate-400 mt-0.5 truncate">
+                {formatRole(user?.role)}
+              </span>
+            </div>
+          </div>
         </div>
 
-        <div className="flex flex-col gap-6 px-3">
-          <div className="flex flex-col gap-1.5">
-            {isOpen && (
-              <div className="text-muted-foreground font-bold text-[10px] tracking-widest uppercase mb-1.5 px-3">
-                Main Menu
-              </div>
-            )}
-            <Link
-              to="/dashboard"
-              title="Dashboard"
-              className={`flex items-center gap-3 ${isOpen ? 'px-4 py-2.5 justify-start' : 'h-10 w-10 justify-center mx-auto'} ${
-                isActive('/dashboard')
-                  ? 'bg-primary/10 text-primary font-bold shadow-sm'
-                  : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-              } rounded-lg text-sm transition-all duration-200`}
-            >
-              <LayoutDashboard
-                className={`w-5 h-5 shrink-0 ${isActive('/dashboard') ? 'text-primary' : 'text-muted-foreground'}`}
-              />
-              {isOpen && <span>Dashboard</span>}
-            </Link>
-            <Link
-              to="/calendar"
-              title="Schedule Visualizer"
-              className={`flex items-center gap-3 ${isOpen ? 'px-4 py-2.5 justify-start' : 'h-10 w-10 justify-center mx-auto'} ${
-                isActive('/calendar')
-                  ? 'bg-primary/10 text-primary font-bold shadow-sm'
-                  : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-              } rounded-lg text-sm transition-all duration-200`}
-            >
-              <Calendar
-                className={`w-5 h-5 shrink-0 ${isActive('/calendar') ? 'text-primary' : 'text-muted-foreground'}`}
-              />
-              {isOpen && <span>Calendar</span>}
-            </Link>
-            <Link
-              to="/messages"
-              title="Team Chat"
-              className={`flex items-center gap-3 ${isOpen ? 'px-4 py-2.5 justify-start' : 'h-10 w-10 justify-center mx-auto'} ${
-                isActive('/messages')
-                  ? 'bg-primary/10 text-primary font-bold shadow-sm'
-                  : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-              } rounded-lg text-sm transition-all duration-200`}
-            >
-              <MessageSquare
-                className={`w-5 h-5 shrink-0 ${isActive('/messages') ? 'text-primary' : 'text-muted-foreground'}`}
-              />
-              {isOpen && <span>Messages</span>}
-            </Link>
+        {/* Main Menu Section */}
+        <div className="flex flex-col gap-1 px-3">
+          <div className="text-slate-500 font-extrabold text-[10px] tracking-widest uppercase mb-2 px-3">
+            MAIN
           </div>
 
-          {/* Admin Portal (Admin Only) */}
+          {/* Dashboard */}
+          <Link
+            to="/dashboard"
+            title="Dashboard"
+            className={`flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group ${
+              isActive('/dashboard')
+                ? 'bg-blue-600/10 text-blue-400 border border-blue-500/10'
+                : 'text-slate-400 hover:bg-slate-900/50 hover:text-slate-100'
+            }`}
+          >
+            <LayoutDashboard
+              className={`w-5 h-5 shrink-0 transition-transform duration-200 group-hover:scale-105 ${
+                isActive('/dashboard') ? 'text-blue-400' : 'text-slate-400 group-hover:text-slate-100'
+              }`}
+            />
+            <span>Dashboard</span>
+          </Link>
+
+          {/* Calendar */}
+          <Link
+            to="/calendar"
+            title="Calendar"
+            className={`flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group ${
+              isActive('/calendar')
+                ? 'bg-blue-600/10 text-blue-400 border border-blue-500/10'
+                : 'text-slate-400 hover:bg-slate-900/50 hover:text-slate-100'
+            }`}
+          >
+            <Calendar
+              className={`w-5 h-5 shrink-0 transition-transform duration-200 group-hover:scale-105 ${
+                isActive('/calendar') ? 'text-blue-400' : 'text-slate-400 group-hover:text-slate-100'
+              }`}
+            />
+            <span>Calendar</span>
+          </Link>
+
+          {/* Admin Portal (Conditional) */}
           {user?.role === 'ADMIN' && (
-            <div className="flex flex-col gap-1.5">
-              {isOpen && (
-                <div className="text-muted-foreground font-bold text-[10px] tracking-widest uppercase mb-1.5 px-3">
-                  Admin
-                </div>
-              )}
+            <>
+              <div className="h-px bg-slate-800/60 my-2 mx-1" />
               <Link
                 to="/admin"
                 title="Admin Portal"
-                className={`flex items-center gap-3 ${isOpen ? 'px-4 py-2.5 justify-start' : 'h-10 w-10 justify-center mx-auto'} ${
+                className={`flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group ${
                   isActive('/admin')
-                    ? 'bg-primary/10 text-primary font-bold shadow-sm'
-                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                } rounded-lg text-sm transition-all duration-200`}
+                    ? 'bg-blue-600/10 text-blue-400 border border-blue-500/10'
+                    : 'text-slate-400 hover:bg-slate-900/50 hover:text-slate-100'
+                }`}
               >
                 <Shield
-                  className={`w-5 h-5 shrink-0 ${isActive('/admin') ? 'text-primary' : 'text-muted-foreground'}`}
+                  className={`w-5 h-5 shrink-0 transition-transform duration-200 group-hover:scale-105 ${
+                    isActive('/admin') ? 'text-blue-400' : 'text-slate-400 group-hover:text-slate-100'
+                  }`}
                 />
-                {isOpen && <span>Admin Portal</span>}
+                <span>Admin Portal</span>
               </Link>
-            </div>
+            </>
           )}
 
-          <div className="flex flex-col gap-1.5">
-            {isOpen && (
-              <div className="text-muted-foreground font-bold text-[10px] tracking-widest uppercase mb-1.5 px-3">
-                General
-              </div>
-            )}
-            <Link
-              to="/settings"
-              title="Settings"
-              className={`flex items-center gap-3 ${isOpen ? 'px-4 py-2.5 justify-start' : 'h-10 w-10 justify-center mx-auto'} ${
-                isActive('/settings')
-                  ? 'bg-primary/10 text-primary font-bold shadow-sm'
-                  : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-              } rounded-lg text-sm transition-all duration-200`}
-            >
-              <Settings
-                className={`w-5 h-5 shrink-0 ${isActive('/settings') ? 'text-primary' : 'text-muted-foreground'}`}
-              />
-              {isOpen && <span>Settings</span>}
-            </Link>
-          </div>
+          {/* Settings */}
+          <div className="h-px bg-slate-800/60 my-2 mx-1" />
+          <Link
+            to="/settings"
+            title="Settings"
+            className={`flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group ${
+              isActive('/settings')
+                ? 'bg-blue-600/10 text-blue-400 border border-blue-500/10'
+                : 'text-slate-400 hover:bg-slate-900/50 hover:text-slate-100'
+            }`}
+          >
+            <Settings
+              className={`w-5 h-5 shrink-0 transition-transform duration-200 group-hover:scale-105 ${
+                isActive('/settings') ? 'text-blue-400' : 'text-slate-400 group-hover:text-slate-100'
+              }`}
+            />
+            <span>Settings</span>
+          </Link>
         </div>
       </div>
 
-      <div className="px-3">
+      {/* Footer Section */}
+      <div className="px-4">
         <button
           onClick={handleLogout}
           title="Log Out"
-          className={`group flex items-center gap-3 w-full ${isOpen ? 'px-4 py-2.5 justify-start' : 'h-10 w-10 justify-center mx-auto'} text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg font-bold text-sm transition-all duration-200`}
+          className="group flex items-center gap-3.5 w-full px-4 py-2.5 text-slate-400 hover:text-slate-100 rounded-xl font-medium text-sm transition-all duration-200 hover:bg-slate-900/50 cursor-pointer"
         >
-          <LogOut className="w-5 h-5 shrink-0 text-muted-foreground group-hover:text-destructive" />
-          {isOpen && <span>Log Out</span>}
+          <LogOut className="w-5 h-5 shrink-0 text-slate-400 group-hover:text-slate-100 group-hover:-translate-x-0.5 transition-transform duration-200" />
+          <span>Log Out</span>
         </button>
       </div>
-
-      {/* Create Project Dialog */}
-      <Dialog open={isCreateProjectOpen} onOpenChange={setIsCreateProjectOpen}>
-        <DialogContent className="bg-background border-border text-foreground sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Create New Project</DialogTitle>
-            <DialogDescription className="text-muted-foreground">
-              Set up a new workspace for your team.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Project Name</label>
-              <Input
-                placeholder="e.g. Website Redesign"
-                className="bg-background border-border focus-visible:ring-primary"
-                value={newProjectName}
-                onChange={(e) => setNewProjectName(e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Description</label>
-              <Textarea
-                placeholder="Briefly describe the project goals..."
-                className="bg-background border-border focus-visible:ring-primary resize-none"
-                value={newProjectDesc}
-                onChange={(e) => setNewProjectDesc(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button
-              variant="ghost"
-              onClick={() => setIsCreateProjectOpen(false)}
-              className="hover:bg-muted text-muted-foreground hover:text-foreground"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleCreateProject}
-              disabled={createProjectMutation.isPending || !newProjectName.trim()}
-            >
-              Create Project
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </aside>
   );
 }

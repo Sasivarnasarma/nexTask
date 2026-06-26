@@ -62,6 +62,7 @@ export class ProjectController extends Controller {
       requestBody.name,
       requestBody.description,
       requestorId,
+      requestBody.endDate,
     );
     this.setStatus(201);
     return successResponse('Project created successfully.', newProject);
@@ -73,6 +74,23 @@ export class ProjectController extends Controller {
     const { userId: requestorId, role: requestorRole } = (request as any).user;
     const projects = await this.projectService.getAllProjects(requestorId, requestorRole);
     return successResponse('Projects retrieved successfully.', projects);
+  }
+
+  // GET /projects/me
+  @Get('me')
+  public async getMyProjects(@Request() request: ExRequest): Promise<ProjectListResponse> {
+    const { userId: requestorId } = (request as any).user;
+    const projects = await this.projectService.getAllProjects(requestorId, 'COLLABORATOR');
+    return successResponse('Personal projects retrieved successfully.', projects);
+  }
+
+  // GET /projects/admin/all
+  @Get('admin/all')
+  @Security('jwt', ['global:admin'])
+  public async getAdminAllProjects(@Request() request: ExRequest): Promise<ProjectListResponse> {
+    const { userId: requestorId } = (request as any).user;
+    const projects = await this.projectService.getAllProjects(requestorId, 'ADMIN');
+    return successResponse('All projects retrieved successfully.', projects);
   }
 
   // 3. GET /projects/{id} (View single project by ID)
@@ -119,10 +137,10 @@ export class ProjectController extends Controller {
     return successResponse('Project archived successfully.', archivedProject);
   }
 
-  // 7. DELETE /projects/{id} (Delete project - Admin Only)
+  // 7. DELETE /projects/{id} (Delete project)
   @Delete('{id}')
   @Middlewares(validateRequest(deleteProjectSchema))
-  @Security('jwt', ['global:admin'])
+  @Security('jwt', ['project:manager'])
   public async delete(@Path() id: string): Promise<VoidResponse> {
     const project = await this.projectService.getProjectById(id);
     if (!project) throw new ApiError(404, 'Project not found.');

@@ -72,7 +72,7 @@ export default function ForceResetPage() {
   // ── Success screen ─────────────────────────────────────────────────────────
   if (done) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-6 w-full">
+      <div className="min-h-screen bg-transparent flex items-center justify-center p-6 w-full">
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-10 text-center w-full max-w-sm">
           <div className="w-14 h-14 rounded-full bg-green-900/50 border border-green-800 flex items-center justify-center mx-auto mb-5">
             <CheckCircle size={28} className="text-green-400" />
@@ -85,7 +85,7 @@ export default function ForceResetPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-6 w-full">
+    <div className="min-h-screen bg-transparent flex items-center justify-center p-6 w-full">
       <div className="w-full max-w-md">
         {/* Warning badge */}
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-950 border border-amber-900 text-amber-400 text-xs font-semibold mb-5">

@@ -131,7 +131,7 @@ export class UserController extends Controller {
    */
   @Get('/')
   @Middlewares(validateRequest(listUsersQuerySchema))
-  @Security('jwt', ['global:admin'])
+  @Security('jwt', ['global:pm'])
   public async listUsers(
     @Request() request: ExRequest,
     @Query() page: number = 1,

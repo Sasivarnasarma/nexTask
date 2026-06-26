@@ -50,6 +50,7 @@ import {
   addProjectMember,
   assignTaskUser,
   bulkAssignTaskUsers,
+  createProject,
   fetchProjectMembers,
   fetchTeamMembersAutocomplete,
   removeProjectMember,
@@ -130,7 +131,7 @@ function KanbanColumn({
   return (
     <div
       ref={setNodeRef}
-      className={`w-80 shrink-0 rounded-xl p-4 flex flex-col transition-all ${bgClass}`}
+      className={`flex-1 min-w-[280px] rounded-xl p-4 flex flex-col transition-all ${bgClass}`}
     >
       <h2 className={`text-sm font-bold uppercase tracking-widest mb-4 ${headerColor}`}>{title}</h2>
       <ScrollArea className="flex-1">
@@ -220,6 +221,39 @@ export function Dashboard() {
     }, 300);
     return () => clearTimeout(timer);
   }, [searchQuery]);
+
+  // Project Creation states
+  const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
+  const [newProjectName, setNewProjectName] = useState('');
+  const [newProjectDesc, setNewProjectDesc] = useState('');
+  const [newProjectEndDate, setNewProjectEndDate] = useState('');
+
+  const canCreateProject = user?.role === 'ADMIN' || user?.role === 'PROJECT_MANAGER';
+
+  const createProjectMutation = useMutation({
+    mutationFn: createProject,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      setActiveProjectId(data.id);
+      setIsCreateProjectOpen(false);
+      setNewProjectName('');
+      setNewProjectDesc('');
+      setNewProjectEndDate('');
+      useToastStore.getState().showSuccess('Project created successfully!');
+    },
+    onError: () => {
+      useToastStore.getState().showError('Failed to create project.');
+    },
+  });
+
+  const handleCreateProject = () => {
+    if (!newProjectName.trim() || newProjectName.trim().length < 3) return;
+    createProjectMutation.mutate({
+      name: newProjectName.trim(),
+      description: newProjectDesc.trim() || undefined,
+      endDate: newProjectEndDate ? new Date(newProjectEndDate).toISOString() : undefined,
+    });
+  };
 
   // Project Members management console states
   const [isMembersModalOpen, setIsMembersModalOpen] = useState(false);
@@ -434,10 +468,10 @@ export function Dashboard() {
 
   const mappedSelectedTask = taskDetails
     ? {
-        ...taskDetails,
-        status: mapStatusToFrontend(taskDetails.status),
-        priority: mapPriorityToFrontend(taskDetails.priority),
-      }
+      ...taskDetails,
+      status: mapStatusToFrontend(taskDetails.status),
+      priority: mapPriorityToFrontend(taskDetails.priority),
+    }
     : null;
 
   const { data: comments = [], refetch: refetchComments } = useQuery({
@@ -691,7 +725,7 @@ export function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
+      <div className="flex items-center justify-center min-h-screen bg-transparent text-foreground">
         <p className="text-muted-foreground animate-pulse">Loading board...</p>
       </div>
     );
@@ -700,7 +734,7 @@ export function Dashboard() {
   if (projects.length === 0) {
     const canCreateProject = user?.role === 'ADMIN' || user?.role === 'PROJECT_MANAGER';
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-8">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-transparent text-foreground p-8">
         <div className="text-center space-y-4 max-w-md">
           <Folder className="h-16 w-16 text-muted-foreground mx-auto animate-pulse" />
           <h2 className="text-2xl font-bold tracking-tight">You are not in any project</h2>
@@ -715,7 +749,7 @@ export function Dashboard() {
   }
 
   return (
-    <div className="p-8 h-full flex flex-col bg-background text-foreground min-h-screen transition-colors duration-300">
+    <div className="p-8 h-full flex flex-col bg-transparent text-foreground min-h-screen transition-colors duration-300 w-full">
       <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center gap-3">
@@ -737,19 +771,32 @@ export function Dashboard() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="bg-popover border-border text-popover-foreground w-56">
-                    {projects.map((project) => (
-                      <DropdownMenuItem
-                        key={project.id}
-                        onClick={() => setActiveProjectId(project.id)}
-                        className={
-                          project.id === activeProjectIdResolved
-                            ? 'bg-primary/10 text-primary font-medium'
-                            : ''
-                        }
-                      >
-                        {project.name}
-                      </DropdownMenuItem>
-                    ))}
+                    <div className="max-h-60 overflow-y-auto">
+                      {projects.map((project) => (
+                        <DropdownMenuItem
+                          key={project.id}
+                          onClick={() => setActiveProjectId(project.id)}
+                          className={
+                            project.id === activeProjectIdResolved
+                              ? 'bg-primary/10 text-primary font-medium'
+                              : ''
+                          }
+                        >
+                          {project.name}
+                        </DropdownMenuItem>
+                      ))}
+                    </div>
+                    {canCreateProject && (
+                      <>
+                        <div className="h-px bg-border my-1" />
+                        <DropdownMenuItem
+                          onClick={() => setIsCreateProjectOpen(true)}
+                          className="cursor-pointer text-primary focus:text-primary font-semibold"
+                        >
+                          + Create New Project
+                        </DropdownMenuItem>
+                      </>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
 
@@ -982,13 +1029,12 @@ export function Dashboard() {
                     <TableCell className="text-foreground font-medium">{task.title}</TableCell>
                     <TableCell>
                       <span
-                        className={`text-xs px-2 py-1 rounded-full border ${
-                          task.status === 'Done'
+                        className={`text-xs px-2 py-1 rounded-full border ${task.status === 'Done'
                             ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
                             : task.status === 'In Progress'
                               ? 'bg-blue-500/10 text-blue-500 border-blue-500/20'
                               : 'bg-muted text-muted-foreground border-border'
-                        }`}
+                          }`}
                       >
                         {task.status}
                       </span>
@@ -1255,9 +1301,8 @@ export function Dashboard() {
                 />
                 <div
                   onClick={() => !isUploading && document.getElementById('file-upload')?.click()}
-                  className={`border-2 border-dashed border-border bg-muted/30 rounded-xl p-6 text-center hover:border-primary hover:bg-primary/5 transition-all ${
-                    isUploading ? 'cursor-not-allowed' : 'cursor-pointer'
-                  } group`}
+                  className={`border-2 border-dashed border-border bg-muted/30 rounded-xl p-6 text-center hover:border-primary hover:bg-primary/5 transition-all ${isUploading ? 'cursor-not-allowed' : 'cursor-pointer'
+                    } group`}
                 >
                   {isUploading ? (
                     <p className="text-sm animate-pulse text-primary font-semibold">
@@ -1392,6 +1437,64 @@ export function Dashboard() {
               </div>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ─── MODAL: CREATE NEW PROJECT ────────────────────────────────────────── */}
+      <Dialog open={isCreateProjectOpen} onOpenChange={setIsCreateProjectOpen}>
+        <DialogContent className="bg-background border-border text-foreground sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Create New Project</DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              Set up a new workspace for your team.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
+                Project Name <span className="text-destructive">*</span>
+              </label>
+              <Input
+                placeholder="e.g. Website Redesign"
+                className="bg-background border-border focus-visible:ring-primary w-full"
+                value={newProjectName}
+                onChange={(e) => setNewProjectName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Description</label>
+              <Textarea
+                placeholder="Briefly describe the project goals..."
+                className="bg-background border-border focus-visible:ring-primary resize-none w-full"
+                value={newProjectDesc}
+                onChange={(e) => setNewProjectDesc(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">End Date</label>
+              <Input
+                type="date"
+                className="bg-background border-border focus-visible:ring-primary w-full"
+                value={newProjectEndDate}
+                onChange={(e) => setNewProjectEndDate(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="ghost"
+              onClick={() => setIsCreateProjectOpen(false)}
+              className="hover:bg-muted text-muted-foreground hover:text-foreground"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateProject}
+              disabled={createProjectMutation.isPending || !newProjectName.trim() || newProjectName.trim().length < 3}
+            >
+              Create Project
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
