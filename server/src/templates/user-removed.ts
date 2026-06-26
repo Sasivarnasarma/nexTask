@@ -10,9 +10,7 @@ export function getUserRemovedTemplate(data: UserRemovedTemplateData): string {
   const filePath = path.join(__dirname, 'user-removed.html');
   let html = fs.readFileSync(filePath, 'utf-8');
 
-  html = html
-    .replace(/\{\{email\}\}/g, data.email)
-    .replace(/\{\{name\}\}/g, data.name);
+  html = html.replace(/\{\{email\}\}/g, data.email).replace(/\{\{name\}\}/g, data.name);
 
   return html;
 }

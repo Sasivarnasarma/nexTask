@@ -1,7 +1,10 @@
-import 'dotenv/config';
+import dotenv from 'dotenv';
+import path from 'path';
 
 import { prisma } from '../lib/prisma';
 import { hashPassword } from '../utils/hash.util';
+
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
 function requireEnv(name: string): string {
   const value = process.env[name];

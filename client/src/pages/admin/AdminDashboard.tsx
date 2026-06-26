@@ -101,16 +101,14 @@ export function AdminDashboard() {
   });
 
   // Mutations
-  const createUserMutation = useMutation<
-    { user: User },
-    unknown,
-    AdminCreateUserRequest
-  >({
+  const createUserMutation = useMutation<{ user: User }, unknown, AdminCreateUserRequest>({
     mutationFn: createUser,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       setIsCreateOpen(false);
-      showSuccess('User account created successfully! Setup instructions have been sent to their email.');
+      showSuccess(
+        'User account created successfully! Setup instructions have been sent to their email.',
+      );
     },
     onError: (err) => {
       showError(extractApiError(err, 'Failed to create user.'));
@@ -798,7 +796,6 @@ export function AdminDashboard() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
     </div>
   );
 }

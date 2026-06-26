@@ -139,7 +139,8 @@ export const initSocket = (server: http.Server) => {
             });
 
             const senderName = socket.data.user?.name || socket.data.user?.email || 'A teammate';
-            const truncatedContent = data.content.substring(0, 40) + (data.content.length > 40 ? '...' : '');
+            const truncatedContent =
+              data.content.substring(0, 40) + (data.content.length > 40 ? '...' : '');
 
             const { NotificationService } = await import('../services/notification.service');
 
@@ -193,4 +194,3 @@ export const sendNotificationToUser = (userId: string, eventName: string, data: 
     io.to(`user:${userId}`).emit(eventName, data);
   }
 };
-

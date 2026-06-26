@@ -41,7 +41,7 @@ export function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
 
     socket.on('notification:received', (notif: Notification) => {
       console.log('[WS] Received real-time notification:', notif);
-      
+
       // Instantly refresh the notification list and badge count
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
 

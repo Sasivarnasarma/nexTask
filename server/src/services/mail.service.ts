@@ -230,7 +230,9 @@ export class MailService {
     const displayName = name || 'Team Member';
 
     if (!this.transporter) {
-      console.log(`[MAIL_WARN] SMTP not configured. User Removed notification for ${to} printed below:`);
+      console.log(
+        `[MAIL_WARN] SMTP not configured. User Removed notification for ${to} printed below:`,
+      );
       console.log(` -> Action: Notify user that their account was removed.`);
       return;
     }
@@ -256,7 +258,9 @@ export class MailService {
     const displayName = name || 'Team Member';
 
     if (!this.transporter) {
-      console.log(`[MAIL_WARN] SMTP not configured. User Status Changed notification for ${to} printed below:`);
+      console.log(
+        `[MAIL_WARN] SMTP not configured. User Status Changed notification for ${to} printed below:`,
+      );
       console.log(` -> Status: ${isActive ? 'Activated' : 'Deactivated'}`);
       return;
     }

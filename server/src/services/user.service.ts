@@ -356,7 +356,10 @@ export class UserService {
     try {
       await this.mailService.sendUserStatusChangedEmail(user.email, user.name, false);
     } catch (mailError) {
-      console.error(`[MAIL_ERROR] Failed to dispatch deactivation email to ${user.email}:`, mailError);
+      console.error(
+        `[MAIL_ERROR] Failed to dispatch deactivation email to ${user.email}:`,
+        mailError,
+      );
     }
 
     return {
@@ -398,7 +401,10 @@ export class UserService {
     try {
       await this.mailService.sendUserStatusChangedEmail(user.email, user.name, true);
     } catch (mailError) {
-      console.error(`[MAIL_ERROR] Failed to dispatch activation email to ${user.email}:`, mailError);
+      console.error(
+        `[MAIL_ERROR] Failed to dispatch activation email to ${user.email}:`,
+        mailError,
+      );
     }
 
     return {
@@ -471,7 +477,10 @@ export class UserService {
     try {
       await this.mailService.sendUserRemovedEmail(user.email, user.name);
     } catch (mailError) {
-      console.error(`[MAIL_ERROR] Failed to dispatch user removed email to ${user.email}:`, mailError);
+      console.error(
+        `[MAIL_ERROR] Failed to dispatch user removed email to ${user.email}:`,
+        mailError,
+      );
     }
   }
 

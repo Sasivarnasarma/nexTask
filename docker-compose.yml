@@ -1,33 +1,61 @@
 services:
+  nginx:
+    image: nginx:alpine
+    container_name: nextask_nginx
+    restart: unless-stopped
+
+    ports:
+      - '80:80'
+
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+
+    depends_on:
+      - client
+      - server
+
+    networks:
+      - nextask
+
   server:
     build:
       context: .
       dockerfile: docker/server/Dockerfile
 
     container_name: nextask_server
-
     restart: unless-stopped
 
     env_file:
-      - server/.env.production
+      - .env
 
-    ports:
-      - '3000:3000'
+    expose:
+      - '3000'
+
+    networks:
+      - nextask
 
   client:
     build:
       context: .
       dockerfile: docker/client/Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL}
 
     container_name: nextask_client
-
     restart: unless-stopped
 
     env_file:
-      - client/.env.production
+      - .env
 
-    ports:
-      - '80:80'
+    expose:
+      - '80'
 
     depends_on:
       - server
+
+    networks:
+      - nextask
+
+networks:
+  nextask:
+    driver: bridge

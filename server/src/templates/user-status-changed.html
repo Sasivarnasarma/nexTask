@@ -60,16 +60,26 @@
       <h1>{{actionTitle}}</h1>
       <p>Hello {{name}},</p>
       <p>
-        This email is to notify you that your nexTask account associated with <strong style="color: #ffffff;">{{email}}</strong> has been **{{statusMessage}}** by an administrator.
+        This email is to notify you that your nexTask account associated with
+        <strong style="color: #ffffff">{{email}}</strong> has been **{{statusMessage}}** by an
+        administrator.
       </p>
 
-      <div class="badge" style="border: 1px solid __BORDER_COLOR__; background-color: __BG_COLOR__; color: __TEXT_COLOR__;">{{statusLabel}}</div>
+      <div
+        class="badge"
+        style="
+          border: 1px solid __BORDER_COLOR__;
+          background-color: __BG_COLOR__;
+          color: __TEXT_COLOR__;
+        "
+      >
+        {{statusLabel}}
+      </div>
 
+      <p>{{statusDescription}}</p>
       <p>
-        {{statusDescription}}
-      </p>
-      <p>
-        If you have any questions or believe this was done in error, please contact your organization's IT administrator.
+        If you have any questions or believe this was done in error, please contact your
+        organization's IT administrator.
       </p>
       <div class="footer">
         This is an automated notification from nexTask. Please do not reply directly to this email.

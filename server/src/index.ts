@@ -1,8 +1,9 @@
 import cors from 'cors';
-import 'dotenv/config';
+import dotenv from 'dotenv';
 import express, { NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
 import http from 'http';
+import path from 'path';
 import swaggerUi from 'swagger-ui-express';
 
 import { initSocket } from './lib/socket';
@@ -10,6 +11,8 @@ import { RegisterRoutes } from './routes';
 import swaggerDocument from './swagger.json';
 import { ApiError } from './utils/apiError.util';
 import { errorResponse } from './utils/response.util';
+
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 const app = express();
 const port = process.env.PORT || 3000;

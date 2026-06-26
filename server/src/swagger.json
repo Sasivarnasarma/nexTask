@@ -3920,7 +3920,7 @@
 						}
 					}
 				},
-				"description": "Fetches the real-time chat history of a project.\nAccess is restricted to authorized project members only.",
+				"description": "Fetches the real-time chat history of a project.\r\nAccess is restricted to authorized project members only.",
 				"tags": [
 					"Messages"
 				],
