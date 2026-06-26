@@ -67,8 +67,21 @@ export default function LoginPage() {
 
       {/* Large 3D Torus Ring Top Right */}
       <div className="absolute -top-[10%] -right-[5%] w-[380px] h-[380px] opacity-35 animate-float-slower pointer-events-none select-none z-0">
-        <svg width="100%" height="100%" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="100" cy="100" r="70" stroke="url(#torus-gradient-1)" strokeWidth="30" filter="url(#torus-glow-1)" />
+        <svg
+          width="100%"
+          height="100%"
+          viewBox="0 0 200 200"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="100"
+            cy="100"
+            r="70"
+            stroke="url(#torus-gradient-1)"
+            strokeWidth="30"
+            filter="url(#torus-glow-1)"
+          />
           <defs>
             <linearGradient id="torus-gradient-1" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#1e1b4b" />
@@ -86,8 +99,20 @@ export default function LoginPage() {
 
       {/* Bottom Left Overlapping Rings / Noodle */}
       <div className="absolute -bottom-[12%] -left-[5%] w-[420px] h-[420px] opacity-30 animate-float-slow pointer-events-none select-none z-0">
-        <svg width="100%" height="100%" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M40,100 A60,60 0 1,0 160,100 A60,60 0 1,0 40,100" stroke="url(#noodle-grad-1)" strokeWidth="32" strokeLinecap="round" filter="url(#torus-glow-2)" />
+        <svg
+          width="100%"
+          height="100%"
+          viewBox="0 0 200 200"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M40,100 A60,60 0 1,0 160,100 A60,60 0 1,0 40,100"
+            stroke="url(#noodle-grad-1)"
+            strokeWidth="32"
+            strokeLinecap="round"
+            filter="url(#torus-glow-2)"
+          />
           <defs>
             <linearGradient id="noodle-grad-1" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#0f172a" />
@@ -97,7 +122,13 @@ export default function LoginPage() {
               <stop offset="100%" stopColor="#0f172a" />
             </linearGradient>
             <filter id="torus-glow-2" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="2" dy="8" stdDeviation="10" floodColor="#4f46e5" floodOpacity="0.3" />
+              <feDropShadow
+                dx="2"
+                dy="8"
+                stdDeviation="10"
+                floodColor="#4f46e5"
+                floodOpacity="0.3"
+              />
             </filter>
           </defs>
         </svg>
@@ -105,8 +136,20 @@ export default function LoginPage() {
 
       {/* Left Z-shaped Noodle */}
       <div className="absolute left-[5%] top-[25%] w-[250px] h-[250px] opacity-25 animate-float-medium pointer-events-none select-none z-0">
-        <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M20,20 C50,20 10,80 40,80 C70,80 60,30 90,40" stroke="url(#pipe-gradient-1)" strokeWidth="12" strokeLinecap="round" filter="url(#pipe-glow)" />
+        <svg
+          width="100%"
+          height="100%"
+          viewBox="0 0 100 100"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M20,20 C50,20 10,80 40,80 C70,80 60,30 90,40"
+            stroke="url(#pipe-gradient-1)"
+            strokeWidth="12"
+            strokeLinecap="round"
+            filter="url(#pipe-glow)"
+          />
           <defs>
             <linearGradient id="pipe-gradient-1" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#3b82f6" />
@@ -114,7 +157,13 @@ export default function LoginPage() {
               <stop offset="100%" stopColor="#a855f7" />
             </linearGradient>
             <filter id="pipe-glow" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="0" dy="4" stdDeviation="6" floodColor="#6366f1" floodOpacity="0.4" />
+              <feDropShadow
+                dx="0"
+                dy="4"
+                stdDeviation="6"
+                floodColor="#6366f1"
+                floodOpacity="0.4"
+              />
             </filter>
           </defs>
         </svg>
@@ -122,8 +171,20 @@ export default function LoginPage() {
 
       {/* Right Curly Noodle */}
       <div className="absolute right-[3%] top-[30%] w-[300px] h-[300px] opacity-25 animate-float-slow pointer-events-none select-none z-0">
-        <svg width="100%" height="100%" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M20,60 C20,20 100,20 100,60 C100,100 50,110 50,70 C50,30 90,40 110,90" stroke="url(#pipe-gradient-2)" strokeWidth="14" strokeLinecap="round" filter="url(#pipe-glow-2)" />
+        <svg
+          width="100%"
+          height="100%"
+          viewBox="0 0 120 120"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M20,60 C20,20 100,20 100,60 C100,100 50,110 50,70 C50,30 90,40 110,90"
+            stroke="url(#pipe-gradient-2)"
+            strokeWidth="14"
+            strokeLinecap="round"
+            filter="url(#pipe-glow-2)"
+          />
           <defs>
             <linearGradient id="pipe-gradient-2" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#a855f7" />
@@ -131,7 +192,13 @@ export default function LoginPage() {
               <stop offset="100%" stopColor="#3b82f6" />
             </linearGradient>
             <filter id="pipe-glow-2" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="0" dy="6" stdDeviation="8" floodColor="#a855f7" floodOpacity="0.3" />
+              <feDropShadow
+                dx="0"
+                dy="6"
+                stdDeviation="8"
+                floodColor="#a855f7"
+                floodOpacity="0.3"
+              />
             </filter>
           </defs>
         </svg>
@@ -139,8 +206,19 @@ export default function LoginPage() {
 
       {/* Right Bottom Wavy Noodle */}
       <div className="absolute right-[12%] bottom-[15%] w-[160px] h-[80px] opacity-20 animate-float-medium pointer-events-none select-none z-0">
-        <svg width="100%" height="100%" viewBox="0 0 100 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M10,25 Q25,10 40,25 T70,25 T100,25" stroke="url(#wave-grad-small)" strokeWidth="8" strokeLinecap="round" />
+        <svg
+          width="100%"
+          height="100%"
+          viewBox="0 0 100 50"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M10,25 Q25,10 40,25 T70,25 T100,25"
+            stroke="url(#wave-grad-small)"
+            strokeWidth="8"
+            strokeLinecap="round"
+          />
           <defs>
             <linearGradient id="wave-grad-small" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#3b82f6" />
@@ -152,7 +230,13 @@ export default function LoginPage() {
 
       {/* Crescent Moon Top Left */}
       <div className="absolute top-[12%] left-[10%] opacity-20 animate-float-slow pointer-events-none select-none z-0">
-        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg
+          width="60"
+          height="60"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
           <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" fill="url(#moon-gradient)" />
           <defs>
             <linearGradient id="moon-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -182,23 +266,21 @@ export default function LoginPage() {
 
       {/* Content container */}
       <div className="w-[90%] sm:w-[420px] flex flex-col items-center relative z-10 animate-slide-up-fade">
-        
         {/* Centered Logo & Branding Section */}
         <div className="flex flex-col items-center mb-8 select-none animate-fade-in-down">
-          <img 
-            src="/logo.png" 
-            alt="NexTask Logo" 
-            className="w-[100px] h-[100px] object-contain select-none filter drop-shadow-[0_0_15px_rgba(99,102,241,0.4)]" 
-          />
-          <h2 className="mt-3 text-3xl font-extrabold tracking-wider bg-gradient-to-r from-[#c084fc] via-[#818cf8] to-[#60a5fa] bg-clip-text text-transparent filter drop-shadow-[0_0_8px_rgba(99,102,241,0.3)]">
+          <h2 className="text-3xl font-extrabold tracking-wider bg-gradient-to-r from-[#c084fc] via-[#818cf8] to-[#60a5fa] bg-clip-text text-transparent filter drop-shadow-[0_0_8px_rgba(99,102,241,0.3)]">
             NexTask
           </h2>
         </div>
 
         {/* Central Glassmorphic Card Container */}
         <div className="w-full bg-[rgba(255,255,255,0.08)] backdrop-blur-[18px] border border-[rgba(255,255,255,0.12)] rounded-[20px] p-[35px] shadow-[0_25px_60px_rgba(0,0,0,0.45)]">
-          <h1 className="text-[32px] font-bold text-white mb-1 tracking-tight select-none">Welcome back</h1>
-          <p className="text-[15px] text-[#B8B8C8] mb-6 select-none font-medium">Sign in to your workspace</p>
+          <h1 className="text-[32px] font-bold text-white mb-1 tracking-tight select-none">
+            Welcome back
+          </h1>
+          <p className="text-[15px] text-[#B8B8C8] mb-6 select-none font-medium">
+            Sign in to your workspace
+          </p>
 
           {/* Error banner */}
           {error && (
