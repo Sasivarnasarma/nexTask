@@ -23,7 +23,6 @@
 - [Security Model](#-security-model)
 - [Testing Suite](#-testing-suite)
 - [CI/CD Pipeline](#-cicd-pipeline)
-- [Team Member Contributions](#-team-member-contributions)
 - [Project Deliverables & Documentation](#-project-deliverables--documentation)
 
 ---
@@ -559,7 +558,7 @@ docker-compose down -v
 
 TSOA automatically generates the OpenAPI schema directly from the backend TypeScript controllers. The live, interactive Swagger UI sandbox is hosted at:
 
-### 👉 [http://localhost:3000/api-docs](http://localhost:3000/api-docs)
+### 👉 [https://nextask.sasivarnasarma.me/api/api-docs/](https://nextask.sasivarnasarma.me/api/api-docs/)
 
 ### API Response Format
 
@@ -694,75 +693,23 @@ Pipeline Steps: 1. Set up Node.js environment
 
 ---
 
-## 👥 Team Member Contributions
-
-Development was structured across **5 phases** with tasks distributed among team members:
-
-### Member A — Infrastructure & Real-Time Systems
-
-| Phase       | Task ID     | Description                                                                                                                   |
-| :---------- | :---------- | :---------------------------------------------------------------------------------------------------------------------------- |
-| **Phase 0** | T0.1 – T0.5 | **System Initialization** — Monorepo scaffolding, backend/API config, database schema, frontend foundations, containerization |
-| **Phase 1** | T1.1        | **Authentication Engine** — Argon2 hashing, JWT generation/verification, login & registration endpoints                       |
-| **Phase 2** | T2.1        | **Web Push System** — VAPID key generation, push subscription management, service worker integration                          |
-| **Phase 3** | T3.1        | **Multi-Assignee Task APIs** — Assign, unassign, bulk assign, and list assignees                                              |
-| **Phase 4** | T4.1        | **WebSocket Integration** — Socket.IO with project-scoped rooms, real-time Kanban updates                                     |
-
-### Member B — Data Services & Collaboration
-
-| Phase       | Task ID | Description                                                                                  |
-| :---------- | :------ | :------------------------------------------------------------------------------------------- |
-| **Phase 1** | T1.2    | **Task Services** — Prisma-based CRUD services, TSOA controllers with standardized responses |
-| **Phase 2** | T2.2    | **Collaboration & S3 Upload** — Comment system, presigned S3 URLs, cascade deletion          |
-| **Phase 3** | T3.2    | **Data Integrity & Validation** — Zod schemas, XSS prevention, strict type enforcement       |
-| **Phase 4** | T4.2    | **Onboarding Mail Service** — SMTP setup, HTML email templates, welcome emails               |
-
-### Member C — UI/UX & Security
-
-| Phase       | Task ID | Description                                                                              |
-| :---------- | :------ | :--------------------------------------------------------------------------------------- |
-| **Phase 1** | T1.3    | **Base Layout UI** — Dashboard shell, sidebar, navigation bar, routing, protected routes |
-| **Phase 2** | T2.3    | **Task Visualization** — Kanban board, task cards, list/table views, task detail modals  |
-| **Phase 3** | T3.3    | **RBAC Enforcement** — Hybrid authorization middleware (global + project-level roles)    |
-| **Phase 4** | T4.3    | **Task Assignment Mail Service** — Email notifications for task assignment events        |
-
-### Member D — Project Management & Admin
-
-| Phase       | Task ID | Description                                                                                             |
-| :---------- | :------ | :------------------------------------------------------------------------------------------------------ |
-| **Phase 1** | T1.4    | **User Onboarding Flows** — First-login password reset, profile editing, password complexity validation |
-| **Phase 2** | T2.4    | **Project Management APIs** — Project CRUD, complete, archive endpoints                                 |
-| **Phase 3** | T3.4    | **Backend Search & Filter APIs** — Text search, task filtering, team member autocomplete                |
-| **Phase 4** | T4.4    | **Admin Management** — User management dashboard, role assignment, deactivation, audit logs             |
-
-### Member E — Frontend Features & Analytics
-
-| Phase       | Task ID | Description                                                                                        |
-| :---------- | :------ | :------------------------------------------------------------------------------------------------- |
-| **Phase 1** | T1.5    | **Error Infrastructure** — Toast notification system, API error mapping                            |
-| **Phase 2** | T2.5    | **Project Membership APIs** — Membership endpoints, project-specific role assignments              |
-| **Phase 3** | T3.5    | **Frontend Search & Filter UI** — Project switcher, member management, search/filter controls      |
-| **Phase 4** | T4.5    | **Analytics & Reporting** — Project status dashboard, priority/status charts, productivity metrics |
-
----
-
 ## 📦 Project Deliverables & Documentation
 
 All project deliverables and diagrams are organized across the repository:
 
-| Deliverable                     | Location                                                                      | Description                                                           |
-| :------------------------------ | :---------------------------------------------------------------------------- | :-------------------------------------------------------------------- |
-| **Source Code**                 | [`/client`](client/), [`/server`](server/), [`/types`](types/)                | Full-stack TypeScript monorepo source code                            |
-| **API Documentation (Swagger)** | [http://localhost:3000/api-docs](http://localhost:3000/api-docs)              | Live sandbox Swagger UI documentation                                 |
-| **API Documentation (Offline)** | [`/docs/api-documentation.md`](docs/api-documentation.md)                     | Complete endpoint and WebSocket events reference                      |
-| **ER Diagram & DB Design**      | [`/docs/database-design.md`](docs/database-design.md)                         | Database model schema, tables, indexes, and relations                 |
-| **Class Diagram**               | [`/docs/class-diagram.md`](docs/class-diagram.md)                             | UML class diagram of the backend system architecture                  |
-| **Deployment Diagram**          | [`/docs/deployment-diagram.md`](docs/deployment-diagram.md)                   | System deployment model, Docker configurations, security architecture |
-| **Prisma Schema**               | [`/server/prisma/schema.prisma`](server/prisma/schema.prisma)                 | Declarative Prisma schema model definitions                           |
-| **Project SRS**                 | [`/_project-plan/Project SRS.md`](_project-plan/Project%20SRS.md)             | Software Requirements Specification document                          |
-| **API Specification Draft**     | [`/_project-plan/API Specification.md`](_project-plan/API%20Specification.md) | Pre-development endpoint design specification                         |
-| **Task Distribution Plan**      | [`/_project-plan/Project Tasks.md`](_project-plan/Project%20Tasks.md)         | Project roadmap, phases, and task mapping                             |
-| **Contributing Guidelines**     | [`/CONTRIBUTING.md`](CONTRIBUTING.md)                                         | Development workflows and styling rules                               |
+| Deliverable                     | Location                                                                                           | Description                                                           |
+| :------------------------------ | :------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------- |
+| **Source Code**                 | [`/client`](client/), [`/server`](server/), [`/types`](types/)                                     | Full-stack TypeScript monorepo source code                            |
+| **API Documentation (Swagger)** | [https://nextask.sasivarnasarma.me/api/api-docs/](https://nextask.sasivarnasarma.me/api/api-docs/) | Live sandbox Swagger UI documentation                                 |
+| **API Documentation (Offline)** | [`/docs/api-documentation.md`](docs/api-documentation.md)                                          | Complete endpoint and WebSocket events reference                      |
+| **ER Diagram & DB Design**      | [`/docs/database-design.md`](docs/database-design.md)                                              | Database model schema, tables, indexes, and relations                 |
+| **Class Diagram**               | [`/docs/class-diagram.md`](docs/class-diagram.md)                                                  | UML class diagram of the backend system architecture                  |
+| **Deployment Diagram**          | [`/docs/deployment-diagram.md`](docs/deployment-diagram.md)                                        | System deployment model, Docker configurations, security architecture |
+| **Prisma Schema**               | [`/server/prisma/schema.prisma`](server/prisma/schema.prisma)                                      | Declarative Prisma schema model definitions                           |
+| **Project SRS**                 | [`/_project-plan/Project SRS.md`](_project-plan/Project%20SRS.md)                                  | Software Requirements Specification document                          |
+| **API Specification Draft**     | [`/_project-plan/API Specification.md`](_project-plan/API%20Specification.md)                      | Pre-development endpoint design specification                         |
+| **Task Distribution Plan**      | [`/_project-plan/Project Tasks.md`](_project-plan/Project%20Tasks.md)                              | Project roadmap, phases, and task mapping                             |
+| **Contributing Guidelines**     | [`/CONTRIBUTING.md`](CONTRIBUTING.md)                                                              | Development workflows and styling rules                               |
 
 ---
 
